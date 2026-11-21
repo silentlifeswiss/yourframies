@@ -149,6 +149,15 @@ export const Navbar: React.FC = () => {
                     >
                       Track Package
                     </Link>
+                    {isAdmin && (
+                      <Link
+                        to="/admin"
+                        className="block px-4 py-2 text-xs text-amber-600 font-bold hover:bg-amber-50 border-t border-neutral-100 flex items-center gap-1.5"
+                      >
+                        <ShieldAlert className="w-3.5 h-3.5 text-amber-600" />
+                        Admin Control Panel
+                      </Link>
+                    )}
                     <button
                       type="button"
                       onClick={logout}

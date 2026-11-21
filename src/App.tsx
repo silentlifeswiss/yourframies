@@ -40,11 +40,15 @@ import { AdminLogin } from './admin/AdminLogin'
 
 const AppContent: React.FC = () => {
   const location = useLocation()
-  const isAdminRoute = location.pathname.startsWith(ADMIN_CONFIG.basePath)
+  const isAdminRoute =
+    location.pathname.startsWith(ADMIN_CONFIG.basePath) ||
+    location.pathname.startsWith('/admin')
 
   if (isAdminRoute) {
     return (
       <Routes>
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/*" element={<AdminLayout />} />
         <Route path={`${ADMIN_CONFIG.basePath}/login`} element={<AdminLogin />} />
         <Route path={`${ADMIN_CONFIG.basePath}/*`} element={<AdminLayout />} />
       </Routes>

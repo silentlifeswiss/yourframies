@@ -72,7 +72,8 @@ export const AdminLayout: React.FC = () => {
 
   // Protect Admin Portal
   if (!isAuthenticated || !adminUser) {
-    navigate(`${ADMIN_CONFIG.basePath}/login`)
+    const loginTarget = window.location.pathname.startsWith('/admin') ? '/admin/login' : `${ADMIN_CONFIG.basePath}/login`
+    navigate(loginTarget)
     return null
   }
 

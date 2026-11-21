@@ -23,7 +23,8 @@ export const AdminLogin: React.FC = () => {
     setIsLoading(false)
 
     if (res.success) {
-      navigate(ADMIN_CONFIG.basePath)
+      const target = window.location.pathname.startsWith('/admin') ? '/admin' : ADMIN_CONFIG.basePath
+      navigate(target)
     } else {
       setErrorMsg(res.message || 'Authentication failed.')
     }

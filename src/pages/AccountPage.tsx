@@ -80,6 +80,15 @@ export const AccountPage: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3">
+            {isAdmin && (
+              <Link
+                to="/admin"
+                className="px-4 py-2 bg-neutral-900 text-amber-400 rounded text-xs font-semibold uppercase tracking-wider hover:bg-neutral-800 flex items-center gap-1.5 shadow"
+              >
+                <ShieldAlert className="w-3.5 h-3.5 text-amber-400" />
+                <span>Admin Control Panel</span>
+              </Link>
+            )}
             <button
               type="button"
               onClick={() => {
