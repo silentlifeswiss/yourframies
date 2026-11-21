@@ -34,10 +34,11 @@ const makeResponse = (statusCode: number, data: any) => ({
 })
 
 export const handler: Handler = async (event: HandlerEvent, _context?: HandlerContext) => {
-  // Normalize path by stripping Netlify / function prefixes
+  // Normalize path by stripping Netlify / function prefixes and any query string
   const rawPath = event.path
     .replace(/^\/\.netlify\/functions\/api/, '')
     .replace(/^\/api/, '')
+    .split('?')[0]
   const path = rawPath === '' ? '/' : rawPath
   const method = event.httpMethod.toUpperCase()
   const clientIp =
@@ -425,6 +426,20 @@ export const handler: Handler = async (event: HandlerEvent, _context?: HandlerCo
       return makeResponse(201, { success: true, data: savedOrder })
     }
 
+    // Customer/Public: List Customer Orders GET /orders?phone=... or ?userId=...
+    if (path === '/orders' && method === 'GET') {
+      const phone = event.queryStringParameters?.phone
+      const userId = event.queryStringParameters?.userId
+      const query = phone || userId
+
+      if (!query) {
+        return makeResponse(400, { success: false, message: 'phone or userId query parameter is required' })
+      }
+
+      const orders = await db.getOrdersByCustomer(query)
+      return makeResponse(200, { success: true, count: orders.length, data: orders })
+    }
+
     // Public: Track Order GET /orders/:orderNumber
     if (path.startsWith('/orders/') && method === 'GET') {
       const orderNumber = path.replace('/orders/', '')
@@ -434,6 +449,53 @@ export const handler: Handler = async (event: HandlerEvent, _context?: HandlerCo
         return makeResponse(404, { success: false, message: 'Order not found' })
       }
       return makeResponse(200, { success: true, data: order })
+    }
+
+    // Public: Live Real-Time Order & Logistics Tracking POST /shipping/track-order
+    if (path === '/shipping/track-order' && method === 'POST') {
+      const { query } = JSON.parse(event.body || '{}')
+      const clean = (query || '').toString().trim()
+      if (!clean) {
+        return makeResponse(400, { success: false, message: 'Please provide an order number or mobile number to track.' })
+      }
+
+      // Check if direct orderNumber / ID
+      let order = await db.getOrderByNumber(clean)
+      let customerOrders: DBOrder[] = []
+
+      // If not direct order match, check by phone / customer identifier
+      if (!order) {
+        customerOrders = await db.getOrdersByCustomer(clean)
+        if (customerOrders.length > 0) {
+          order = customerOrders[0] // Primary latest order
+        }
+      }
+
+      if (!order) {
+        return makeResponse(404, {
+          success: false,
+          message: `No active order found matching "${clean}". Please verify your order number (e.g. YF-2026-1042) or registered phone.`,
+        })
+      }
+
+      // If AWB code or Delhivery courier partner exists, fetch live transit scans
+      let trackingEvents: any = null
+      if (order.awbCode) {
+        try {
+          trackingEvents = await shipping.getTrackingEvents(order.awbCode)
+        } catch (err) {
+          console.warn('Delhivery live track lookup failed:', err)
+        }
+      }
+
+      return makeResponse(200, {
+        success: true,
+        data: {
+          order,
+          additionalOrders: customerOrders.length > 1 ? customerOrders.slice(1) : [],
+          tracking: trackingEvents,
+        },
+      })
     }
 
     // Admin: List Orders GET /admin/orders
@@ -834,6 +896,44 @@ export const handler: Handler = async (event: HandlerEvent, _context?: HandlerCo
 
       const logs = await db.getAuditLogs()
       return makeResponse(200, { success: true, count: logs.length, data: logs })
+    }
+
+    // ==========================================================================
+    // 8. Customer Cart Persistence Endpoints (Syncs across devices & logins)
+    // ==========================================================================
+    if (path === '/cart' && method === 'GET') {
+      const userId = event.queryStringParameters?.userId || event.queryStringParameters?.phone
+      if (!userId) {
+        return makeResponse(200, { success: true, data: { items: [], coupon: null } })
+      }
+
+      const cart = await db.getCart(userId)
+      return makeResponse(200, {
+        success: true,
+        data: cart || { items: [], coupon: null },
+      })
+    }
+
+    if (path === '/cart' && method === 'POST') {
+      const { userId, items, coupon } = JSON.parse(event.body || '{}')
+      if (!userId) {
+        return makeResponse(400, { success: false, message: 'userId is required to persist cart' })
+      }
+
+      await db.saveCart(userId, items || [], coupon || null)
+      return makeResponse(200, { success: true, message: 'Cart saved to database' })
+    }
+
+    if (path === '/cart' && method === 'DELETE') {
+      const userId =
+        event.queryStringParameters?.userId ||
+        event.queryStringParameters?.phone ||
+        JSON.parse(event.body || '{}').userId
+
+      if (userId) {
+        await db.clearCart(userId)
+      }
+      return makeResponse(200, { success: true, message: 'Cart cleared' })
     }
 
     // Default 404

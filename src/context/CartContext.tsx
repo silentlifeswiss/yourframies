@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { CartItem, FrameCustomization, Product } from '../types'
+import { useAuth } from './AuthContext'
+import { api } from '../services/api'
 
 export interface Coupon {
   code: string
@@ -55,6 +57,7 @@ const CART_STORAGE_KEY = 'yourframies_cart'
 const COUPON_STORAGE_KEY = 'yourframies_coupon'
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user } = useAuth()
   const [items, setItems] = useState<CartItem[]>(() => {
     try {
       const stored = localStorage.getItem(CART_STORAGE_KEY)
@@ -75,13 +78,50 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const [isCartOpen, setIsCartOpen] = useState(false)
 
+  // Hydrate & synchronize remote database cart when customer logs in
+  useEffect(() => {
+    const customerId = user?.id || user?.phone
+    if (!customerId) return
+
+    let isMounted = true
+    api
+      .getCart(customerId)
+      .then((res) => {
+        if (!isMounted || !res.success || !res.data) return
+        if (Array.isArray(res.data.items) && res.data.items.length > 0) {
+          setItems((prev) => {
+            const existingIds = new Set(prev.map((i) => i.id))
+            const incoming = res.data.items.filter((i: any) => !existingIds.has(i.id))
+            return [...prev, ...incoming]
+          })
+          if (res.data.coupon && !appliedCoupon) {
+            setAppliedCoupon(res.data.coupon)
+          }
+        }
+      })
+      .catch(() => {})
+
+    return () => {
+      isMounted = false
+    }
+  }, [user?.id, user?.phone])
+
+  // Save cart to local storage and sync with PostgreSQL database for logged-in customer
   useEffect(() => {
     try {
       localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items))
     } catch {
       // Ignore storage errors
     }
-  }, [items])
+
+    const customerId = user?.id || user?.phone
+    if (customerId) {
+      const timer = setTimeout(() => {
+        api.saveCart(customerId, items, appliedCoupon).catch(() => {})
+      }, 600)
+      return () => clearTimeout(timer)
+    }
+  }, [items, appliedCoupon, user?.id, user?.phone])
 
   useEffect(() => {
     try {
@@ -141,6 +181,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const clearCart = () => {
     setItems([])
     setAppliedCoupon(null)
+    const customerId = user?.id || user?.phone
+    if (customerId) {
+      api.clearCart(customerId).catch(() => {})
+    }
   }
 
   const applyCoupon = (code: string) => {

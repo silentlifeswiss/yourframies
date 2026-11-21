@@ -299,4 +299,48 @@ export const api = {
     })
     return res.json()
   },
+
+  // ----------------------------------------------------------------------------
+  // Customer Cart Persistence (Database & Cross-Device Sync)
+  // ----------------------------------------------------------------------------
+  async getCart(userId: string) {
+    const res = await fetch(`${API_BASE}/cart?userId=${encodeURIComponent(userId)}`)
+    return res.json()
+  },
+
+  async saveCart(userId: string, items: any[], coupon?: any) {
+    const res = await fetch(`${API_BASE}/cart`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, items, coupon }),
+    })
+    return res.json()
+  },
+
+  async clearCart(userId: string) {
+    const res = await fetch(`${API_BASE}/cart?userId=${encodeURIComponent(userId)}`, {
+      method: 'DELETE',
+    })
+    return res.json()
+  },
+
+  // ----------------------------------------------------------------------------
+  // Customer Orders & Real-Time Tracking
+  // ----------------------------------------------------------------------------
+  async getCustomerOrders(params: { userId?: string; phone?: string }) {
+    const q = params.phone
+      ? `phone=${encodeURIComponent(params.phone)}`
+      : `userId=${encodeURIComponent(params.userId || '')}`
+    const res = await fetch(`${API_BASE}/orders?${q}`)
+    return res.json()
+  },
+
+  async trackOrder(query: string) {
+    const res = await fetch(`${API_BASE}/shipping/track-order`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query }),
+    })
+    return res.json()
+  },
 }

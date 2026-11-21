@@ -8,6 +8,7 @@ interface OrderContextType {
   getOrderById: (idOrNumber: string) => Order | undefined
   updateOrderStatus: (orderNumber: string, status: OrderStatus, awbCode?: string, courier?: string) => void
   userOrders: (userId?: string) => Order[]
+  refreshCustomerOrders: (identifier: string) => Promise<void>
 }
 
 const OrderContext = createContext<OrderContextType | undefined>(undefined)
@@ -181,6 +182,26 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return orders.filter((o) => o.userId === userId)
   }
 
+  const refreshCustomerOrders = async (identifier: string) => {
+    const clean = identifier.trim()
+    if (!clean) return
+    try {
+      const res = await api.getCustomerOrders({ phone: clean, userId: clean })
+      if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+        setOrders((prev) => {
+          const map = new Map<string, Order>()
+          res.data.forEach((o: Order) => map.set(o.orderNumber, o))
+          prev.forEach((o) => {
+            if (!map.has(o.orderNumber)) map.set(o.orderNumber, o)
+          })
+          return Array.from(map.values())
+        })
+      }
+    } catch {
+      // Fallback
+    }
+  }
+
   return (
     <OrderContext.Provider
       value={{
@@ -189,6 +210,7 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         getOrderById,
         updateOrderStatus,
         userOrders,
+        refreshCustomerOrders,
       }}
     >
       {children}

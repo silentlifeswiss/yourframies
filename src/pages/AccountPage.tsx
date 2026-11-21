@@ -18,10 +18,17 @@ import { checkIndianPincode, lookupPincode } from '../data/pincodes'
 
 export const AccountPage: React.FC = () => {
   const { user, addresses, addAddress, deleteAddress, logout, isAdmin } = useAuth()
-  const { orders } = useOrders()
+  const { orders, refreshCustomerOrders } = useOrders()
   const navigate = useNavigate()
 
   const [activeTab, setActiveTab] = useState<'orders' | 'addresses' | 'profile'>('orders')
+
+  // Auto-refresh customer orders from live database
+  React.useEffect(() => {
+    if (user?.phone || user?.id) {
+      refreshCustomerOrders(user.phone || user.id)
+    }
+  }, [user?.phone, user?.id])
 
   // New address state
   const [showAddAddr, setShowAddAddr] = useState(false)

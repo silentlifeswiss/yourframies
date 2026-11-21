@@ -8,17 +8,26 @@ function createEvent(
   body?: any,
   headers: Record<string, string> = {}
 ): HandlerEvent {
+  const [purePath, queryStr] = path.split('?')
+  const qParams: Record<string, string> = {}
+  if (queryStr) {
+    const usp = new URLSearchParams(queryStr)
+    usp.forEach((val, key) => {
+      qParams[key] = val
+    })
+  }
+
   return {
     rawUrl: `http://localhost:5173${path}`,
-    rawQuery: '',
-    path,
+    rawQuery: queryStr || '',
+    path: purePath,
     httpMethod: method,
     headers: {
       'content-type': 'application/json',
       ...headers,
     },
     multiValueHeaders: {},
-    queryStringParameters: null,
+    queryStringParameters: queryStr ? qParams : null,
     multiValueQueryStringParameters: null,
     body: body ? JSON.stringify(body) : null,
     isBase64Encoded: false,
@@ -364,5 +373,100 @@ describe('Your Framies - Backend Serverless Architecture & APIs', () => {
     const loginRes: any = await handler(loginEvent, {} as any)
     expect(loginRes.statusCode).toBe(200)
     expect(JSON.parse(loginRes.body).success).toBe(true)
+  })
+
+  // --------------------------------------------------------------------------
+  // 8. Customer Cart Persistence & Real-Time Tracking
+  // --------------------------------------------------------------------------
+  it('POST /cart, GET /cart, and DELETE /cart synchronize customer cart in database', async () => {
+    const testUserId = 'cust-test-999'
+    const cartItems = [
+      {
+        id: 'test-cart-item-1',
+        productId: 'yf-car-01',
+        title: 'Porsche 911 GT3 RS Neon Night Frame',
+        priceINR: 1499,
+        quantity: 2,
+        customization: { frameSize: '12x18', moulding: 'Black Wood' },
+      },
+    ]
+
+    // Save cart
+    const saveRes: any = await handler(
+      createEvent('/cart', 'POST', {
+        userId: testUserId,
+        items: cartItems,
+        coupon: { code: 'WELCOME10', discountPercent: 10 },
+      }),
+      {} as any
+    )
+    expect(saveRes.statusCode).toBe(200)
+
+    // Fetch cart
+    const getRes: any = await handler(
+      createEvent(`/cart?userId=${testUserId}`, 'GET'),
+      {} as any
+    )
+    expect(getRes.statusCode).toBe(200)
+    const getData = JSON.parse(getRes.body)
+    expect(getData.success).toBe(true)
+    expect(getData.data.items).toHaveLength(1)
+    expect(getData.data.coupon.code).toBe('WELCOME10')
+
+    // Delete cart
+    const delRes: any = await handler(
+      createEvent(`/cart?userId=${testUserId}`, 'DELETE'),
+      {} as any
+    )
+    expect(delRes.statusCode).toBe(200)
+
+    // Verify empty
+    const verifyRes: any = await handler(
+      createEvent(`/cart?userId=${testUserId}`, 'GET'),
+      {} as any
+    )
+    const verifyData = JSON.parse(verifyRes.body)
+    expect(verifyData.data.items).toHaveLength(0)
+  })
+
+  it('POST /shipping/track-order returns live order tracking details by order number or phone', async () => {
+    // 1. Create a live order to track
+    const orderPayload = {
+      items: [{ productId: 'yf-car-01', title: 'Porsche Frame', priceINR: 1499, quantity: 1 }],
+      shippingAddress: {
+        fullName: 'Sameer Sen',
+        phone: '9845012345',
+        addressLine1: 'MG Road',
+        city: 'Bengaluru',
+        state: 'Karnataka',
+        pincode: '560001',
+      },
+      paymentMethod: 'PREPAID_RAZORPAY',
+    }
+
+    const orderRes: any = await handler(createEvent('/orders', 'POST', orderPayload), {} as any)
+    const orderData = JSON.parse(orderRes.body)
+    expect(orderRes.statusCode).toBe(201)
+    const orderNumber = orderData.data.orderNumber
+
+    // 2. Track by Order Number
+    const trackOrderRes: any = await handler(
+      createEvent('/shipping/track-order', 'POST', { query: orderNumber }),
+      {} as any
+    )
+    expect(trackOrderRes.statusCode).toBe(200)
+    const trackOrderData = JSON.parse(trackOrderRes.body)
+    expect(trackOrderData.success).toBe(true)
+    expect(trackOrderData.data.order.orderNumber).toBe(orderNumber)
+
+    // 3. Track by Phone Number
+    const trackPhoneRes: any = await handler(
+      createEvent('/shipping/track-order', 'POST', { query: '9845012345' }),
+      {} as any
+    )
+    expect(trackPhoneRes.statusCode).toBe(200)
+    const trackPhoneData = JSON.parse(trackPhoneRes.body)
+    expect(trackPhoneData.success).toBe(true)
+    expect(trackPhoneData.data.order.shippingAddress.phone).toBe('9845012345')
   })
 })

@@ -261,6 +261,7 @@ class DataStore {
   private products: DBProduct[] = [...INITIAL_PRODUCTS]
   private categories: DBCategory[] = [...INITIAL_CATEGORIES]
   private orders: DBOrder[] = []
+  private carts: Record<string, { items: any[]; coupon: any; updatedAt: string }> = {}
   private adminUsers: DBAdminUser[] = [{ ...INITIAL_ADMIN }]
   private siteSettings: DBSiteSettings = { ...INITIAL_SITE_SETTINGS }
   private homepageSections: DBHomepageSection[] = [...INITIAL_HOMEPAGE_SECTIONS]
@@ -287,6 +288,7 @@ class DataStore {
         if (data.products) this.products = data.products
         if (data.categories) this.categories = data.categories
         if (data.orders) this.orders = data.orders
+        if (data.carts) this.carts = data.carts
         if (data.adminUsers) this.adminUsers = data.adminUsers
         if (data.siteSettings) this.siteSettings = data.siteSettings
         if (data.homepageSections) this.homepageSections = data.homepageSections
@@ -305,6 +307,7 @@ class DataStore {
         products: this.products,
         categories: this.categories,
         orders: this.orders,
+        carts: this.carts,
         adminUsers: this.adminUsers,
         siteSettings: this.siteSettings,
         homepageSections: this.homepageSections,
@@ -389,9 +392,10 @@ class DataStore {
 
     for (const url of candidateUrls) {
       try {
+        const cleanUrl = url.replace(/([?&])sslmode=[^&]+(&|$)/, '$1').replace(/[?&]$/, '')
         const pool = new Pool({
-          connectionString: url,
-          ssl: url.includes('localhost') ? false : { rejectUnauthorized: false },
+          connectionString: cleanUrl,
+          ssl: cleanUrl.includes('localhost') ? false : { rejectUnauthorized: false },
           max: 3,
           idleTimeoutMillis: 10000,
           connectionTimeoutMillis: 5000,
@@ -510,6 +514,13 @@ class DataStore {
         updated_at TIMESTAMPTZ DEFAULT NOW()
       );
 
+      CREATE TABLE IF NOT EXISTS customer_carts (
+        user_id VARCHAR(100) PRIMARY KEY,
+        items JSONB NOT NULL DEFAULT '[]'::jsonb,
+        coupon JSONB,
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+      );
+
       CREATE TABLE IF NOT EXISTS audit_logs (
         id VARCHAR(100) PRIMARY KEY,
         admin_id VARCHAR(100) NOT NULL,
@@ -617,16 +628,149 @@ class DataStore {
   // Orders
   // ----------------------------------------------------------------------------
   public async getOrders(): Promise<DBOrder[]> {
+    if (this.pool && this.isPostgresConnected) {
+      try {
+        const res = await this.pool.query(
+          `SELECT id, order_number AS "orderNumber", user_id AS "userId", status,
+                  payment_method AS "paymentMethod", payment_status AS "paymentStatus",
+                  currency, subtotal_inr AS "subtotalINR", discount_inr AS "discountINR",
+                  shipping_fee_inr AS "shippingFeeINR", cod_charge_inr AS "codChargeINR",
+                  total_inr AS "totalINR", shipping_address AS "shippingAddress", items,
+                  notes, awb_code AS "awbCode", courier_partner AS "courierPartner",
+                  created_at AS "createdAt", updated_at AS "updatedAt"
+           FROM orders
+           ORDER BY created_at DESC`
+        )
+        if (res.rows.length > 0) {
+          return res.rows.map((row) => ({
+            ...row,
+            subtotalINR: Number(row.subtotalINR),
+            discountINR: Number(row.discountINR),
+            shippingFeeINR: Number(row.shippingFeeINR),
+            codChargeINR: Number(row.codChargeINR),
+            totalINR: Number(row.totalINR),
+          })) as DBOrder[]
+        }
+      } catch (err) {
+        console.warn('Postgres getOrders error, using fallback:', err)
+      }
+    }
     return this.orders
   }
 
   public async getOrderByNumber(orderNumber: string): Promise<DBOrder | undefined> {
+    if (this.pool && this.isPostgresConnected) {
+      try {
+        const res = await this.pool.query(
+          `SELECT id, order_number AS "orderNumber", user_id AS "userId", status,
+                  payment_method AS "paymentMethod", payment_status AS "paymentStatus",
+                  currency, subtotal_inr AS "subtotalINR", discount_inr AS "discountINR",
+                  shipping_fee_inr AS "shippingFeeINR", cod_charge_inr AS "codChargeINR",
+                  total_inr AS "totalINR", shipping_address AS "shippingAddress", items,
+                  notes, awb_code AS "awbCode", courier_partner AS "courierPartner",
+                  created_at AS "createdAt", updated_at AS "updatedAt"
+           FROM orders
+           WHERE order_number = $1 OR id = $1
+           LIMIT 1`,
+          [orderNumber]
+        )
+        if (res.rows.length > 0) {
+          const row = res.rows[0]
+          return {
+            ...row,
+            subtotalINR: Number(row.subtotalINR),
+            discountINR: Number(row.discountINR),
+            shippingFeeINR: Number(row.shippingFeeINR),
+            codChargeINR: Number(row.codChargeINR),
+            totalINR: Number(row.totalINR),
+          } as DBOrder
+        }
+      } catch (err) {
+        console.warn('Postgres getOrderByNumber error, using fallback:', err)
+      }
+    }
     return this.orders.find((o) => o.orderNumber === orderNumber || o.id === orderNumber)
+  }
+
+  public async getOrdersByCustomer(query: string): Promise<DBOrder[]> {
+    const clean = query.trim()
+    if (this.pool && this.isPostgresConnected) {
+      try {
+        const res = await this.pool.query(
+          `SELECT id, order_number AS "orderNumber", user_id AS "userId", status,
+                  payment_method AS "paymentMethod", payment_status AS "paymentStatus",
+                  currency, subtotal_inr AS "subtotalINR", discount_inr AS "discountINR",
+                  shipping_fee_inr AS "shippingFeeINR", cod_charge_inr AS "codChargeINR",
+                  total_inr AS "totalINR", shipping_address AS "shippingAddress", items,
+                  notes, awb_code AS "awbCode", courier_partner AS "courierPartner",
+                  created_at AS "createdAt", updated_at AS "updatedAt"
+           FROM orders
+           WHERE user_id = $1 OR (shipping_address->>'phone') = $1 OR order_number = $1
+           ORDER BY created_at DESC`,
+          [clean]
+        )
+        if (res.rows.length > 0) {
+          return res.rows.map((row) => ({
+            ...row,
+            subtotalINR: Number(row.subtotalINR),
+            discountINR: Number(row.discountINR),
+            shippingFeeINR: Number(row.shippingFeeINR),
+            codChargeINR: Number(row.codChargeINR),
+            totalINR: Number(row.totalINR),
+          })) as DBOrder[]
+        }
+      } catch (err) {
+        console.warn('Postgres getOrdersByCustomer error, using fallback:', err)
+      }
+    }
+    return this.orders.filter(
+      (o) => o.userId === clean || o.shippingAddress?.phone === clean || o.orderNumber === clean
+    )
   }
 
   public async createOrder(order: DBOrder): Promise<DBOrder> {
     this.orders.unshift(order)
     this.saveToFile()
+
+    if (this.pool && this.isPostgresConnected) {
+      try {
+        await this.pool.query(
+          `INSERT INTO orders (
+            id, order_number, user_id, status, payment_method, payment_status,
+            currency, subtotal_inr, discount_inr, shipping_fee_inr, cod_charge_inr,
+            total_inr, shipping_address, items, notes, awb_code, courier_partner,
+            created_at, updated_at
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
+          ON CONFLICT (id) DO UPDATE SET
+            status = EXCLUDED.status,
+            payment_status = EXCLUDED.payment_status,
+            updated_at = NOW()`,
+          [
+            order.id,
+            order.orderNumber,
+            order.userId || null,
+            order.status,
+            order.paymentMethod,
+            order.paymentStatus,
+            order.currency || 'INR',
+            order.subtotalINR,
+            order.discountINR || 0,
+            order.shippingFeeINR || 0,
+            order.codChargeINR || 0,
+            order.totalINR,
+            JSON.stringify(order.shippingAddress),
+            JSON.stringify(order.items),
+            order.notes || null,
+            order.awbCode || null,
+            order.courierPartner || null,
+            order.createdAt,
+            order.updatedAt,
+          ]
+        )
+      } catch (err) {
+        console.warn('Postgres createOrder error, saved in fallback store:', err)
+      }
+    }
     return order
   }
 
@@ -644,7 +788,81 @@ class DataStore {
       if (details?.paymentStatus) order.paymentStatus = details.paymentStatus
       this.saveToFile()
     }
+
+    if (this.pool && this.isPostgresConnected) {
+      try {
+        await this.pool.query(
+          `UPDATE orders
+           SET status = $1,
+               awb_code = COALESCE($2, awb_code),
+               courier_partner = COALESCE($3, courier_partner),
+               payment_status = COALESCE($4, payment_status),
+               updated_at = NOW()
+           WHERE order_number = $5 OR id = $5`,
+          [status, details?.awbCode || null, details?.courierPartner || null, details?.paymentStatus || null, orderNumber]
+        )
+      } catch (err) {
+        console.warn('Postgres updateOrderStatus error:', err)
+      }
+    }
     return order
+  }
+
+  // ----------------------------------------------------------------------------
+  // Customer Cart (Persistent Across Sessions & Devices)
+  // ----------------------------------------------------------------------------
+  public async getCart(userId: string): Promise<{ items: any[]; coupon: any } | null> {
+    if (this.pool && this.isPostgresConnected) {
+      try {
+        const res = await this.pool.query(
+          'SELECT items, coupon FROM customer_carts WHERE user_id = $1 LIMIT 1',
+          [userId]
+        )
+        if (res.rows.length > 0) {
+          return {
+            items: res.rows[0].items || [],
+            coupon: res.rows[0].coupon || null,
+          }
+        }
+      } catch (err) {
+        console.warn('Postgres getCart error, using fallback:', err)
+      }
+    }
+    const local = this.carts[userId]
+    return local ? { items: local.items, coupon: local.coupon } : null
+  }
+
+  public async saveCart(userId: string, items: any[], coupon: any = null): Promise<void> {
+    const updatedAt = new Date().toISOString()
+    this.carts[userId] = { items, coupon, updatedAt }
+    this.saveToFile()
+
+    if (this.pool && this.isPostgresConnected) {
+      try {
+        await this.pool.query(
+          `INSERT INTO customer_carts (user_id, items, coupon, updated_at)
+           VALUES ($1, $2, $3, NOW())
+           ON CONFLICT (user_id)
+           DO UPDATE SET items = EXCLUDED.items, coupon = EXCLUDED.coupon, updated_at = NOW()`,
+          [userId, JSON.stringify(items), coupon ? JSON.stringify(coupon) : null]
+        )
+      } catch (err) {
+        console.warn('Postgres saveCart error:', err)
+      }
+    }
+  }
+
+  public async clearCart(userId: string): Promise<void> {
+    delete this.carts[userId]
+    this.saveToFile()
+
+    if (this.pool && this.isPostgresConnected) {
+      try {
+        await this.pool.query('DELETE FROM customer_carts WHERE user_id = $1', [userId])
+      } catch (err) {
+        console.warn('Postgres clearCart error:', err)
+      }
+    }
   }
 
   // ----------------------------------------------------------------------------

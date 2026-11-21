@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Search, Package, CheckCircle2, Clock, Truck, ShieldCheck, MapPin } from 'lucide-react'
+import { Search, Package, CheckCircle2, Clock, Truck, ShieldCheck, MapPin, ExternalLink, Loader2 } from 'lucide-react'
 import { useOrders } from '../context/OrderContext'
 import { formatINR } from '../utils/formatters'
+import { api } from '../services/api'
 
 export const OrderTrackingPage: React.FC = () => {
   const [searchParams] = useSearchParams()
   const initialOrderQuery = searchParams.get('order') || ''
 
-  const { orders, getOrderById } = useOrders()
+  const { getOrderById } = useOrders()
   const [query, setQuery] = useState(initialOrderQuery)
   const [searchedOrder, setSearchedOrder] = useState<any>(null)
+  const [liveTracking, setLiveTracking] = useState<any>(null)
+  const [additionalOrders, setAdditionalOrders] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -19,50 +23,94 @@ export const OrderTrackingPage: React.FC = () => {
     }
   }, [initialOrderQuery])
 
-  const handleSearch = (targetQuery: string) => {
+  const handleSearch = async (targetQuery: string) => {
     setError('')
     const clean = targetQuery.trim()
     if (!clean) return
 
-    const match = getOrderById(clean)
-    if (match) {
-      setSearchedOrder(match)
-    } else {
+    setIsLoading(true)
+
+    try {
+      // 1. Query live database / serverless backend
+      const res = await api.trackOrder(clean)
+
+      if (res.success && res.data?.order) {
+        setSearchedOrder(res.data.order)
+        setLiveTracking(res.data.tracking)
+        setAdditionalOrders(res.data.additionalOrders || [])
+        setIsLoading(false)
+        return
+      }
+
+      // 2. Fallback to local client order context if offline or newly created
+      const localMatch = getOrderById(clean)
+      if (localMatch) {
+        setSearchedOrder(localMatch)
+        setLiveTracking(null)
+        setAdditionalOrders([])
+        setIsLoading(false)
+        return
+      }
+
       setSearchedOrder(null)
-      setError(`No order found matching "${clean}". Please verify your order number (e.g. YF-2026-1042).`)
+      setLiveTracking(null)
+      setAdditionalOrders([])
+      setError(
+        res.message ||
+          `No order found matching "${clean}". Please verify your order number (e.g. YF-2026-1042) or registered 10-digit mobile number.`
+      )
+    } catch {
+      const localMatch = getOrderById(clean)
+      if (localMatch) {
+        setSearchedOrder(localMatch)
+        setLiveTracking(null)
+      } else {
+        setSearchedOrder(null)
+        setError(`Unable to connect to tracking server. Please verify your order number and retry.`)
+      }
+    } finally {
+      setIsLoading(false)
     }
   }
 
+  const isDelivered = searchedOrder?.status === 'DELIVERED'
+  const isOutForDelivery = ['OUT_FOR_DELIVERY', 'DELIVERED'].includes(searchedOrder?.status)
+  const isShipped = ['SHIPPED', 'OUT_FOR_DELIVERY', 'DELIVERED'].includes(searchedOrder?.status)
+  const isFraming = ['PROCESSING', 'PRINTING', 'FRAMING', 'PACKAGED', 'SHIPPED', 'OUT_FOR_DELIVERY', 'DELIVERED'].includes(
+    searchedOrder?.status
+  )
+  const isPrinting = ['PRINTING', 'FRAMING', 'PACKAGED', 'SHIPPED', 'OUT_FOR_DELIVERY', 'DELIVERED'].includes(
+    searchedOrder?.status
+  )
+
   const trackingSteps = [
-    { label: 'Order Confirmed', desc: 'Received & routed to framing studio', done: true },
+    { label: 'Order Confirmed', desc: 'Received & routed to framing atelier studio', done: true },
     {
       label: 'Archival Printing',
-      desc: '12-color giclée print on 300 GSM cotton rag',
-      done: searchedOrder ? searchedOrder.status !== 'PENDING' : false,
+      desc: '12-color ultra-chrome giclée print on 300 GSM cotton rag',
+      done: Boolean(searchedOrder && isPrinting),
     },
     {
       label: 'Moulding & Assembly',
-      desc: 'Solid hardwood cut and corner-joined with glazing',
-      done: searchedOrder
-        ? ['PROCESSING', 'PRINTING', 'FRAMING', 'PACKAGED', 'SHIPPED', 'DELIVERED'].includes(
-            searchedOrder.status
-          )
-        : false,
+      desc: 'Solid hardwood custom joinery with anti-glare glazing & acid-free matting',
+      done: Boolean(searchedOrder && isFraming),
     },
     {
-      label: 'Shipped via Delhivery',
-      desc: 'Dispatched with protective shockproof casing',
-      done: searchedOrder ? ['SHIPPED', 'OUT_FOR_DELIVERY', 'DELIVERED'].includes(searchedOrder.status) : false,
+      label: 'Shipped via Courier Partner',
+      desc: searchedOrder?.awbCode
+        ? `Dispatched with protective casing. AWB: ${searchedOrder.awbCode}`
+        : 'Dispatched with protective shockproof multi-layer casing',
+      done: Boolean(searchedOrder && isShipped),
     },
     {
       label: 'Out for Delivery',
-      desc: 'Courier executive arriving at your destination',
-      done: searchedOrder ? ['OUT_FOR_DELIVERY', 'DELIVERED'].includes(searchedOrder.status) : false,
+      desc: 'Express logistics courier executive out for delivery to destination',
+      done: Boolean(searchedOrder && isOutForDelivery),
     },
     {
       label: 'Delivered',
-      desc: 'Safely handed over to recipient',
-      done: searchedOrder ? searchedOrder.status === 'DELIVERED' : false,
+      desc: 'Safely handed over to recipient with signature confirmation',
+      done: Boolean(searchedOrder && isDelivered),
     },
   ]
 
@@ -92,19 +140,40 @@ export const OrderTrackingPage: React.FC = () => {
               required
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="e.g. YF-2026-1042"
+              placeholder="e.g. YF-2026-1042 or 9876543210"
               className="flex-1 px-4 py-3 bg-white border border-neutral-300 rounded text-xs uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-black font-mono"
             />
             <button
               type="submit"
-              className="px-6 py-3 bg-neutral-950 text-white rounded text-xs uppercase tracking-widest font-semibold hover:bg-neutral-800 transition-colors flex items-center gap-2"
+              disabled={isLoading}
+              className="px-6 py-3 bg-neutral-950 text-white rounded text-xs uppercase tracking-widest font-semibold hover:bg-neutral-800 transition-colors flex items-center gap-2 disabled:opacity-50"
             >
-              <Search className="w-4 h-4" />
-              <span>Track</span>
+              {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+              <span>{isLoading ? 'Searching...' : 'Track'}</span>
             </button>
           </form>
 
-          {error && <p className="mt-3 text-xs text-red-600">{error}</p>}
+          {error && <p className="mt-3 text-xs text-red-600 bg-red-50 p-2.5 rounded border border-red-200">{error}</p>}
+
+          {additionalOrders.length > 0 && (
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+              <span className="text-[11px] text-neutral-500 font-semibold uppercase">Other Orders Found:</span>
+              {additionalOrders.map((ord: any) => (
+                <button
+                  key={ord.id}
+                  type="button"
+                  onClick={() => setSearchedOrder(ord)}
+                  className={`px-2.5 py-1 text-xs rounded-full border transition-all ${
+                    searchedOrder?.orderNumber === ord.orderNumber
+                      ? 'bg-neutral-900 text-white border-neutral-900'
+                      : 'bg-white text-neutral-700 border-neutral-200 hover:border-black'
+                  }`}
+                >
+                  {ord.orderNumber}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {searchedOrder ? (
@@ -116,20 +185,61 @@ export const OrderTrackingPage: React.FC = () => {
                   Tracking Order
                 </span>
                 <h2 className="text-xl font-bold text-neutral-900">{searchedOrder.orderNumber}</h2>
-                <p className="text-xs text-neutral-500">
-                  Recipient: {searchedOrder.shippingAddress.fullName} • {searchedOrder.shippingAddress.city}
+                <p className="text-xs text-neutral-500 mt-0.5">
+                  Recipient: <span className="font-semibold text-neutral-700">{searchedOrder.shippingAddress?.fullName}</span> • {searchedOrder.shippingAddress?.city}, {searchedOrder.shippingAddress?.state} ({searchedOrder.shippingAddress?.pincode})
+                </p>
+                <p className="text-[11px] text-neutral-400 mt-0.5">
+                  Payment: <span className="font-medium text-neutral-600">{searchedOrder.paymentMethod === 'PREPAID_RAZORPAY' ? 'Prepaid via Razorpay' : 'Cash on Delivery (COD)'}</span> • Total: {formatINR(searchedOrder.totalINR)}
                 </p>
               </div>
 
               <div className="flex flex-col sm:items-end">
-                <span className="px-3 py-1 bg-neutral-900 text-white text-xs font-semibold uppercase tracking-wider rounded-full">
+                <span className="px-3.5 py-1 bg-neutral-900 text-white text-xs font-semibold uppercase tracking-wider rounded-full shadow-sm">
                   Status: {searchedOrder.status}
                 </span>
-                <span className="text-[11px] text-neutral-400 mt-1">
-                  Courier: Delhivery Surface Express (AWB: DEL-8894210)
+                <span className="text-[11px] text-neutral-500 mt-1.5 flex items-center gap-1">
+                  <Truck className="w-3.5 h-3.5 text-neutral-400" />
+                  Courier: {searchedOrder.courierPartner || 'Delhivery Express'}
+                  {searchedOrder.awbCode ? (
+                    <a
+                      href={`https://www.delhivery.com/track/package/${searchedOrder.awbCode}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="ml-1 text-neutral-900 font-mono font-bold underline hover:text-black flex items-center gap-0.5"
+                    >
+                      (AWB: {searchedOrder.awbCode})
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  ) : (
+                    <span className="text-neutral-400 font-mono"> (AWB Pending Dispatch)</span>
+                  )}
                 </span>
               </div>
             </div>
+
+            {/* Live Delhivery Scan Details if available */}
+            {liveTracking && (
+              <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-emerald-900 uppercase tracking-wider flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 text-emerald-700" />
+                    Live Delhivery One Transit Status
+                  </span>
+                  <span className="text-xs font-semibold text-emerald-800">
+                    {liveTracking.status || 'Active In-Transit'}
+                  </span>
+                </div>
+                {liveTracking.scans && liveTracking.scans.length > 0 && (
+                  <div className="pt-2 border-t border-emerald-200 text-xs text-emerald-800 space-y-1">
+                    {liveTracking.scans.slice(0, 3).map((scan: any, sIdx: number) => (
+                      <p key={sIdx} className="text-[11px]">
+                        • <span className="font-semibold">{scan.scanDateTime || scan.date}:</span> {scan.instructions || scan.activity} ({scan.location})
+                      </p>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Visual Timeline */}
             <div className="py-4">
