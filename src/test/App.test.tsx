@@ -2,14 +2,24 @@ import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import App from '../App'
 
-describe('App Component', () => {
-  it('renders the brand title', () => {
+describe('Your Framies E-Commerce App', () => {
+  it('renders the brand title and announcement bar', () => {
     render(<App />)
-    expect(screen.getByText('yourframies')).toBeInTheDocument()
+    const brandTitles = screen.getAllByText(/Your Framies/i)
+    expect(brandTitles.length).toBeGreaterThan(0)
+    expect(screen.getByText(/WELCOME10/i)).toBeInTheDocument()
   })
 
-  it('renders the interactive counter', () => {
+  it('renders primary navigation links', () => {
     render(<App />)
-    expect(screen.getByRole('button', { name: /clicked 0 times/i })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /^Shop All$/i })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /^Custom Studio$/i })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /Track Order/i })).toBeInTheDocument()
+  })
+
+  it('renders hero banner and call to action', () => {
+    render(<App />)
+    expect(screen.getByText(/Artisanal Frames/i)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /Explore Collections/i })).toBeInTheDocument()
   })
 })

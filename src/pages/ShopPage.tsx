@@ -1,0 +1,174 @@
+import React, { useState, useMemo } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import { Filter, SlidersHorizontal, ArrowUpDown } from 'lucide-react'
+import { INITIAL_PRODUCTS } from '../data/products'
+import { CATEGORIES } from '../data/categories'
+import { ProductCard } from '../components/product/ProductCard'
+
+export const ShopPage: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const activeCategorySlug = searchParams.get('category') || 'all'
+  const searchQuery = searchParams.get('search') || ''
+
+  const [sortBy, setSortBy] = useState<'featured' | 'price-asc' | 'price-desc' | 'name'>('featured')
+  const [selectedSize, setSelectedSize] = useState<string>('all')
+
+  const filteredProducts = useMemo(() => {
+    return INITIAL_PRODUCTS.filter((product) => {
+      // Category Filter
+      if (activeCategorySlug !== 'all') {
+        const cat = CATEGORIES.find((c) => c.slug === activeCategorySlug)
+        if (cat && product.categoryId !== cat.id) return false
+      }
+
+      // Search Query Filter
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase()
+        const matchesTitle = product.title.toLowerCase().includes(q)
+        const matchesDesc = product.description.toLowerCase().includes(q)
+        if (!matchesTitle && !matchesDesc) return false
+      }
+
+      // Size Filter
+      if (selectedSize !== 'all' && !product.availableSizes.includes(selectedSize)) {
+        return false
+      }
+
+      return true
+    }).sort((a, b) => {
+      if (sortBy === 'price-asc') return a.basePriceINR - b.basePriceINR
+      if (sortBy === 'price-desc') return b.basePriceINR - a.basePriceINR
+      if (sortBy === 'name') return a.title.localeCompare(b.title)
+      return 0
+    })
+  }, [activeCategorySlug, searchQuery, sortBy, selectedSize])
+
+  const handleCategoryChange = (slug: string) => {
+    if (slug === 'all') {
+      searchParams.delete('category')
+    } else {
+      searchParams.set('category', slug)
+    }
+    setSearchParams(searchParams)
+  }
+
+  return (
+    <div className="bg-neutral-50 min-h-screen py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header Title */}
+        <div className="border-b border-neutral-200 pb-8 mb-8">
+          <span className="text-[11px] font-bold uppercase tracking-widest text-neutral-400">
+            Catalog & Artworks
+          </span>
+          <h1 className="font-serif text-3xl sm:text-5xl text-neutral-900 mt-1">
+            {activeCategorySlug === 'all'
+              ? 'All Handcrafted Frames'
+              : CATEGORIES.find((c) => c.slug === activeCategorySlug)?.name || 'Collection'}
+          </h1>
+          {searchQuery && (
+            <p className="mt-2 text-xs text-neutral-500">
+              Showing search results for "<strong className="text-neutral-900">{searchQuery}</strong>" (
+              {filteredProducts.length} items)
+            </p>
+          )}
+        </div>
+
+        {/* Category Filter Pills */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-8 scrollbar-none">
+          <button
+            type="button"
+            onClick={() => handleCategoryChange('all')}
+            className={`px-4 py-2 rounded-full text-xs font-semibold uppercase tracking-wider whitespace-nowrap transition-all ${
+              activeCategorySlug === 'all'
+                ? 'bg-neutral-900 text-white shadow-xs'
+                : 'bg-white border border-neutral-300 text-neutral-700 hover:border-black'
+            }`}
+          >
+            All Collections
+          </button>
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat.id}
+              type="button"
+              onClick={() => handleCategoryChange(cat.slug)}
+              className={`px-4 py-2 rounded-full text-xs font-semibold uppercase tracking-wider whitespace-nowrap transition-all ${
+                activeCategorySlug === cat.slug
+                  ? 'bg-neutral-900 text-white shadow-xs'
+                  : 'bg-white border border-neutral-300 text-neutral-700 hover:border-black'
+              }`}
+            >
+              {cat.name}
+            </button>
+          ))}
+        </div>
+
+        {/* Filters and Sorting Bar */}
+        <div className="bg-white p-4 rounded-xl border border-neutral-200 mb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-4 w-full sm:w-auto">
+            <div className="flex items-center gap-2 text-xs font-semibold text-neutral-700">
+              <Filter className="w-4 h-4" />
+              <span>Filter Size:</span>
+            </div>
+            <select
+              value={selectedSize}
+              onChange={(e) => setSelectedSize(e.target.value)}
+              className="text-xs bg-neutral-50 border border-neutral-300 rounded px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-black"
+            >
+              <option value="all">All Sizes</option>
+              <option value="8x10">8x10"</option>
+              <option value="12x18">12x18"</option>
+              <option value="16x24">16x24"</option>
+              <option value="20x30">20x30"</option>
+              <option value="24x36">24x36"</option>
+            </select>
+          </div>
+
+          <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+            <div className="flex items-center gap-2 text-xs font-semibold text-neutral-700">
+              <ArrowUpDown className="w-3.5 h-3.5" />
+              <span>Sort:</span>
+            </div>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as any)}
+              className="text-xs bg-neutral-50 border border-neutral-300 rounded px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-black"
+            >
+              <option value="featured">Featured Picks</option>
+              <option value="price-asc">Price: Low to High</option>
+              <option value="price-desc">Price: High to Low</option>
+              <option value="name">Product Name (A-Z)</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Product Grid */}
+        {filteredProducts.length === 0 ? (
+          <div className="py-24 text-center bg-white rounded-2xl border border-neutral-200">
+            <SlidersHorizontal className="w-10 h-10 text-neutral-300 mx-auto mb-3" />
+            <h3 className="text-sm font-semibold text-neutral-800">No frames found</h3>
+            <p className="text-xs text-neutral-500 mt-1 max-w-sm mx-auto">
+              Try adjusting your category filter, clearing your search query, or resetting sizes.
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                handleCategoryChange('all')
+                setSearchParams({})
+                setSelectedSize('all')
+              }}
+              className="mt-5 px-5 py-2.5 rounded-full bg-neutral-900 text-white text-xs uppercase tracking-wider font-semibold"
+            >
+              Reset Filters
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+            {filteredProducts.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
