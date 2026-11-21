@@ -14,6 +14,7 @@ import {
 import { useAuth } from '../context/AuthContext'
 import { useOrders } from '../context/OrderContext'
 import { formatINR } from '../utils/formatters'
+import { checkIndianPincode, lookupPincode } from '../data/pincodes'
 
 export const AccountPage: React.FC = () => {
   const { user, addresses, addAddress, deleteAddress, logout, isAdmin } = useAuth()
@@ -44,6 +45,28 @@ export const AccountPage: React.FC = () => {
         </Link>
       </div>
     )
+  }
+
+  const handleAddrPinChange = async (val: string) => {
+    const cleaned = val.replace(/\D/g, '').slice(0, 6)
+    setAddrPin(cleaned)
+
+    if (cleaned.length === 6) {
+      const check = checkIndianPincode(cleaned)
+      if (check.isServiceable) {
+        setAddrCity(check.city)
+        setAddrState(check.state)
+      }
+      try {
+        const refined = await lookupPincode(cleaned)
+        if (refined.isServiceable) {
+          setAddrCity(refined.city)
+          setAddrState(refined.state)
+        }
+      } catch {
+        // Keep directory values
+      }
+    }
   }
 
   const handleCreateAddress = (e: React.FormEvent) => {
@@ -268,7 +291,7 @@ export const AccountPage: React.FC = () => {
                     maxLength={6}
                     placeholder="PIN Code"
                     value={addrPin}
-                    onChange={(e) => setAddrPin(e.target.value)}
+                    onChange={(e) => handleAddrPinChange(e.target.value)}
                     className="p-2.5 border border-neutral-300 rounded text-xs outline-none font-mono"
                   />
                   <input

@@ -4,6 +4,8 @@ import {
   authenticateAdmin,
   checkRateLimitAndLogin,
   hashPassword,
+  sendMobileOtp,
+  verifyMobileOtp,
 } from './lib/auth.ts'
 import { payments } from './lib/payments.ts'
 import { shipping } from './lib/shipping.ts'
@@ -642,6 +644,69 @@ export const handler: Handler = async (event: HandlerEvent, _context?: HandlerCo
       const awb = path.replace('/shipping/track/', '')
       const tracking = await shipping.getTrackingEvents(awb)
       return makeResponse(200, { success: true, data: tracking })
+    }
+
+    // ==========================================================================
+    // 6b. Customer Mobile OTP Authentication & Verification Endpoints
+    // ==========================================================================
+    if (path === '/auth/send-otp' && method === 'POST') {
+      const { phone, purpose } = JSON.parse(event.body || '{}')
+      if (!phone) {
+        return makeResponse(400, { success: false, message: 'Mobile number is required' })
+      }
+
+      const result = await sendMobileOtp(phone, purpose || 'login')
+      return makeResponse(result.success ? 200 : 400, result)
+    }
+
+    if (path === '/auth/verify-otp' && method === 'POST') {
+      const { phone, otp, name, email, purpose } = JSON.parse(event.body || '{}')
+      if (!phone || !otp) {
+        return makeResponse(400, { success: false, message: 'Phone and 6-digit OTP code are required' })
+      }
+
+      const result = await verifyMobileOtp(phone, otp, { name, email, purpose })
+      return makeResponse(result.success ? 200 : 400, result)
+    }
+
+    if (path === '/auth/register' && method === 'POST') {
+      const { phone, otp, name, email } = JSON.parse(event.body || '{}')
+      if (!phone || !otp) {
+        return makeResponse(400, { success: false, message: 'Mobile OTP verification is required to register.' })
+      }
+
+      const result = await verifyMobileOtp(phone, otp, { name, email, purpose: 'register' })
+      return makeResponse(result.success ? 200 : 400, result)
+    }
+
+    if (path === '/auth/login' && method === 'POST') {
+      const body = JSON.parse(event.body || '{}')
+      if (body.phone && body.otp) {
+        const result = await verifyMobileOtp(body.phone, body.otp, { purpose: 'login' })
+        return makeResponse(result.success ? 200 : 400, result)
+      }
+
+      // Email/password login
+      if (body.email && body.password) {
+        const result = await checkRateLimitAndLogin(body.email, body.password, clientIp)
+        if (!result.success) {
+          return makeResponse(401, { success: false, message: result.message })
+        }
+        return makeResponse(200, {
+          success: true,
+          token: result.token,
+          user: {
+            id: result.user!.id,
+            name: result.user!.name,
+            email: result.user!.email,
+            phone: '9999999999',
+            role: result.user!.role === 'SUPER_ADMIN' ? 'ADMIN' : 'CUSTOMER',
+            isPhoneVerified: true,
+          },
+        })
+      }
+
+      return makeResponse(400, { success: false, message: 'Mobile number & OTP or Email & Password required.' })
     }
 
     // ==========================================================================

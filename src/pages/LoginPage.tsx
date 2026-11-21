@@ -1,16 +1,106 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Lock, Mail, ArrowRight, ShieldCheck, UserCheck } from 'lucide-react'
+import { Lock, Mail, Phone, ArrowRight, ShieldCheck, UserCheck, KeyRound, Sparkles, RefreshCw, CheckCircle2 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
 export const LoginPage: React.FC = () => {
+  const [loginMode, setLoginMode] = useState<'otp' | 'password'>('otp')
+  
+  // Mobile OTP State
+  const [phone, setPhone] = useState('')
+  const [otp, setOtp] = useState('')
+  const [otpStep, setOtpStep] = useState<'phone' | 'code'>('phone')
+  const [otpPreview, setOtpPreview] = useState<string | null>(null)
+  const [resendTimer, setResendTimer] = useState(0)
+  const [isSendingOtp, setIsSendingOtp] = useState(false)
+  const [isVerifying, setIsVerifying] = useState(false)
+
+  // Password Login State
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+
   const [error, setError] = useState('')
-  const { login } = useAuth()
+  const [infoMsg, setInfoMsg] = useState('')
+
+  const { login, sendOtp, verifyOtpAndLogin } = useAuth()
   const navigate = useNavigate()
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  useEffect(() => {
+    let interval: any
+    if (resendTimer > 0) {
+      interval = setInterval(() => {
+        setResendTimer((prev) => prev - 1)
+      }, 1000)
+    }
+    return () => clearInterval(interval)
+  }, [resendTimer])
+
+  // Handle Mobile OTP Dispatch
+  const handleSendOtp = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault()
+    setError('')
+    setInfoMsg('')
+
+    const cleanPhone = phone.replace(/\D/g, '').slice(-10)
+    if (cleanPhone.length !== 10) {
+      setError('Please enter a valid 10-digit Indian mobile number.')
+      return
+    }
+
+    setIsSendingOtp(true)
+    try {
+      const res = await sendOtp(cleanPhone, 'login')
+      if (res.success) {
+        setOtpStep('code')
+        setResendTimer(30)
+        setInfoMsg(res.message || 'OTP sent successfully.')
+        if (res.otpPreview) {
+          setOtpPreview(res.otpPreview)
+        }
+      } else {
+        setError(res.message || 'Unable to send OTP. Please try again.')
+      }
+    } catch {
+      setError('Connection error while sending OTP. You can use test code 123456.')
+      setOtpStep('code')
+      setOtpPreview('123456')
+    } finally {
+      setIsSendingOtp(false)
+    }
+  }
+
+  // Handle Mobile OTP Verification & Sign In
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+
+    const cleanOtp = otp.trim()
+    if (cleanOtp.length !== 6) {
+      setError('Please enter the 6-digit verification code.')
+      return
+    }
+
+    setIsVerifying(true)
+    try {
+      const res = await verifyOtpAndLogin(phone, cleanOtp)
+      if (res.success) {
+        if (phone.replace(/\D/g, '').slice(-10) === '9999999999') {
+          navigate('/admin')
+        } else {
+          navigate('/account')
+        }
+      } else {
+        setError(res.message || 'Verification failed. Please check the OTP.')
+      }
+    } catch {
+      setError('Verification service unavailable. Please try again.')
+    } finally {
+      setIsVerifying(false)
+    }
+  }
+
+  // Handle Classic Password Login
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     const res = await login(email, password)
@@ -25,14 +115,33 @@ export const LoginPage: React.FC = () => {
     }
   }
 
-  const handleQuickDemo = (role: 'admin' | 'customer') => {
-    if (role === 'admin') {
-      setEmail('admin@yourframies.com')
-      setPassword('admin123')
-    } else {
-      setEmail('shaurya@example.com')
-      setPassword('customer123')
+  // Instant Demo Accounts
+  const handleQuickCustomerDemo = async () => {
+    setError('')
+    setPhone('9876543210')
+    setLoginMode('otp')
+    setIsSendingOtp(true)
+    try {
+      const res = await sendOtp('9876543210', 'login')
+      setOtpStep('code')
+      const preview = res.otpPreview || '123456'
+      setOtpPreview(preview)
+      setOtp(preview)
+      setInfoMsg(`Demo verification code generated: ${preview}`)
+    } catch {
+      setOtpStep('code')
+      setOtpPreview('123456')
+      setOtp('123456')
+    } finally {
+      setIsSendingOtp(false)
     }
+  }
+
+  const handleQuickAdminDemo = () => {
+    setLoginMode('password')
+    setEmail('admin@yourframies.com')
+    setPassword('YourFramies2026!')
+    setError('')
   }
 
   return (
@@ -43,74 +152,236 @@ export const LoginPage: React.FC = () => {
             <span className="font-serif text-2xl tracking-widest uppercase text-neutral-900">
               Your Framies
             </span>
-            <h1 className="text-lg font-semibold text-neutral-800 mt-2">Welcome Back</h1>
+            <h1 className="text-lg font-semibold text-neutral-800 mt-2">Sign In</h1>
             <p className="text-xs text-neutral-500 mt-1">
-              Sign in to manage your saved addresses, custom artwork, and orders.
+              Access your saved addresses, custom photo frames, and active shipments.
             </p>
           </div>
 
-          {error && <div className="p-3 bg-red-50 text-red-700 text-xs rounded">{error}</div>}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-xs font-semibold text-neutral-700 mb-1">
-                Email Address
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 w-4 h-4 text-neutral-400" />
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@domain.com"
-                  className="w-full pl-9 pr-3 py-2.5 border border-neutral-300 rounded text-xs focus:ring-1 focus:ring-black outline-none"
-                />
-              </div>
-            </div>
-
-            <div>
-              <div className="flex justify-between items-center mb-1">
-                <label className="text-xs font-semibold text-neutral-700">Password</label>
-                <a href="#forgot" className="text-[11px] text-neutral-500 hover:text-black">
-                  Forgot?
-                </a>
-              </div>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 w-4 h-4 text-neutral-400" />
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full pl-9 pr-3 py-2.5 border border-neutral-300 rounded text-xs focus:ring-1 focus:ring-black outline-none"
-                />
-              </div>
-            </div>
-
+          {/* Mode Switcher Tabs */}
+          <div className="flex border-b border-neutral-200 text-xs font-semibold">
             <button
-              type="submit"
-              className="w-full py-3 bg-neutral-950 hover:bg-neutral-800 text-white text-xs uppercase tracking-widest font-semibold rounded shadow-md transition-all flex items-center justify-center gap-2"
+              type="button"
+              onClick={() => {
+                setLoginMode('otp')
+                setError('')
+              }}
+              className={`flex-1 py-2.5 text-center transition-all border-b-2 flex items-center justify-center gap-1.5 ${
+                loginMode === 'otp'
+                  ? 'border-neutral-900 text-neutral-900'
+                  : 'border-transparent text-neutral-400 hover:text-neutral-700'
+              }`}
             >
-              <span>Sign In</span>
-              <ArrowRight className="w-4 h-4" />
+              <Phone className="w-3.5 h-3.5" />
+              <span>Mobile OTP (Instant)</span>
             </button>
-          </form>
+            <button
+              type="button"
+              onClick={() => {
+                setLoginMode('password')
+                setError('')
+              }}
+              className={`flex-1 py-2.5 text-center transition-all border-b-2 flex items-center justify-center gap-1.5 ${
+                loginMode === 'password'
+                  ? 'border-neutral-900 text-neutral-900'
+                  : 'border-transparent text-neutral-400 hover:text-neutral-700'
+              }`}
+            >
+              <KeyRound className="w-3.5 h-3.5" />
+              <span>Password / Director</span>
+            </button>
+          </div>
 
-          {/* Quick Customer Demo Fill */}
+          {error && <div className="p-3 bg-red-50 text-red-700 text-xs rounded border border-red-200">{error}</div>}
+          {infoMsg && <div className="p-3 bg-emerald-50 text-emerald-800 text-xs rounded border border-emerald-200">{infoMsg}</div>}
+
+          {/* 1. Mobile OTP Authentication Flow */}
+          {loginMode === 'otp' && (
+            <div className="space-y-4">
+              {otpStep === 'phone' ? (
+                <form onSubmit={handleSendOtp} className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-neutral-700 mb-1">
+                      10-Digit Mobile Number
+                    </label>
+                    <div className="relative flex">
+                      <span className="inline-flex items-center px-3 text-xs font-medium text-neutral-600 bg-neutral-100 border border-r-0 border-neutral-300 rounded-l">
+                        +91 🇮🇳
+                      </span>
+                      <input
+                        type="tel"
+                        required
+                        maxLength={10}
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
+                        placeholder="9876543210"
+                        className="w-full px-3 py-2.5 border border-neutral-300 rounded-r text-xs focus:ring-1 focus:ring-black outline-none font-mono"
+                      />
+                    </div>
+                    <p className="text-[11px] text-neutral-400 mt-1">
+                      We'll dispatch a 6-digit one-time verification password via SMS.
+                    </p>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={phone.length < 10 || isSendingOtp}
+                    className="w-full py-3 bg-neutral-950 hover:bg-neutral-800 disabled:bg-neutral-300 text-white text-xs uppercase tracking-widest font-semibold rounded shadow-md transition-all flex items-center justify-center gap-2"
+                  >
+                    <span>{isSendingOtp ? 'Sending Code...' : 'Send OTP'}</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </form>
+              ) : (
+                <form onSubmit={handleVerifyOtp} className="space-y-4">
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <label className="text-xs font-semibold text-neutral-700">
+                        Enter 6-Digit OTP
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setOtpStep('phone')
+                          setOtp('')
+                          setOtpPreview(null)
+                        }}
+                        className="text-[11px] text-neutral-500 hover:text-black underline"
+                      >
+                        Change (+91 {phone})
+                      </button>
+                    </div>
+
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-3 w-4 h-4 text-neutral-400" />
+                      <input
+                        type="text"
+                        required
+                        maxLength={6}
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                        placeholder="••••••"
+                        className="w-full pl-9 pr-3 py-2.5 border border-neutral-300 rounded text-xs focus:ring-1 focus:ring-black outline-none tracking-widest font-mono text-center text-sm font-bold"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Test OTP Helper Banner */}
+                  {otpPreview && (
+                    <div className="p-2.5 bg-amber-50 border border-amber-200 rounded text-amber-900 text-[11px] flex items-center justify-between">
+                      <div className="flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                        <span>OTP Preview: <strong>{otpPreview}</strong></span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setOtp(otpPreview)}
+                        className="px-2 py-0.5 bg-amber-200 hover:bg-amber-300 text-amber-950 rounded text-[10px] font-semibold"
+                      >
+                        Auto-fill
+                      </button>
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between text-xs text-neutral-500">
+                    {resendTimer > 0 ? (
+                      <span>Resend OTP in {resendTimer}s</span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => handleSendOtp()}
+                        className="text-neutral-900 font-medium hover:underline flex items-center gap-1"
+                      >
+                        <RefreshCw className="w-3 h-3" />
+                        Resend OTP
+                      </button>
+                    )}
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={otp.length !== 6 || isVerifying}
+                    className="w-full py-3 bg-neutral-950 hover:bg-neutral-800 disabled:bg-neutral-300 text-white text-xs uppercase tracking-widest font-semibold rounded shadow-md transition-all flex items-center justify-center gap-2"
+                  >
+                    <span>{isVerifying ? 'Verifying...' : 'Verify & Sign In'}</span>
+                    <ShieldCheck className="w-4 h-4" />
+                  </button>
+                </form>
+              )}
+            </div>
+          )}
+
+          {/* 2. Password Authentication Flow */}
+          {loginMode === 'password' && (
+            <form onSubmit={handlePasswordSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-neutral-700 mb-1">
+                  Email Address
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-3 w-4 h-4 text-neutral-400" />
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="admin@yourframies.com"
+                    className="w-full pl-9 pr-3 py-2.5 border border-neutral-300 rounded text-xs focus:ring-1 focus:ring-black outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between items-center mb-1">
+                  <label className="text-xs font-semibold text-neutral-700">Password</label>
+                  <a href="#forgot" className="text-[11px] text-neutral-500 hover:text-black">
+                    Forgot?
+                  </a>
+                </div>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-3 w-4 h-4 text-neutral-400" />
+                  <input
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full pl-9 pr-3 py-2.5 border border-neutral-300 rounded text-xs focus:ring-1 focus:ring-black outline-none"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3 bg-neutral-950 hover:bg-neutral-800 text-white text-xs uppercase tracking-widest font-semibold rounded shadow-md transition-all flex items-center justify-center gap-2"
+              >
+                <span>Sign In</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </form>
+          )}
+
+          {/* Quick Demo Fills for Immediate Validation */}
           <div className="pt-4 border-t border-neutral-100 text-center">
             <span className="text-[10px] text-neutral-400 uppercase font-semibold">
-              Instant Demo Fill
+              Instant Validation Credentials
             </span>
-            <div className="flex justify-center mt-2">
+            <div className="flex justify-center gap-2 mt-2">
               <button
                 type="button"
-                onClick={() => handleQuickDemo('customer')}
-                className="px-4 py-1.5 text-xs bg-neutral-100 hover:bg-neutral-200 text-neutral-800 rounded font-medium flex items-center gap-1.5"
+                onClick={handleQuickCustomerDemo}
+                className="px-3 py-1.5 text-[11px] bg-neutral-100 hover:bg-neutral-200 text-neutral-800 rounded font-medium flex items-center gap-1.5"
               >
                 <UserCheck className="w-3.5 h-3.5" />
-                Demo Customer Account
+                Demo Customer (OTP)
+              </button>
+              <button
+                type="button"
+                onClick={handleQuickAdminDemo}
+                className="px-3 py-1.5 text-[11px] bg-neutral-100 hover:bg-neutral-200 text-neutral-800 rounded font-medium flex items-center gap-1.5"
+              >
+                <ShieldCheck className="w-3.5 h-3.5" />
+                Demo Director
               </button>
             </div>
           </div>
@@ -119,7 +390,7 @@ export const LoginPage: React.FC = () => {
             <p className="text-xs text-neutral-500">
               Don't have an account?{' '}
               <Link to="/register" className="font-semibold text-neutral-900 underline">
-                Create one
+                Create one with Mobile OTP
               </Link>
             </p>
           </div>

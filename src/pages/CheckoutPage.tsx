@@ -13,7 +13,7 @@ import {
 import { useCart } from '../context/CartContext'
 import { useOrders } from '../context/OrderContext'
 import { useAuth } from '../context/AuthContext'
-import { checkIndianPincode } from '../data/pincodes'
+import { checkIndianPincode, lookupPincode } from '../data/pincodes'
 import { formatINR } from '../utils/formatters'
 import { PaymentMethod } from '../types'
 import { api } from '../services/api'
@@ -64,16 +64,29 @@ export const CheckoutPage: React.FC = () => {
     courierName: string
   } | null>(null)
 
-  const handlePincodeChange = (val: string) => {
+  const handlePincodeChange = async (val: string) => {
     const cleaned = val.replace(/\D/g, '').slice(0, 6)
     setPincode(cleaned)
 
     if (cleaned.length === 6) {
+      // Immediate synchronous postal check covering all prefixes (11-85 + 403 + 1-8)
       const check = checkIndianPincode(cleaned)
       setPincodeStatus(check)
       if (check.isServiceable) {
         setCity(check.city)
         setState(check.state)
+      }
+
+      // Asynchronous refinement with Postal Pincode Directory API
+      try {
+        const refined = await lookupPincode(cleaned)
+        if (refined.isServiceable) {
+          setPincodeStatus(refined)
+          setCity(refined.city)
+          setState(refined.state)
+        }
+      } catch {
+        // Retain directory values
       }
     } else {
       setPincodeStatus(null)

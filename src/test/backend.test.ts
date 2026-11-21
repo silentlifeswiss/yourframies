@@ -280,4 +280,89 @@ describe('Your Framies - Backend Serverless Architecture & APIs', () => {
     expect(validVerifyRes.statusCode).toBe(200)
     expect(JSON.parse(validVerifyRes.body).verified).toBe(true)
   })
+
+  // --------------------------------------------------------------------------
+  // 7. Customer Mobile OTP Authentication & Verification
+  // --------------------------------------------------------------------------
+  it('POST /auth/send-otp dispatches 6-digit OTP for valid Indian mobile numbers', async () => {
+    const validSendEvent = createEvent('/auth/send-otp', 'POST', {
+      phone: '9876543210',
+      purpose: 'login',
+    })
+    const res: any = await handler(validSendEvent, {} as any)
+    expect(res.statusCode).toBe(200)
+
+    const payload = JSON.parse(res.body)
+    expect(payload.success).toBe(true)
+    expect(payload).toHaveProperty('otpPreview')
+    expect(payload.otpPreview).toMatch(/^\d{6}$/)
+
+    // Rejects invalid phone numbers
+    const invalidSendEvent = createEvent('/auth/send-otp', 'POST', {
+      phone: '12345',
+    })
+    const invalidRes: any = await handler(invalidSendEvent, {} as any)
+    expect(invalidRes.statusCode).toBe(400)
+    expect(JSON.parse(invalidRes.body).success).toBe(false)
+  })
+
+  it('POST /auth/verify-otp verifies OTP code and issues customer session token', async () => {
+    // 1. Dispatch OTP
+    const sendEvent = createEvent('/auth/send-otp', 'POST', {
+      phone: '9876543210',
+      purpose: 'login',
+    })
+    const sendRes: any = await handler(sendEvent, {} as any)
+    const otpCode = JSON.parse(sendRes.body).otpPreview
+
+    // 2. Reject incorrect OTP
+    const wrongEvent = createEvent('/auth/verify-otp', 'POST', {
+      phone: '9876543210',
+      otp: '000000',
+    })
+    const wrongRes: any = await handler(wrongEvent, {} as any)
+    expect(wrongRes.statusCode).toBe(400)
+    expect(JSON.parse(wrongRes.body).success).toBe(false)
+
+    // 3. Accept correct OTP
+    const correctEvent = createEvent('/auth/verify-otp', 'POST', {
+      phone: '9876543210',
+      otp: otpCode,
+      name: 'Shaurya Customer',
+    })
+    const correctRes: any = await handler(correctEvent, {} as any)
+    expect(correctRes.statusCode).toBe(200)
+
+    const payload = JSON.parse(correctRes.body)
+    expect(payload.success).toBe(true)
+    expect(payload.user.isPhoneVerified).toBe(true)
+    expect(payload.user.phone).toBe('9876543210')
+    expect(payload).toHaveProperty('token')
+  })
+
+  it('POST /auth/register and /auth/login enforce mobile OTP verification', async () => {
+    // Register with master test OTP 123456
+    const regEvent = createEvent('/auth/register', 'POST', {
+      name: 'Priya Sharma',
+      email: 'priya@example.com',
+      phone: '9812345678',
+      otp: '123456',
+    })
+    const regRes: any = await handler(regEvent, {} as any)
+    expect(regRes.statusCode).toBe(200)
+
+    const regData = JSON.parse(regRes.body)
+    expect(regData.success).toBe(true)
+    expect(regData.user.name).toBe('Priya Sharma')
+    expect(regData.user.isPhoneVerified).toBe(true)
+
+    // Customer Login via OTP
+    const loginEvent = createEvent('/auth/login', 'POST', {
+      phone: '9812345678',
+      otp: '123456',
+    })
+    const loginRes: any = await handler(loginEvent, {} as any)
+    expect(loginRes.statusCode).toBe(200)
+    expect(JSON.parse(loginRes.body).success).toBe(true)
+  })
 })

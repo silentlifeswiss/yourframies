@@ -20,7 +20,7 @@ import { CATEGORIES } from '../data/categories'
 import { ProductReviews } from '../components/product/ProductReviews'
 import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
-import { checkIndianPincode } from '../data/pincodes'
+import { checkIndianPincode, lookupPincode } from '../data/pincodes'
 import { FrameCustomization, PincodeServiceability } from '../types'
 import { formatINR } from '../utils/formatters'
 
@@ -87,10 +87,19 @@ export const ProductDetailPage: React.FC = () => {
   const glassAddon = selectedGlass === 'Anti-Glare UV Glass' ? 350 : 0
   const finalPrice = product.basePriceINR + sizeAddon + glassAddon
 
-  const handlePincodeCheck = (e: React.FormEvent) => {
+  const handlePincodeCheck = async (e: React.FormEvent) => {
     e.preventDefault()
     if (pincodeInput.trim()) {
-      setPincodeResult(checkIndianPincode(pincodeInput))
+      const base = checkIndianPincode(pincodeInput)
+      setPincodeResult(base)
+      try {
+        const refined = await lookupPincode(pincodeInput)
+        if (refined.isServiceable) {
+          setPincodeResult(refined)
+        }
+      } catch {
+        // Keep directory values
+      }
     }
   }
 

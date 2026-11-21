@@ -254,4 +254,49 @@ export const api = {
     })
     return res.json()
   },
+
+  // ----------------------------------------------------------------------------
+  // Customer Mobile OTP Authentication
+  // ----------------------------------------------------------------------------
+  async sendOtp(phone: string, purpose: 'login' | 'register' = 'login') {
+    const res = await fetch(`${API_BASE}/auth/send-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone, purpose }),
+    })
+    return res.json()
+  },
+
+  async verifyOtp(payload: {
+    phone: string
+    otp: string
+    name?: string
+    email?: string
+    purpose?: 'login' | 'register'
+  }) {
+    const res = await fetch(`${API_BASE}/auth/verify-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+    return res.json()
+  },
+
+  async customerLogin(credentials: { phone?: string; otp?: string; email?: string; password?: string }) {
+    const res = await fetch(`${API_BASE}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(credentials),
+    })
+    return res.json()
+  },
+
+  async customerRegister(payload: { name: string; email: string; phone: string; otp: string }) {
+    const res = await fetch(`${API_BASE}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+    return res.json()
+  },
 }
