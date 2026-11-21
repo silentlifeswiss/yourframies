@@ -15,9 +15,11 @@ import {
 import { useCart } from '../../context/CartContext'
 import { useWishlist } from '../../context/WishlistContext'
 import { useAuth } from '../../context/AuthContext'
+import { useSiteContent } from '../../context/SiteContentContext'
 import { INITIAL_PRODUCTS } from '../../data/products'
 
 export const Navbar: React.FC = () => {
+  const { settings } = useSiteContent()
   const { itemCount, setIsCartOpen } = useCart()
   const { wishlistCount } = useWishlist()
   const { user, isAuthenticated, isAdmin, logout } = useAuth()
@@ -89,10 +91,10 @@ export const Navbar: React.FC = () => {
             <div className="flex-1 text-center lg:flex-initial">
               <Link to="/" className="inline-flex flex-col items-center group">
                 <span className="font-serif text-2xl sm:text-3xl font-light tracking-widest text-neutral-900 uppercase">
-                  Your Framies
+                  {settings.logoText || 'Your Framies'}
                 </span>
                 <span className="text-[9px] tracking-[0.3em] uppercase text-neutral-600 font-sans mt-0.5">
-                  Artisanal Wall Framing
+                  {settings.tagline || 'Artisanal Wall Framing'}
                 </span>
               </Link>
             </div>
@@ -123,34 +125,20 @@ export const Navbar: React.FC = () => {
                 )}
               </Link>
 
-              {/* Customer / Admin Account */}
+              {/* Customer Account */}
               {isAuthenticated ? (
                 <div className="relative group">
                   <Link
-                    to={isAdmin ? '/admin' : '/account'}
+                    to="/account"
                     className="p-2 flex items-center gap-1.5 text-neutral-700 hover:text-black transition-colors"
                   >
                     <UserIcon className="w-5 h-5" />
-                    {isAdmin && (
-                      <span className="hidden md:inline-block text-[10px] uppercase font-bold px-1.5 py-0.5 bg-neutral-900 text-white rounded">
-                        Admin
-                      </span>
-                    )}
                   </Link>
                   {/* Dropdown */}
                   <div className="absolute right-0 mt-1 w-48 bg-white border border-neutral-200 shadow-xl rounded-md py-2 hidden group-hover:block z-50">
                     <div className="px-4 py-2 border-b border-neutral-100 text-xs text-neutral-500">
                       Signed in as <strong className="text-neutral-900">{user?.name}</strong>
                     </div>
-                    {isAdmin && (
-                      <Link
-                        to="/admin"
-                        className="flex items-center gap-2 px-4 py-2 text-xs text-neutral-800 hover:bg-neutral-50 font-semibold"
-                      >
-                        <ShieldAlert className="w-3.5 h-3.5 text-amber-600" />
-                        Admin Dashboard
-                      </Link>
-                    )}
                     <Link
                       to="/account"
                       className="block px-4 py-2 text-xs text-neutral-700 hover:bg-neutral-50"
@@ -339,15 +327,6 @@ export const Navbar: React.FC = () => {
                   >
                     My Profile & Orders
                   </Link>
-                  {isAdmin && (
-                    <Link
-                      to="/admin"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="block text-xs uppercase tracking-wider font-bold text-amber-700"
-                    >
-                      Admin Dashboard
-                    </Link>
-                  )}
                   <button
                     type="button"
                     onClick={() => {

@@ -1,8 +1,10 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { Mail, Phone, MapPin, ShieldCheck, RefreshCw, Truck } from 'lucide-react'
+import { useSiteContent } from '../../context/SiteContentContext'
 
 export const Footer: React.FC = () => {
+  const { settings } = useSiteContent()
   return (
     <footer className="bg-neutral-950 text-neutral-400 text-xs border-t border-neutral-800">
       {/* Value Badges Banner */}
@@ -57,23 +59,23 @@ export const Footer: React.FC = () => {
         {/* Col 1: Brand Info */}
         <div className="lg:col-span-2 space-y-4">
           <span className="font-serif text-2xl tracking-widest text-neutral-100 uppercase">
-            Your Framies
+            {settings.brandName || 'Your Framies'}
           </span>
           <p className="text-neutral-500 max-w-sm leading-relaxed">
-            India's destination for contemporary automotive wall art, bespoke photo preservation, and studio-grade custom framing.
+            {settings.tagline || "India's destination for contemporary automotive wall art, bespoke photo preservation, and studio-grade custom framing."}
           </p>
           <div className="pt-2 text-neutral-400 space-y-2">
             <p className="flex items-center gap-2">
               <MapPin className="w-4 h-4 text-neutral-500" />
-              <span>Studio & Workshop: Outer Ring Road, Bengaluru, Karnataka 560103</span>
+              <span>Studio: {settings.workshopAddress || 'Outer Ring Road, Bengaluru, Karnataka 560103'}</span>
             </p>
             <p className="flex items-center gap-2">
               <Mail className="w-4 h-4 text-neutral-500" />
-              <span>support@yourframies.com</span>
+              <span>{settings.contactEmail || 'support@yourframies.com'}</span>
             </p>
             <p className="flex items-center gap-2">
               <Phone className="w-4 h-4 text-neutral-500" />
-              <span>+91 98765 43210 (Mon-Sat, 10 AM - 7 PM IST)</span>
+              <span>{settings.contactPhone || '+91 98765 43210'} (Mon-Sat, 10 AM - 7 PM IST)</span>
             </p>
           </div>
         </div>
@@ -175,11 +177,6 @@ export const Footer: React.FC = () => {
             <li>
               <Link to="/policy/terms" className="hover:text-white transition-colors">
                 Terms & Conditions
-              </Link>
-            </li>
-            <li>
-              <Link to="/admin" className="text-neutral-600 hover:text-neutral-400 transition-colors">
-                Admin Portal
               </Link>
             </li>
           </ul>

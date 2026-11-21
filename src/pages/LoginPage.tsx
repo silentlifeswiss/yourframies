@@ -98,27 +98,19 @@ export const LoginPage: React.FC = () => {
             </button>
           </form>
 
-          {/* Quick Demo Credentials for Reviewers */}
+          {/* Quick Customer Demo Fill */}
           <div className="pt-4 border-t border-neutral-100 text-center">
             <span className="text-[10px] text-neutral-400 uppercase font-semibold">
               Instant Demo Fill
             </span>
-            <div className="flex gap-2 justify-center mt-2">
+            <div className="flex justify-center mt-2">
               <button
                 type="button"
                 onClick={() => handleQuickDemo('customer')}
-                className="px-3 py-1.5 text-xs bg-neutral-100 hover:bg-neutral-200 text-neutral-800 rounded font-medium flex items-center gap-1.5"
+                className="px-4 py-1.5 text-xs bg-neutral-100 hover:bg-neutral-200 text-neutral-800 rounded font-medium flex items-center gap-1.5"
               >
                 <UserCheck className="w-3.5 h-3.5" />
-                Customer
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickDemo('admin')}
-                className="px-3 py-1.5 text-xs bg-neutral-900 text-white rounded font-medium flex items-center gap-1.5 hover:bg-neutral-800"
-              >
-                <ShieldCheck className="w-3.5 h-3.5" />
-                Store Admin
+                Demo Customer Account
               </button>
             </div>
           </div>

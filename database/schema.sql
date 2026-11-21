@@ -192,3 +192,79 @@ CREATE INDEX IF NOT EXISTS idx_shipments_order ON shipments(order_id);
 CREATE INDEX IF NOT EXISTS idx_shipments_awb ON shipments(awb_code);
 CREATE INDEX IF NOT EXISTS idx_addresses_user ON addresses(user_id);
 CREATE INDEX IF NOT EXISTS idx_addresses_pincode ON addresses(pincode);
+
+
+-- ==============================================================================
+-- 10. Admin Users & Role-Based Access Control
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS admin_users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    role VARCHAR(30) NOT NULL DEFAULT 'MANAGER', -- 'SUPER_ADMIN', 'MANAGER', 'SUPPORT'
+    is_active BOOLEAN DEFAULT TRUE,
+    two_factor_enabled BOOLEAN DEFAULT FALSE,
+    failed_login_attempts INT DEFAULT 0,
+    locked_until TIMESTAMPTZ,
+    last_login_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ==============================================================================
+-- 11. Website General Settings & Store Identity (Visual CMS)
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS site_settings (
+    setting_key VARCHAR(100) PRIMARY KEY,
+    setting_value JSONB NOT NULL,
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_by VARCHAR(255)
+);
+
+-- ==============================================================================
+-- 12. Homepage Dynamic Sections (Visual Section Reordering & Layout)
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS homepage_sections (
+    id VARCHAR(100) PRIMARY KEY,
+    section_type VARCHAR(50) NOT NULL,
+    title VARCHAR(255),
+    subtitle TEXT,
+    content JSONB DEFAULT '{}'::jsonb,
+    display_order INT NOT NULL DEFAULT 0,
+    is_active BOOLEAN DEFAULT TRUE,
+    background_style VARCHAR(100) DEFAULT 'white',
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ==============================================================================
+-- 13. Central Media Library
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS media_library (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    filename VARCHAR(255) NOT NULL,
+    url TEXT NOT NULL,
+    file_size_bytes INT,
+    mime_type VARCHAR(100),
+    alt_text VARCHAR(255),
+    folder VARCHAR(100) DEFAULT 'general',
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ==============================================================================
+-- 14. Admin Security & Operation Audit Logs
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS audit_logs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    admin_id VARCHAR(100) NOT NULL,
+    admin_name VARCHAR(100) NOT NULL,
+    action VARCHAR(100) NOT NULL, -- 'PRODUCT_UPDATE', 'ORDER_STATUS_CHANGE', 'SETTINGS_PUBLISH', etc.
+    entity_type VARCHAR(50) NOT NULL,
+    entity_id VARCHAR(100),
+    details JSONB DEFAULT '{}'::jsonb,
+    ip_address VARCHAR(50),
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_audit_logs_created ON audit_logs(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_homepage_sections_order ON homepage_sections(display_order ASC);
