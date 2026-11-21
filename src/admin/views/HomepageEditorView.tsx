@@ -320,7 +320,6 @@ export const HomepageEditorView: React.FC = () => {
                 <option value="categories">Category Showcase</option>
                 <option value="bestsellers">Product Highlights</option>
                 <option value="why_choose_us">Why Choose Us Pillars</option>
-                <option value="reviews">Customer Reviews Block</option>
                 <option value="instagram">Instagram Showcase</option>
               </select>
             </div>

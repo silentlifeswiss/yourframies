@@ -13,9 +13,11 @@ import {
   Image as ImageIcon,
   Trash2,
   RefreshCw,
+  Star,
 } from 'lucide-react'
 import { getStoreProducts } from '../data/products'
 import { CATEGORIES } from '../data/categories'
+import { ProductReviews } from '../components/product/ProductReviews'
 import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
 import { checkIndianPincode } from '../data/pincodes'
@@ -232,6 +234,25 @@ export const ProductDetailPage: React.FC = () => {
               <h1 className="font-serif text-3xl sm:text-4xl text-neutral-900 mt-1">
                 {product.title}
               </h1>
+              <div className="flex items-center gap-2 mt-2">
+                <a
+                  href="#product-reviews"
+                  className="flex items-center gap-1.5 group"
+                >
+                  <div className="flex items-center gap-0.5">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                    ))}
+                  </div>
+                  <span className="text-xs font-semibold text-neutral-800 group-hover:underline">
+                    4.9 / 5.0
+                  </span>
+                  <span className="text-neutral-400">•</span>
+                  <span className="text-xs text-amber-600 font-semibold group-hover:underline">
+                    Read & Write Reviews
+                  </span>
+                </a>
+              </div>
               <p className="mt-3 text-xs sm:text-sm text-neutral-600 font-light leading-relaxed">
                 {product.description}
               </p>
@@ -526,6 +547,9 @@ export const ProductDetailPage: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Customer Reviews & Write-A-Review Mechanism */}
+        <ProductReviews product={product} />
       </div>
     </div>
   )

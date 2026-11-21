@@ -116,22 +116,13 @@ export const DEFAULT_HOMEPAGE_SECTIONS: HomepageSection[] = [
     order: 4,
   },
   {
-    id: 'sec-reviews',
-    type: 'reviews',
-    title: 'Loved in 10,000+ Indian Homes',
-    subtitle: 'Read genuine verified reviews from collectors across India',
-    isActive: true,
-    backgroundStyle: 'white',
-    order: 5,
-  },
-  {
     id: 'sec-instagram',
     type: 'instagram',
     title: 'Follow Our Journey on Instagram',
     subtitle: '#YourFramiesInTheWild',
     isActive: true,
     backgroundStyle: 'neutral-900',
-    order: 6,
+    order: 5,
   },
   {
     id: 'sec-newsletter',
@@ -141,7 +132,7 @@ export const DEFAULT_HOMEPAGE_SECTIONS: HomepageSection[] = [
       'Subscribe for early access to limited edition automotive prints, seasonal releases, and private studio promotions.',
     isActive: true,
     backgroundStyle: 'neutral-50',
-    order: 7,
+    order: 6,
   },
 ]
 
@@ -182,7 +173,9 @@ export const SiteContentProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [publishedSections, setPublishedSections] = useState<HomepageSection[]>(() => {
     try {
       const stored = localStorage.getItem(SECTIONS_STORAGE_KEY)
-      return stored ? JSON.parse(stored) : DEFAULT_HOMEPAGE_SECTIONS
+      return stored
+        ? JSON.parse(stored).filter((s: HomepageSection) => s.type !== 'reviews')
+        : DEFAULT_HOMEPAGE_SECTIONS
     } catch {
       return DEFAULT_HOMEPAGE_SECTIONS
     }

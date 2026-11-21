@@ -5,7 +5,6 @@ import { CategoryGrid } from '../components/home/CategoryGrid'
 import { ProductCarousel } from '../components/home/ProductCarousel'
 import { WhyChooseUs } from '../components/home/WhyChooseUs'
 import { FrameCustomizer } from '../components/product/FrameCustomizer'
-import { CustomerReviews } from '../components/home/CustomerReviews'
 import { InstagramSection } from '../components/home/InstagramSection'
 import { Newsletter } from '../components/home/Newsletter'
 import { useSiteContent, HomepageSection } from '../context/SiteContentContext'
@@ -73,9 +72,6 @@ export const HomePage: React.FC = () => {
 
       case 'why_choose_us':
         return <WhyChooseUs key={section.id} />
-
-      case 'reviews':
-        return <CustomerReviews key={section.id} />
 
       case 'instagram':
         return <InstagramSection key={section.id} />

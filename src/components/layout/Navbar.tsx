@@ -37,10 +37,10 @@ export const Navbar: React.FC = () => {
 
   const searchResults = searchQuery.trim()
     ? INITIAL_PRODUCTS.filter(
-        (p) =>
-          p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          p.description.toLowerCase().includes(searchQuery.toLowerCase())
-      ).slice(0, 4)
+      (p) =>
+        p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.description.toLowerCase().includes(searchQuery.toLowerCase())
+    ).slice(0, 4)
     : []
 
   return (
