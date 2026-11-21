@@ -4,7 +4,7 @@ import { api } from '../services/api'
 
 interface OrderContextType {
   orders: Order[]
-  createOrder: (order: Omit<Order, 'id' | 'orderNumber' | 'createdAt'>) => Order
+  createOrder: (order: Partial<Order> & Omit<Order, 'id' | 'orderNumber' | 'createdAt'>) => Order
   getOrderById: (idOrNumber: string) => Order | undefined
   updateOrderStatus: (orderNumber: string, status: OrderStatus, awbCode?: string, courier?: string) => void
   userOrders: (userId?: string) => Order[]
@@ -125,13 +125,15 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     syncBackendOrders()
   }, [])
 
-  const createOrder = (orderData: Omit<Order, 'id' | 'orderNumber' | 'createdAt'>): Order => {
+  const createOrder = (
+    orderData: Partial<Order> & Omit<Order, 'id' | 'orderNumber' | 'createdAt'>
+  ): Order => {
     const randomSuffix = Math.floor(1000 + Math.random() * 9000)
     const newOrder: Order = {
       ...orderData,
-      id: `ord-${Date.now()}`,
-      orderNumber: `YF-2026-${randomSuffix}`,
-      createdAt: new Date().toISOString(),
+      id: orderData.id || `ord-${Date.now()}`,
+      orderNumber: orderData.orderNumber || `YF-2026-${randomSuffix}`,
+      createdAt: orderData.createdAt || new Date().toISOString(),
     }
 
     setOrders((prev) => [newOrder, ...prev])

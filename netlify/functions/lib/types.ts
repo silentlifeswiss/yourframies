@@ -28,26 +28,27 @@ export type AdminRole = 'SUPER_ADMIN' | 'MANAGER' | 'SUPPORT'
 
 // Shipping Address Schema
 export const AddressSchema = z.object({
-  fullName: z.string().min(2, 'Name must be at least 2 characters').max(100),
-  phone: z.string().regex(/^[6-9]\d{9}$/, 'Must be a valid 10-digit Indian mobile number'),
+  fullName: z.string().min(1, 'Full name is required').max(100),
+  phone: z.string().min(10, 'Valid 10-digit mobile number required'),
   alternatePhone: z.string().optional(),
-  addressLine1: z.string().min(5, 'Address line 1 must be at least 5 characters').max(255),
+  addressLine1: z.string().min(1, 'Address is required').max(255),
   addressLine2: z.string().max(255).optional(),
   landmark: z.string().max(100).optional(),
-  city: z.string().min(2).max(100),
-  state: z.string().min(2).max(100),
-  pincode: z.string().regex(/^[1-9][0-9]{5}$/, 'Must be a valid 6-digit Indian Postal PIN code'),
+  city: z.string().min(1, 'City is required').max(100),
+  state: z.string().min(1, 'State is required').max(100),
+  pincode: z.string().regex(/^\d{6}$/, 'Must be a valid 6-digit PIN code'),
 })
 
 // Frame Customization Schema
 export const FrameCustomizationSchema = z.object({
   photoUrl: z.string().optional(),
-  frameSize: z.enum(['8x10', '12x18', '16x24', '20x30', '24x36']),
-  moulding: z.enum(['Black Wood', 'White Minimalist', 'Natural Oak', 'Walnut', 'Gold Leaf']),
-  matColor: z.enum(['None', 'Pure White', 'Off-White', 'Jet Black']).optional(),
-  glassType: z.enum(['Acrylic Glaze', 'Anti-Glare UV Glass']),
-  orientation: z.enum(['portrait', 'landscape', 'square']).optional(),
-})
+  frameSize: z.string().optional(),
+  moulding: z.string().optional(),
+  matColor: z.string().optional(),
+  matWidthInches: z.number().optional(),
+  glassType: z.string().optional(),
+  orientation: z.string().optional(),
+}).passthrough()
 
 // Order Item Schema
 export const OrderItemSchema = z.object({

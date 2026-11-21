@@ -116,6 +116,11 @@ export const CheckoutPage: React.FC = () => {
     setIsProcessing(true)
 
     try {
+      const cleanedPhone = phone.replace(/\D/g, '').slice(-10)
+      const cleanedPincode = pincode.replace(/\D/g, '').slice(0, 6)
+      const determinedCity = city.trim() || pincodeStatus?.city || 'Metro Area'
+      const determinedState = state.trim() || pincodeStatus?.state || 'India'
+
       // 1. Create order on backend database with server-side validation
       const orderPayload = {
         items: items.map((i) => ({
@@ -123,32 +128,38 @@ export const CheckoutPage: React.FC = () => {
           title: i.product.title,
           priceINR: i.priceINR,
           quantity: i.quantity,
-          customization: i.customization,
+          customization: i.customization || {
+            frameSize: '12x18',
+            moulding: 'Black Wood',
+            glassType: 'Acrylic Glaze',
+          },
         })),
         shippingAddress: {
-          fullName,
-          phone,
-          addressLine1,
-          addressLine2,
-          landmark,
-          city,
-          state,
-          pincode,
+          fullName: fullName.trim(),
+          phone: cleanedPhone,
+          addressLine1: addressLine1.trim(),
+          addressLine2: addressLine2.trim() || undefined,
+          landmark: landmark.trim() || undefined,
+          city: determinedCity,
+          state: determinedState,
+          pincode: cleanedPincode,
         },
         paymentMethod,
       }
 
       const orderRes = await api.createOrder(orderPayload)
       if (!orderRes.success || !orderRes.data) {
-        setErrorMsg(orderRes.message || 'Unable to place order. Please check your shipping details.')
+        setErrorMsg(orderRes.message || 'Unable to place order. Please review your shipping details.')
         setIsProcessing(false)
         return
       }
 
       const createdOrder = orderRes.data
 
-      // Sync into client orders context
+      // Sync into client orders context with backend orderNumber & ID
       createOrder({
+        id: createdOrder.id,
+        orderNumber: createdOrder.orderNumber,
         userId: user?.id,
         status: createdOrder.status,
         paymentMethod: createdOrder.paymentMethod,
@@ -161,7 +172,7 @@ export const CheckoutPage: React.FC = () => {
         totalINR: createdOrder.totalINR,
         shippingAddress: createdOrder.shippingAddress,
         items: createdOrder.items,
-      })
+      } as any)
 
       // 2. Handle Cash on Delivery (COD)
       if (paymentMethod === 'COD') {

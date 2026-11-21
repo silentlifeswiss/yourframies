@@ -1,14 +1,36 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { CheckCircle2, Package, Truck, Printer, ArrowRight, ShieldCheck } from 'lucide-react'
 import { useOrders } from '../context/OrderContext'
 import { formatINR } from '../utils/formatters'
+import { api } from '../services/api'
 
 export const OrderConfirmationPage: React.FC = () => {
   const { orderNumber } = useParams<{ orderNumber: string }>()
   const { getOrderById } = useOrders()
+  const localOrder = orderNumber ? getOrderById(orderNumber) : undefined
+  const [order, setOrder] = useState<any>(localOrder)
+  const [loading, setLoading] = useState(!localOrder)
 
-  const order = orderNumber ? getOrderById(orderNumber) : undefined
+  useEffect(() => {
+    if (!order && orderNumber) {
+      api.getOrder(orderNumber).then((res) => {
+        if (res.success && res.data) {
+          setOrder(res.data)
+        }
+        setLoading(false)
+      }).catch(() => setLoading(false))
+    }
+  }, [order, orderNumber])
+
+  if (loading) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-8 h-8 border-2 border-neutral-900 border-t-transparent rounded-full animate-spin mb-4" />
+        <p className="text-xs text-neutral-500">Retrieving your order #{orderNumber}...</p>
+      </div>
+    )
+  }
 
   if (!order) {
     return (
@@ -70,12 +92,14 @@ export const OrderConfirmationPage: React.FC = () => {
               Items In This Order
             </h3>
             <div className="divide-y divide-neutral-100">
-              {order.items.map((item) => (
+              {order.items?.map((item: any) => (
                 <div key={item.id} className="py-3 flex justify-between items-center text-xs">
                   <div>
                     <p className="font-semibold text-neutral-900">{item.title}</p>
                     <p className="text-neutral-500 text-[11px]">
-                      Size: {item.customization.frameSize}" • Moulding: {item.customization.moulding} (x{item.quantity})
+                      {item.customization?.frameSize ? `Size: ${item.customization.frameSize}" • ` : ''}
+                      {item.customization?.moulding ? `Moulding: ${item.customization.moulding} ` : ''}
+                      (x{item.quantity})
                     </p>
                   </div>
                   <span className="font-bold text-neutral-900">

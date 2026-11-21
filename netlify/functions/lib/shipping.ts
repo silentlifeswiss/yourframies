@@ -172,9 +172,8 @@ export class ShippingManager {
     }
 
     // Comprehensive Pan-India Postal Directory Resolution
-    const prefix2 = cleaned.slice(0, 2)
-    const match = PINCODE_PREFIX_MAP[prefix2]
-    if (!match) {
+    const firstDigit = cleaned.charAt(0)
+    if (!/^[1-8]/.test(firstDigit)) {
       return {
         city: 'Unserviceable Area',
         state: 'India',
@@ -184,6 +183,25 @@ export class ShippingManager {
         courier: 'MANUAL',
         source: 'postal_index',
       }
+    }
+
+    const prefix2 = cleaned.slice(0, 2)
+    const zoneDefaults: Record<string, { state: string; days: number }> = {
+      '1': { state: 'Delhi / NCR / North Zone', days: 2 },
+      '2': { state: 'Uttar Pradesh / Uttarakhand', days: 3 },
+      '3': { state: 'Rajasthan / Gujarat', days: 3 },
+      '4': { state: 'Maharashtra / MP / Goa', days: 3 },
+      '5': { state: 'Karnataka / South Zone', days: 2 },
+      '6': { state: 'Tamil Nadu / Kerala', days: 3 },
+      '7': { state: 'Eastern & North Eastern India', days: 4 },
+      '8': { state: 'Bihar / Jharkhand', days: 4 },
+    }
+
+    const zone = zoneDefaults[firstDigit] || { state: 'India', days: 4 }
+    const match = PINCODE_PREFIX_MAP[prefix2] || {
+      city: 'District Delivery Hub',
+      state: zone.state,
+      days: zone.days,
     }
 
     const highRiskPins = ['110006', '700024', '400009', '500002']

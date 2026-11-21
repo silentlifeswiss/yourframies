@@ -314,7 +314,15 @@ export const handler: Handler = async (event: HandlerEvent, _context?: HandlerCo
       const body = JSON.parse(event.body || '{}')
       const validation = CreateOrderRequestSchema.safeParse(body)
       if (!validation.success) {
-        return makeResponse(400, { success: false, errors: validation.error.format() })
+        const errorDetails = validation.error.issues
+          .map((e: any) => `${e.path.join('.') || 'field'}: ${e.message}`)
+          .join(', ')
+        console.warn('Order validation failed:', errorDetails)
+        return makeResponse(400, {
+          success: false,
+          message: `Please review order details: ${errorDetails}`,
+          errors: validation.error.format(),
+        })
       }
 
       const { items, shippingAddress, paymentMethod, notes, couponCode } = validation.data
@@ -324,8 +332,16 @@ export const handler: Handler = async (event: HandlerEvent, _context?: HandlerCo
       if (!pinCheck.isServiceable) {
         return makeResponse(400, {
           success: false,
-          message: 'The entered Indian PIN code is currently unserviceable for fragile glass frames.',
+          message: `The entered PIN code (${shippingAddress.pincode}) is currently unserviceable by our courier partners. Please check your 6-digit PIN code.`,
         })
+      }
+
+      // Auto-fill city and state from PIN check if not provided
+      if (!shippingAddress.city || shippingAddress.city.trim() === '') {
+        shippingAddress.city = pinCheck.city || 'Metro Area'
+      }
+      if (!shippingAddress.state || shippingAddress.state.trim() === '') {
+        shippingAddress.state = pinCheck.state || 'India'
       }
 
       // Server-Side Price Verification (NEVER trust frontend price totals!)
