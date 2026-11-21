@@ -317,7 +317,10 @@ class DataStore {
   }
 
   private async initializePostgres() {
-    const dbUrl = process.env.NETLIFY_DB_URL || process.env.DATABASE_URL
+    const dbUrl =
+      process.env.SUPABASE_DATABASE_URL ||
+      process.env.NETLIFY_DB_URL ||
+      process.env.DATABASE_URL
     if (!dbUrl || dbUrl.includes('ep-sample-pooler') || dbUrl.includes('user:password')) {
       return
     }
