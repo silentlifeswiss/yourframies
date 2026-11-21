@@ -46,7 +46,7 @@ export const CartDrawer: React.FC = () => {
         onClick={() => setIsCartOpen(false)}
       />
 
-      <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
+      <div className="fixed inset-y-0 right-0 max-w-full flex pl-0 sm:pl-10">
         <div className="w-screen max-w-md bg-white shadow-2xl flex flex-col justify-between">
           {/* Header */}
           <div className="p-6 border-b border-neutral-100 flex items-center justify-between">
@@ -149,17 +149,19 @@ export const CartDrawer: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                          className="p-1 hover:bg-neutral-100 text-neutral-600"
+                          className="px-2.5 py-1.5 hover:bg-neutral-100 text-neutral-600 active:bg-neutral-200 transition-colors"
+                          aria-label="Decrease quantity"
                         >
                           <Minus className="w-3 h-3" />
                         </button>
-                        <span className="px-2.5 text-xs font-semibold text-neutral-900">
+                        <span className="px-3 text-xs font-semibold text-neutral-900">
                           {item.quantity}
                         </span>
                         <button
                           type="button"
                           onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                          className="p-1 hover:bg-neutral-100 text-neutral-600"
+                          className="px-2.5 py-1.5 hover:bg-neutral-100 text-neutral-600 active:bg-neutral-200 transition-colors"
+                          aria-label="Increase quantity"
                         >
                           <Plus className="w-3 h-3" />
                         </button>
@@ -177,7 +179,7 @@ export const CartDrawer: React.FC = () => {
 
           {/* Footer & Checkout Area */}
           {items.length > 0 && (
-            <div className="p-6 border-t border-neutral-200 bg-neutral-50/50 space-y-4">
+            <div className="p-4 sm:p-6 border-t border-neutral-200 bg-neutral-50/50 space-y-4 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]">
               {/* Coupon Engine */}
               <div>
                 {appliedCoupon ? (

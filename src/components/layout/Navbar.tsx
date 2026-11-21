@@ -47,7 +47,7 @@ export const Navbar: React.FC = () => {
     <>
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-neutral-200 transition-all">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
+          <div className="flex items-center justify-between h-16 sm:h-20">
             {/* Left: Mobile Menu Trigger & Main Navigation */}
             <div className="flex items-center gap-6">
               <button
@@ -56,7 +56,7 @@ export const Navbar: React.FC = () => {
                 className="lg:hidden p-2 text-neutral-800 hover:text-black focus:outline-none"
                 aria-label="Open mobile menu"
               >
-                <Menu className="w-6 h-6" />
+                <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
 
               <nav className="hidden lg:flex items-center space-x-7 text-xs tracking-widest uppercase font-semibold text-neutral-700">
@@ -88,10 +88,10 @@ export const Navbar: React.FC = () => {
             {/* Center: Brand Logo */}
             <div className="flex-1 text-center lg:flex-initial">
               <Link to="/" className="inline-flex flex-col items-center group">
-                <span className="font-serif text-2xl sm:text-3xl font-light tracking-widest text-neutral-900 uppercase">
+                <span className="font-serif text-lg sm:text-3xl font-light tracking-widest text-neutral-900 uppercase">
                   Your Framies
                 </span>
-                <span className="text-[9px] tracking-[0.3em] uppercase text-neutral-600 font-sans mt-0.5">
+                <span className="text-[8px] sm:text-[9px] tracking-[0.25em] sm:tracking-[0.3em] uppercase text-neutral-600 font-sans mt-0.5">
                   Artisanal Wall Framing
                 </span>
               </Link>

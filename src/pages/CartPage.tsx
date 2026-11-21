@@ -53,79 +53,79 @@ export const CartPage: React.FC = () => {
   }
 
   return (
-    <div className="bg-neutral-50 min-h-screen py-12">
+    <div className="bg-neutral-50 min-h-screen py-6 sm:py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="font-serif text-3xl sm:text-4xl text-neutral-900 mb-8">
+        <h1 className="font-serif text-2xl sm:text-4xl text-neutral-900 mb-6 sm:mb-8">
           Shopping Bag ({items.reduce((acc, i) => acc + i.quantity, 0)} Items)
         </h1>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-10 items-start">
           {/* Item List */}
-          <div className="lg:col-span-8 bg-white p-6 sm:p-8 rounded-xl border border-neutral-200 space-y-6">
+          <div className="lg:col-span-8 bg-white p-4 sm:p-8 rounded-xl border border-neutral-200 space-y-6">
             {items.map((item) => (
               <div
                 key={item.id}
-                className="flex flex-col sm:flex-row gap-6 pb-6 border-b border-neutral-100 last:border-none last:pb-0"
+                className="flex flex-row gap-3.5 sm:gap-6 pb-6 border-b border-neutral-100 last:border-none last:pb-0"
               >
                 <img
                   src={item.customization.photoUrl || item.product.images[0]}
                   alt={item.product.title}
-                  className="w-24 h-32 object-cover rounded border border-neutral-200 shrink-0"
+                  className="w-20 h-24 sm:w-24 sm:h-32 object-cover rounded border border-neutral-200 shrink-0"
                 />
 
-                <div className="flex-1 flex flex-col justify-between">
+                <div className="flex-1 flex flex-col justify-between min-w-0">
                   <div>
-                    <div className="flex items-start justify-between">
-                      <h3 className="text-sm font-semibold text-neutral-900">
+                    <div className="flex items-start justify-between gap-2">
+                      <h3 className="text-xs sm:text-sm font-semibold text-neutral-900 truncate">
                         {item.product.title}
                       </h3>
                       <button
                         type="button"
                         onClick={() => removeFromCart(item.id)}
-                        className="text-neutral-400 hover:text-red-500 p-1"
+                        className="text-neutral-400 hover:text-red-500 p-1 shrink-0"
                         aria-label="Remove item"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
 
-                    <div className="text-xs text-neutral-500 mt-2 space-y-1">
-                      <p>
-                        Frame Size: <strong className="text-neutral-800">{item.customization.frameSize}"</strong> • Moulding: <strong className="text-neutral-800">{item.customization.moulding}</strong>
+                    <div className="text-[11px] sm:text-xs text-neutral-500 mt-1 sm:mt-2 space-y-0.5 sm:space-y-1">
+                      <p className="truncate">
+                        Frame: <strong className="text-neutral-800">{item.customization.frameSize}"</strong> • <strong className="text-neutral-800">{item.customization.moulding}</strong>
                       </p>
-                      <p>
-                        Matboard: <span className="text-neutral-800">{item.customization.matColor || 'None'}</span> • Glass: <span className="text-neutral-800">{item.customization.glassType}</span>
+                      <p className="truncate">
+                        Mat: <span className="text-neutral-800">{item.customization.matColor || 'None'}</span> • Glass: <span className="text-neutral-800">{item.customization.glassType}</span>
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between mt-4">
+                  <div className="flex items-center justify-between mt-3 sm:mt-4">
                     <div className="flex items-center border border-neutral-300 rounded">
                       <button
                         type="button"
                         onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        className="p-1.5 hover:bg-neutral-100 text-neutral-600"
+                        className="px-2 py-1 sm:p-1.5 hover:bg-neutral-100 text-neutral-600 active:bg-neutral-200 transition-colors"
                       >
                         <Minus className="w-3.5 h-3.5" />
                       </button>
-                      <span className="px-3 text-xs font-semibold text-neutral-900">
+                      <span className="px-2.5 sm:px-3 text-xs font-semibold text-neutral-900">
                         {item.quantity}
                       </span>
                       <button
                         type="button"
                         onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        className="p-1.5 hover:bg-neutral-100 text-neutral-600"
+                        className="px-2 py-1 sm:p-1.5 hover:bg-neutral-100 text-neutral-600 active:bg-neutral-200 transition-colors"
                       >
                         <Plus className="w-3.5 h-3.5" />
                       </button>
                     </div>
 
                     <div className="text-right">
-                      <span className="text-sm font-bold text-neutral-900">
+                      <span className="text-xs sm:text-sm font-bold text-neutral-900">
                         {formatINR(item.priceINR * item.quantity)}
                       </span>
                       {item.quantity > 1 && (
-                        <p className="text-[11px] text-neutral-400">
+                        <p className="text-[10px] sm:text-[11px] text-neutral-400">
                           {formatINR(item.priceINR)} each
                         </p>
                       )}

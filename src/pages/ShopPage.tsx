@@ -61,20 +61,20 @@ export const ShopPage: React.FC = () => {
   }
 
   return (
-    <div className="bg-neutral-50 min-h-screen py-12">
+    <div className="bg-neutral-50 min-h-screen py-6 sm:py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header Title */}
-        <div className="border-b border-neutral-200 pb-8 mb-8">
-          <span className="text-[11px] font-bold uppercase tracking-widest text-neutral-400">
+        <div className="border-b border-neutral-200 pb-5 sm:pb-8 mb-5 sm:mb-8">
+          <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-neutral-400">
             Catalog & Artworks
           </span>
-          <h1 className="font-serif text-3xl sm:text-5xl text-neutral-900 mt-1">
+          <h1 className="font-serif text-2xl sm:text-5xl text-neutral-900 mt-1">
             {activeCategorySlug === 'all'
               ? 'All Handcrafted Frames'
               : CATEGORIES.find((c) => c.slug === activeCategorySlug)?.name || 'Collection'}
           </h1>
           {searchQuery && (
-            <p className="mt-2 text-xs text-neutral-500">
+            <p className="mt-1.5 text-xs text-neutral-500">
               Showing search results for "<strong className="text-neutral-900">{searchQuery}</strong>" (
               {filteredProducts.length} items)
             </p>
@@ -82,11 +82,11 @@ export const ShopPage: React.FC = () => {
         </div>
 
         {/* Category Filter Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-8 scrollbar-none">
+        <div className="flex items-center gap-2 overflow-x-auto pb-3 sm:pb-4 mb-5 sm:mb-8 scrollbar-none touch-scroll">
           <button
             type="button"
             onClick={() => handleCategoryChange('all')}
-            className={`px-4 py-2 rounded-full text-xs font-semibold uppercase tracking-wider whitespace-nowrap transition-all ${
+            className={`px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-semibold uppercase tracking-wider whitespace-nowrap transition-all ${
               activeCategorySlug === 'all'
                 ? 'bg-neutral-900 text-white shadow-xs'
                 : 'bg-white border border-neutral-300 text-neutral-700 hover:border-black'
@@ -99,7 +99,7 @@ export const ShopPage: React.FC = () => {
               key={cat.id}
               type="button"
               onClick={() => handleCategoryChange(cat.slug)}
-              className={`px-4 py-2 rounded-full text-xs font-semibold uppercase tracking-wider whitespace-nowrap transition-all ${
+              className={`px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-semibold uppercase tracking-wider whitespace-nowrap transition-all ${
                 activeCategorySlug === cat.slug
                   ? 'bg-neutral-900 text-white shadow-xs'
                   : 'bg-white border border-neutral-300 text-neutral-700 hover:border-black'
@@ -111,16 +111,13 @@ export const ShopPage: React.FC = () => {
         </div>
 
         {/* Filters and Sorting Bar */}
-        <div className="bg-white p-4 rounded-xl border border-neutral-200 mb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-4 w-full sm:w-auto">
-            <div className="flex items-center gap-2 text-xs font-semibold text-neutral-700">
-              <Filter className="w-4 h-4" />
-              <span>Filter Size:</span>
-            </div>
+        <div className="bg-white p-3 sm:p-4 rounded-xl border border-neutral-200 mb-6 sm:mb-8 grid grid-cols-2 sm:flex sm:items-center sm:justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <Filter className="w-3.5 h-3.5 text-neutral-500 shrink-0" />
             <select
               value={selectedSize}
               onChange={(e) => setSelectedSize(e.target.value)}
-              className="text-xs bg-neutral-50 border border-neutral-300 rounded px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-black"
+              className="w-full text-xs bg-neutral-50 border border-neutral-300 rounded px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-black"
             >
               <option value="all">All Sizes</option>
               <option value="8x10">8x10"</option>
@@ -131,20 +128,17 @@ export const ShopPage: React.FC = () => {
             </select>
           </div>
 
-          <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-            <div className="flex items-center gap-2 text-xs font-semibold text-neutral-700">
-              <ArrowUpDown className="w-3.5 h-3.5" />
-              <span>Sort:</span>
-            </div>
+          <div className="flex items-center gap-2 justify-end">
+            <ArrowUpDown className="w-3.5 h-3.5 text-neutral-500 shrink-0" />
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="text-xs bg-neutral-50 border border-neutral-300 rounded px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-black"
+              className="w-full text-xs bg-neutral-50 border border-neutral-300 rounded px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-black"
             >
-              <option value="featured">Featured Picks</option>
+              <option value="featured">Featured</option>
               <option value="price-asc">Price: Low to High</option>
               <option value="price-desc">Price: High to Low</option>
-              <option value="name">Product Name (A-Z)</option>
+              <option value="name">Name (A-Z)</option>
             </select>
           </div>
         </div>
@@ -170,7 +164,7 @@ export const ShopPage: React.FC = () => {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 lg:gap-8">
             {filteredProducts.map((p) => (
               <ProductCard key={p.id} product={p} />
             ))}

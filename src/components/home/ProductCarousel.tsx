@@ -18,14 +18,14 @@ export const ProductCarousel: React.FC = () => {
       : productsList.slice(4, 8)
 
   return (
-    <section className="py-20 bg-white border-b border-neutral-200">
+    <section className="py-12 sm:py-20 bg-white border-b border-neutral-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-10 gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 sm:mb-10 gap-4">
           <div>
-            <span className="text-[11px] font-bold uppercase tracking-widest text-neutral-400">
+            <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-neutral-400">
               Popular Picks
             </span>
-            <h2 className="font-serif text-3xl sm:text-4xl text-neutral-900 mt-1">
+            <h2 className="font-serif text-2xl sm:text-4xl text-neutral-900 mt-1">
               Curated for Modern Spaces
             </h2>
           </div>
@@ -35,7 +35,7 @@ export const ProductCarousel: React.FC = () => {
             <button
               type="button"
               onClick={() => setActiveTab('bestsellers')}
-              className={`px-5 py-2 text-xs font-semibold tracking-wider uppercase rounded-full transition-all ${
+              className={`px-4 sm:px-5 py-1.5 sm:py-2 text-[11px] sm:text-xs font-semibold tracking-wider uppercase rounded-full transition-all ${
                 activeTab === 'bestsellers'
                   ? 'bg-neutral-900 text-white shadow-sm'
                   : 'text-neutral-600 hover:text-black'
@@ -46,7 +46,7 @@ export const ProductCarousel: React.FC = () => {
             <button
               type="button"
               onClick={() => setActiveTab('new-arrivals')}
-              className={`px-5 py-2 text-xs font-semibold tracking-wider uppercase rounded-full transition-all ${
+              className={`px-4 sm:px-5 py-1.5 sm:py-2 text-[11px] sm:text-xs font-semibold tracking-wider uppercase rounded-full transition-all ${
                 activeTab === 'new-arrivals'
                   ? 'bg-neutral-900 text-white shadow-sm'
                   : 'text-neutral-600 hover:text-black'
@@ -57,8 +57,8 @@ export const ProductCarousel: React.FC = () => {
           </div>
         </div>
 
-        {/* Product Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+        {/* Product Grid - 2 cols on mobile */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 lg:gap-8">
           {productsToShow.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}

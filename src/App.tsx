@@ -14,6 +14,7 @@ import { AnnouncementBar } from './components/layout/AnnouncementBar'
 import { Navbar } from './components/layout/Navbar'
 import { Footer } from './components/layout/Footer'
 import { CartDrawer } from './components/cart/CartDrawer'
+import { MobileBottomNav } from './components/layout/MobileBottomNav'
 import { ScrollToTop } from './components/common/ScrollToTop'
 
 // Public Store Pages
@@ -61,7 +62,7 @@ const AppContent: React.FC = () => {
       <Navbar />
       <CartDrawer />
 
-      <main className="flex-1">
+      <main className="flex-1 pb-16 lg:pb-0">
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/shop" element={<ShopPage />} />
@@ -85,6 +86,7 @@ const AppContent: React.FC = () => {
         </Routes>
       </main>
 
+      <MobileBottomNav />
       <Footer />
     </div>
   )

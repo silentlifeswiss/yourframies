@@ -29,14 +29,14 @@ export const WishlistPage: React.FC = () => {
   }
 
   return (
-    <div className="bg-neutral-50 min-h-screen py-12">
+    <div className="bg-neutral-50 min-h-screen py-6 sm:py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex justify-between items-center mb-6 sm:mb-8">
           <div>
-            <span className="text-[11px] font-bold uppercase tracking-widest text-neutral-400">
+            <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-neutral-400">
               Saved Pieces
             </span>
-            <h1 className="font-serif text-3xl sm:text-4xl text-neutral-900 mt-1">
+            <h1 className="font-serif text-2xl sm:text-4xl text-neutral-900 mt-1">
               My Wishlist ({wishlistProducts.length})
             </h1>
           </div>
@@ -50,7 +50,7 @@ export const WishlistPage: React.FC = () => {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 lg:gap-8">
           {wishlistProducts.map((p) => (
             <ProductCard key={p.id} product={p} />
           ))}

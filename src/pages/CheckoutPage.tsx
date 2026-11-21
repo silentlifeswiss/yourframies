@@ -9,6 +9,9 @@ import {
   Lock,
   Truck,
   ArrowRight,
+  ShoppingBag,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import { useOrders } from '../context/OrderContext'
@@ -54,6 +57,7 @@ export const CheckoutPage: React.FC = () => {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('PREPAID_RAZORPAY')
   const [isProcessing, setIsProcessing] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
+  const [showMobileSummary, setShowMobileSummary] = useState(false)
 
   // Pincode lookup trigger
   const [pincodeStatus, setPincodeStatus] = useState<{
@@ -319,20 +323,95 @@ export const CheckoutPage: React.FC = () => {
   }
 
   return (
-    <div className="bg-neutral-50 min-h-screen py-10">
+    <div className="bg-neutral-50 min-h-screen py-6 sm:py-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="font-serif text-3xl sm:text-4xl text-neutral-900 mb-8">
+        <h1 className="font-serif text-2xl sm:text-4xl text-neutral-900 mb-4 sm:mb-8">
           Checkout & Shipping
         </h1>
 
-        <form onSubmit={handleSubmitOrder} className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        {/* Mobile Collapsible Order Summary Accordion */}
+        <div className="lg:hidden mb-6 bg-white rounded-xl border border-neutral-200 overflow-hidden shadow-xs">
+          <button
+            type="button"
+            onClick={() => setShowMobileSummary(!showMobileSummary)}
+            className="w-full p-4 flex items-center justify-between text-left bg-neutral-50/80 hover:bg-neutral-100/60 transition-colors"
+          >
+            <div className="flex items-center gap-2 text-xs font-semibold text-neutral-900">
+              <ShoppingBag className="w-4 h-4 text-neutral-700" />
+              <span>{showMobileSummary ? 'Hide Order Summary' : 'Show Order Summary'}</span>
+              <span className="text-neutral-500 font-normal">({items.length} items)</span>
+              {showMobileSummary ? (
+                <ChevronUp className="w-3.5 h-3.5 text-neutral-500" />
+              ) : (
+                <ChevronDown className="w-3.5 h-3.5 text-neutral-500" />
+              )}
+            </div>
+            <span className="text-sm font-bold text-neutral-900">{formatINR(totalPayable)}</span>
+          </button>
+
+          {showMobileSummary && (
+            <div className="p-4 border-t border-neutral-200 bg-white space-y-3 text-xs">
+              <div className="max-h-52 overflow-y-auto divide-y divide-neutral-100">
+                {items.map((i) => (
+                  <div key={i.id} className="py-2.5 flex items-center gap-3">
+                    <img
+                      src={i.customization.photoUrl || i.product.images[0]}
+                      alt=""
+                      className="w-10 h-12 object-cover rounded border border-neutral-200 shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-neutral-900 truncate">{i.product.title}</p>
+                      <p className="text-[10px] text-neutral-500">
+                        {i.customization.frameSize}" • {i.customization.moulding} (x{i.quantity})
+                      </p>
+                      <p className="font-bold text-neutral-900 mt-0.5">
+                        {formatINR(i.priceINR * i.quantity)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="pt-3 border-t border-neutral-200 space-y-1.5 text-neutral-600 text-[11px]">
+                <div className="flex justify-between">
+                  <span>Subtotal</span>
+                  <span className="font-semibold text-neutral-900">{formatINR(subtotalINR)}</span>
+                </div>
+                {discountINR > 0 && (
+                  <div className="flex justify-between text-emerald-600 font-semibold">
+                    <span>Discount</span>
+                    <span>-{formatINR(discountINR)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between">
+                  <span>Express Shipping</span>
+                  <span className="font-semibold text-neutral-900">
+                    {shippingFeeINR === 0 ? <strong className="text-emerald-600">FREE</strong> : formatINR(shippingFeeINR)}
+                  </span>
+                </div>
+                {paymentMethod === 'COD' && (
+                  <div className="flex justify-between text-amber-700 font-medium">
+                    <span>COD Handling Fee</span>
+                    <span>+{formatINR(codCharge)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between text-xs font-bold text-neutral-900 pt-2 border-t border-neutral-200">
+                  <span>Total Payable</span>
+                  <span>{formatINR(totalPayable)}</span>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <form onSubmit={handleSubmitOrder} className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-10">
           {/* Left Column: Delivery Address & Payment Method */}
-          <div className="lg:col-span-8 space-y-8">
+          <div className="lg:col-span-8 space-y-6 sm:space-y-8">
             {/* 1. Contact & Delivery Details */}
-            <div className="bg-white p-6 sm:p-8 rounded-xl border border-neutral-200 space-y-5">
+            <div className="bg-white p-5 sm:p-8 rounded-xl border border-neutral-200 space-y-4 sm:space-y-5">
               <div className="flex items-center gap-2 border-b border-neutral-100 pb-3">
                 <MapPin className="w-5 h-5 text-neutral-800" />
-                <h2 className="text-sm font-semibold uppercase tracking-wider text-neutral-900">
+                <h2 className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-neutral-900">
                   1. Shipping Address (India)
                 </h2>
               </div>
@@ -345,6 +424,7 @@ export const CheckoutPage: React.FC = () => {
                   <input
                     type="text"
                     required
+                    autoComplete="name"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="Recipient's Name"
@@ -358,12 +438,14 @@ export const CheckoutPage: React.FC = () => {
                   </label>
                   <input
                     type="tel"
+                    inputMode="tel"
+                    autoComplete="tel"
                     required
                     maxLength={10}
                     value={phone}
                     onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
                     placeholder="9876543210 (For Courier SMS & OTP)"
-                    className="w-full px-3 py-2.5 border border-neutral-300 rounded text-xs focus:ring-1 focus:ring-black outline-none"
+                    className="w-full px-3 py-2.5 border border-neutral-300 rounded text-xs focus:ring-1 focus:ring-black outline-none font-mono"
                   />
                 </div>
               </div>
@@ -374,6 +456,8 @@ export const CheckoutPage: React.FC = () => {
                 </label>
                 <input
                   type="email"
+                  inputMode="email"
+                  autoComplete="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -389,6 +473,7 @@ export const CheckoutPage: React.FC = () => {
                 <input
                   type="text"
                   required
+                  autoComplete="address-line1"
                   value={addressLine1}
                   onChange={(e) => setAddressLine1(e.target.value)}
                   placeholder="e.g. Flat 402, Prestige Towers, 8th Main"
@@ -403,6 +488,7 @@ export const CheckoutPage: React.FC = () => {
                   </label>
                   <input
                     type="text"
+                    autoComplete="address-line2"
                     value={addressLine2}
                     onChange={(e) => setAddressLine2(e.target.value)}
                     placeholder="e.g. Indiranagar"
@@ -431,6 +517,9 @@ export const CheckoutPage: React.FC = () => {
                   </label>
                   <input
                     type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    autoComplete="postal-code"
                     required
                     maxLength={6}
                     value={pincode}

@@ -237,10 +237,10 @@ export const ProductDetailPage: React.FC = () => {
           {/* Right: Specifications & Purchasing Controls */}
           <div className="lg:col-span-5 space-y-6">
             <div>
-              <span className="text-[11px] font-bold uppercase tracking-widest text-neutral-400">
+              <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-neutral-400">
                 {category?.name || 'Exclusive Frame'}
               </span>
-              <h1 className="font-serif text-3xl sm:text-4xl text-neutral-900 mt-1">
+              <h1 className="font-serif text-2xl sm:text-4xl text-neutral-900 mt-1">
                 {product.title}
               </h1>
               <div className="flex items-center gap-2 mt-2">
@@ -559,6 +559,32 @@ export const ProductDetailPage: React.FC = () => {
 
         {/* Customer Reviews & Write-A-Review Mechanism */}
         <ProductReviews product={product} />
+      </div>
+
+      {/* Sticky Mobile Add-to-Bag Bar */}
+      <div className="sm:hidden fixed bottom-16 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-neutral-200/90 p-3 shadow-lg flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <img
+            src={product.images[0]}
+            alt={product.title}
+            className="w-10 h-10 object-cover rounded border border-neutral-200 shrink-0"
+          />
+          <div className="min-w-0">
+            <div className="text-sm font-bold text-neutral-900">{formatINR(finalPrice)}</div>
+            <div className="text-[10px] text-neutral-500 truncate">
+              {selectedSize}" • {selectedMoulding}
+            </div>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleAddToCart}
+          className="py-2.5 px-5 bg-neutral-950 text-white text-xs uppercase tracking-widest font-semibold rounded-sm shadow-md active:scale-95 transition-transform flex items-center gap-1.5 shrink-0"
+        >
+          <ShoppingBag className="w-3.5 h-3.5" />
+          <span>Add To Bag</span>
+        </button>
       </div>
     </div>
   )

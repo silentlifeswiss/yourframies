@@ -133,7 +133,7 @@ export const OrderTrackingPage: React.FC = () => {
               e.preventDefault()
               handleSearch(query)
             }}
-            className="mt-6 flex gap-2"
+            className="mt-6 flex flex-col sm:flex-row gap-2"
           >
             <input
               type="text"
@@ -146,7 +146,7 @@ export const OrderTrackingPage: React.FC = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="px-6 py-3 bg-neutral-950 text-white rounded text-xs uppercase tracking-widest font-semibold hover:bg-neutral-800 transition-colors flex items-center gap-2 disabled:opacity-50"
+              className="px-6 py-3 bg-neutral-950 text-white rounded text-xs uppercase tracking-widest font-semibold hover:bg-neutral-800 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 active:scale-[0.98]"
             >
               {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
               <span>{isLoading ? 'Searching...' : 'Track'}</span>
@@ -177,7 +177,7 @@ export const OrderTrackingPage: React.FC = () => {
         </div>
 
         {searchedOrder ? (
-          <div className="bg-white p-8 sm:p-10 rounded-2xl border border-neutral-200 shadow-sm space-y-8">
+          <div className="bg-white p-5 sm:p-10 rounded-2xl border border-neutral-200 shadow-sm space-y-6 sm:space-y-8">
             {/* Header info */}
             <div className="flex flex-col sm:flex-row justify-between sm:items-center pb-6 border-b border-neutral-200 gap-4">
               <div>

@@ -128,7 +128,7 @@ export const FrameCustomizer: React.FC<FrameCustomizerProps> = ({
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
       {/* Left: Interactive Real-Time Visualizer Canvas */}
       <div className="lg:col-span-7 flex flex-col items-center">
-        <div className="w-full bg-neutral-100/80 rounded-2xl p-6 sm:p-12 flex items-center justify-center min-h-[460px] sm:min-h-[580px] relative border border-neutral-200">
+        <div className="w-full bg-neutral-100/80 rounded-2xl p-4 sm:p-12 flex items-center justify-center min-h-[320px] sm:min-h-[520px] relative border border-neutral-200">
           {/* Wall Hanging Shadow & 2D Realistic Frame Bevel */}
           <div
             className={`transition-all duration-300 relative max-w-[92%] sm:max-w-[440px] w-full flex items-center justify-center ${getMouldingStyle()}`}
@@ -159,17 +159,17 @@ export const FrameCustomizer: React.FC<FrameCustomizerProps> = ({
           </div>
 
           {/* Quick Info Pill */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-white/90 backdrop-blur-md border border-neutral-200 shadow-sm text-[11px] font-medium text-neutral-600 tracking-wider uppercase flex items-center gap-2">
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 px-3 py-1 sm:px-4 sm:py-1.5 rounded-full bg-white/90 backdrop-blur-md border border-neutral-200 shadow-sm text-[10px] sm:text-[11px] font-medium text-neutral-600 tracking-wider uppercase flex items-center gap-2 whitespace-nowrap">
             <Sparkles className="w-3.5 h-3.5 text-amber-500" />
             Live Preview • {frameSize}" • {moulding}
           </div>
         </div>
 
         {/* Upload Button */}
-        <div className="mt-4 w-full flex items-center justify-between text-xs text-neutral-500 px-2">
-          <label className="cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-neutral-900 text-white font-medium hover:bg-neutral-800 transition-colors">
+        <div className="mt-4 w-full flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-neutral-500 px-1">
+          <label className="w-full sm:w-auto cursor-pointer inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-full bg-neutral-900 text-white font-medium hover:bg-neutral-800 transition-colors shadow-xs active:scale-[0.98]">
             <Upload className="w-4 h-4" />
-            <span>Upload Your Photo (PNG/JPG up to 15MB)</span>
+            <span>Upload Your Photo (JPG/PNG)</span>
             <input
               type="file"
               accept="image/*"
@@ -196,7 +196,7 @@ export const FrameCustomizer: React.FC<FrameCustomizerProps> = ({
       </div>
 
       {/* Right: Customization Controls */}
-      <div className="lg:col-span-5 space-y-7 bg-white p-6 sm:p-8 rounded-2xl border border-neutral-200 shadow-sm">
+      <div className="lg:col-span-5 space-y-6 sm:space-y-7 bg-white p-4 sm:p-8 rounded-2xl border border-neutral-200 shadow-sm">
         <div>
           <span className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
             Bespoke Customizer
@@ -351,17 +351,17 @@ export const FrameCustomizer: React.FC<FrameCustomizerProps> = ({
         </div>
 
         {/* Price and Add to Bag Button */}
-        <div className="pt-4 border-t border-neutral-200 flex items-center justify-between gap-4">
+        <div className="pt-4 border-t border-neutral-200 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
           <div>
-            <span className="text-[11px] uppercase tracking-wider text-neutral-400">Total Price</span>
-            <div className="text-2xl font-bold text-neutral-900">{formatINR(finalPrice)}</div>
+            <span className="text-[10px] sm:text-[11px] uppercase tracking-wider text-neutral-400">Total Price</span>
+            <div className="text-xl sm:text-2xl font-bold text-neutral-900">{formatINR(finalPrice)}</div>
             <p className="text-[10px] text-neutral-500">Taxes included • Free Pan-India Delivery</p>
           </div>
 
           <button
             type="button"
             onClick={handleAddToCart}
-            className="flex-1 max-w-xs py-3.5 px-6 rounded-md bg-neutral-950 hover:bg-neutral-800 text-white text-xs uppercase tracking-widest font-semibold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
+            className="w-full sm:w-auto sm:flex-1 sm:max-w-xs py-3.5 px-6 rounded-md bg-neutral-950 hover:bg-neutral-800 text-white text-xs uppercase tracking-widest font-semibold shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2"
           >
             <Check className="w-4 h-4" />
             Add To Bag

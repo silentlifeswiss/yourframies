@@ -4,10 +4,10 @@ import { Mail, Phone, MapPin, ShieldCheck, RefreshCw, Truck } from 'lucide-react
 
 export const Footer: React.FC = () => {
   return (
-    <footer className="bg-neutral-950 text-neutral-400 text-xs border-t border-neutral-800">
+    <footer className="bg-neutral-950 text-neutral-400 text-xs border-t border-neutral-800 pb-20 lg:pb-0">
       {/* Value Badges Banner */}
-      <div className="border-b border-neutral-900 py-10 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
+      <div className="border-b border-neutral-900 py-8 sm:py-10 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 text-center md:text-left">
           <div className="flex flex-col md:flex-row items-center gap-4">
             <div className="w-12 h-12 rounded-full bg-neutral-900 flex items-center justify-center text-neutral-200">
               <ShieldCheck className="w-6 h-6" />
