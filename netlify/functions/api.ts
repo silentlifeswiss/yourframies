@@ -63,6 +63,7 @@ export const handler: Handler = async (event: HandlerEvent, _context?: HandlerCo
     // 1. Health & Environment Status
     // ==========================================================================
     if (path === '/health' && method === 'GET') {
+      await db.ensureConnected()
       return makeResponse(200, {
         status: 'ok',
         success: true,
@@ -70,10 +71,7 @@ export const handler: Handler = async (event: HandlerEvent, _context?: HandlerCo
         currency: 'INR',
         service: 'Your Framies API',
         timestamp: new Date().toISOString(),
-        database: {
-          isLivePostgres: db.isUsingLiveDatabase(),
-          mode: db.isUsingLiveDatabase() ? 'PostgreSQL Connection Active' : 'Persistent Storage Fallback',
-        },
+        database: db.getConnectionDiagnostics(),
         integrations: {
           razorpay: {
             configured: payments.isRazorpayConfigured(),

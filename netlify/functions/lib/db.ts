@@ -269,12 +269,14 @@ class DataStore {
   private auditLogs: DBAuditLog[] = []
   private pool: Pool | null = null
   private isPostgresConnected = false
+  private connectionError: string | null = null
+  private initPromise: Promise<void> | null = null
   private storageFilePath: string
 
   constructor() {
     this.storageFilePath = path.join(process.cwd(), '.server_datastore.json')
     this.loadFromFile()
-    this.initializePostgres()
+    this.initPromise = this.initializePostgres()
   }
 
   private loadFromFile() {
@@ -316,12 +318,35 @@ class DataStore {
     }
   }
 
-  private async initializePostgres() {
-    const dbUrl =
+  public getDetectedDbUrl(): string | undefined {
+    return (
+      process.env.DATABASE_URL ||
       process.env.SUPABASE_DATABASE_URL ||
+      process.env.SUPABASE_DB_URL ||
       process.env.NETLIFY_DB_URL ||
-      process.env.DATABASE_URL
-    if (!dbUrl || dbUrl.includes('ep-sample-pooler') || dbUrl.includes('user:password')) {
+      process.env.POSTGRES_URL ||
+      process.env.POSTGRES_PRISMA_URL
+    )
+  }
+
+  private async initializePostgres() {
+    const dbUrl = this.getDetectedDbUrl()
+
+    if (!dbUrl) {
+      this.connectionError = 'No database connection string environment variable found. Set DATABASE_URL or SUPABASE_DATABASE_URL in Netlify.'
+      this.isPostgresConnected = false
+      return
+    }
+
+    if (dbUrl.includes('ep-sample-pooler') || dbUrl.includes('user:password')) {
+      this.connectionError = 'Sample placeholder database URL detected. Replace with real Supabase connection string.'
+      this.isPostgresConnected = false
+      return
+    }
+
+    if (dbUrl.includes('[') && dbUrl.includes(']')) {
+      this.connectionError = 'Connection string contains placeholder brackets like [YOUR-PASSWORD]. Please replace with your actual Supabase database password in Netlify environment variables.'
+      this.isPostgresConnected = false
       return
     }
 
@@ -331,6 +356,7 @@ class DataStore {
         ssl: dbUrl.includes('localhost') ? false : { rejectUnauthorized: false },
         max: 3,
         idleTimeoutMillis: 10000,
+        connectionTimeoutMillis: 5000,
       })
 
       // Verify connection and auto-migrate tables and seed initial data
@@ -338,13 +364,15 @@ class DataStore {
       try {
         await this.autoMigrateAndSeed(client)
         this.isPostgresConnected = true
-        console.log('Successfully connected to PostgreSQL database with automatic migrations applied')
+        this.connectionError = null
+        console.log('Successfully connected to Supabase PostgreSQL database with automatic migrations applied')
       } finally {
         client.release()
       }
     } catch (err: any) {
       console.warn('PostgreSQL connection not available, using persistent fallback store:', err.message)
       this.isPostgresConnected = false
+      this.connectionError = err.message || 'Unable to connect to PostgreSQL host'
     }
   }
 
@@ -464,8 +492,39 @@ class DataStore {
     `)
   }
 
+  public async ensureConnected(): Promise<void> {
+    if (this.initPromise) {
+      await this.initPromise
+    }
+  }
+
   public isUsingLiveDatabase(): boolean {
     return this.isPostgresConnected
+  }
+
+  public getConnectionError(): string | null {
+    return this.connectionError
+  }
+
+  public getConnectionDiagnostics() {
+    const rawUrl = this.getDetectedDbUrl()
+    let maskedUrl: string | null = null
+    if (rawUrl) {
+      try {
+        const parsed = new URL(rawUrl)
+        maskedUrl = `${parsed.protocol}//${parsed.username}:••••@${parsed.host}${parsed.pathname}`
+      } catch {
+        maskedUrl = 'Valid connection string present (masked)'
+      }
+    }
+
+    return {
+      isLivePostgres: this.isPostgresConnected,
+      mode: this.isPostgresConnected ? 'PostgreSQL Connection Active' : 'Persistent Storage Fallback',
+      connectionStringDetected: !!rawUrl,
+      detectedUrlMasked: maskedUrl,
+      connectionError: this.connectionError,
+    }
   }
 
   // ----------------------------------------------------------------------------
