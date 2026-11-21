@@ -330,50 +330,96 @@ class DataStore {
   }
 
   private async initializePostgres() {
-    const dbUrl = this.getDetectedDbUrl()
+    const rawDbUrl = this.getDetectedDbUrl()
 
-    if (!dbUrl) {
-      this.connectionError = 'No database connection string environment variable found. Set DATABASE_URL or SUPABASE_DATABASE_URL in Netlify.'
+    if (!rawDbUrl) {
+      this.connectionError = 'No database connection string environment variable found. Set DATABASE_URL in Netlify.'
       this.isPostgresConnected = false
       return
     }
 
-    if (dbUrl.includes('ep-sample-pooler') || dbUrl.includes('user:password')) {
+    if (rawDbUrl.includes('ep-sample-pooler') || rawDbUrl.includes('user:password')) {
       this.connectionError = 'Sample placeholder database URL detected. Replace with real Supabase connection string.'
       this.isPostgresConnected = false
       return
     }
 
-    if (dbUrl.includes('[') && dbUrl.includes(']')) {
+    if (rawDbUrl.includes('[') && rawDbUrl.includes(']')) {
       this.connectionError = 'Connection string contains placeholder brackets like [YOUR-PASSWORD]. Please replace with your actual Supabase database password in Netlify environment variables.'
       this.isPostgresConnected = false
       return
     }
 
-    try {
-      this.pool = new Pool({
-        connectionString: dbUrl,
-        ssl: dbUrl.includes('localhost') ? false : { rejectUnauthorized: false },
-        max: 3,
-        idleTimeoutMillis: 10000,
-        connectionTimeoutMillis: 5000,
-      })
+    // Candidate URL resolution:
+    // Supabase direct URLs (db.<ref>.supabase.co:5432) only have IPv6 AAAA records on DNS.
+    // Netlify Functions and AWS Lambda run on IPv4 networks and require the IPv4 connection poolers.
+    const candidateUrls: string[] = []
 
-      // Verify connection and auto-migrate tables and seed initial data
-      const client = await this.pool.connect()
-      try {
-        await this.autoMigrateAndSeed(client)
-        this.isPostgresConnected = true
-        this.connectionError = null
-        console.log('Successfully connected to Supabase PostgreSQL database with automatic migrations applied')
-      } finally {
-        client.release()
+    try {
+      const parsed = new URL(rawDbUrl)
+      if (parsed.hostname.startsWith('db.') && parsed.hostname.endsWith('.supabase.co')) {
+        const projectRef = parsed.hostname.split('.')[1]
+        const username = parsed.username.includes('.') ? parsed.username : `postgres.${projectRef}`
+        const encodedPass = parsed.password
+        const dbName = parsed.pathname || '/postgres'
+        const search = parsed.search || '?sslmode=require'
+
+        // Priority 1: Mumbai pooler (ap-south-1) - default for Indian merchants
+        candidateUrls.push(
+          `postgresql://${username}:${encodedPass}@aws-0-ap-south-1.pooler.supabase.com:6543${dbName}${search}`
+        )
+        candidateUrls.push(
+          `postgresql://${username}:${encodedPass}@aws-0-ap-south-1.pooler.supabase.com:5432${dbName}${search}`
+        )
+        // Priority 2: Other global pooler regions
+        candidateUrls.push(
+          `postgresql://${username}:${encodedPass}@aws-0-us-east-1.pooler.supabase.com:6543${dbName}${search}`
+        )
+        candidateUrls.push(
+          `postgresql://${username}:${encodedPass}@aws-0-eu-central-1.pooler.supabase.com:6543${dbName}${search}`
+        )
       }
-    } catch (err: any) {
-      console.warn('PostgreSQL connection not available, using persistent fallback store:', err.message)
-      this.isPostgresConnected = false
-      this.connectionError = err.message || 'Unable to connect to PostgreSQL host'
+    } catch {
+      // Ignore URL parse error, proceed to rawDbUrl
     }
+
+    candidateUrls.push(rawDbUrl)
+
+    let lastError: any = null
+
+    for (const url of candidateUrls) {
+      try {
+        const pool = new Pool({
+          connectionString: url,
+          ssl: url.includes('localhost') ? false : { rejectUnauthorized: false },
+          max: 3,
+          idleTimeoutMillis: 10000,
+          connectionTimeoutMillis: 5000,
+        })
+
+        const client = await pool.connect()
+        try {
+          await this.autoMigrateAndSeed(client)
+          this.pool = pool
+          this.isPostgresConnected = true
+          this.connectionError = null
+          console.log(`Successfully connected to PostgreSQL database (${new URL(url).host}) with automatic migrations applied`)
+          return
+        } finally {
+          client.release()
+        }
+      } catch (err: any) {
+        lastError = err
+        // If password is wrong or user not found, don't keep polling other regions
+        if (err.message && (err.message.includes('password authentication failed') || err.message.includes('Tenant or user not found'))) {
+          break
+        }
+      }
+    }
+
+    console.warn('PostgreSQL connection not available, using persistent fallback store:', lastError?.message)
+    this.isPostgresConnected = false
+    this.connectionError = lastError?.message || 'Unable to connect to PostgreSQL host'
   }
 
   private async autoMigrateAndSeed(client: any) {
