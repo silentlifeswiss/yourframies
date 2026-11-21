@@ -23,11 +23,11 @@ export const ShippingView: React.FC = () => {
   const [couriers, setCouriers] = useState({
     delhivery: {
       enabled: true,
-      apiKey: '••••••••••••••••••••••••3a9b',
+      apiKey: 'a83902984b7d61ecb111ccc79229c7a1e1f3e472',
       clientId: 'YOURFRAMIES_BLR_01',
       warehousePin: '560103',
-      environment: 'sandbox' as 'sandbox' | 'production',
-      status: 'Connected (Sandbox)',
+      environment: 'production' as 'sandbox' | 'production',
+      status: 'Connected (Live Production)',
     },
     shiprocket: {
       enabled: true,

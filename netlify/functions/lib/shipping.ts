@@ -94,8 +94,8 @@ export class ShippingManager {
   private nimbusEmail: string | undefined
 
   constructor() {
-    this.delhiveryToken = process.env.DELHIVERY_API_TOKEN
-    this.delhiveryMode = process.env.DELHIVERY_MODE || 'staging'
+    this.delhiveryToken = process.env.DELHIVERY_API_TOKEN || 'a83902984b7d61ecb111ccc79229c7a1e1f3e472'
+    this.delhiveryMode = process.env.DELHIVERY_MODE || 'production'
     this.shiprocketEmail = process.env.SHIPROCKET_EMAIL
     this.shiprocketPass = process.env.SHIPROCKET_PASSWORD
     this.nimbusEmail = process.env.NIMBUSPOST_EMAIL

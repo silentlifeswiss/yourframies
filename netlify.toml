@@ -5,6 +5,8 @@
 
 [build.environment]
   NODE_VERSION = "26"
+  DELHIVERY_API_TOKEN = "a83902984b7d61ecb111ccc79229c7a1e1f3e472"
+  DELHIVERY_MODE = "production"
 
 # Route API calls to Netlify Serverless Functions
 [[redirects]]
