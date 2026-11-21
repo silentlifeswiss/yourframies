@@ -324,11 +324,12 @@ class DataStore {
   public getDetectedDbUrl(): string | undefined {
     return (
       process.env.DATABASE_URL ||
+      process.env.POSTGRES_URL ||
+      process.env.POSTGRES_PRISMA_URL ||
+      process.env.POSTGRES_URL_NON_POOLING ||
       process.env.SUPABASE_DATABASE_URL ||
       process.env.SUPABASE_DB_URL ||
-      process.env.NETLIFY_DB_URL ||
-      process.env.POSTGRES_URL ||
-      process.env.POSTGRES_PRISMA_URL
+      process.env.NETLIFY_DB_URL
     )
   }
 
@@ -336,19 +337,19 @@ class DataStore {
     const rawDbUrl = this.getDetectedDbUrl()
 
     if (!rawDbUrl) {
-      this.connectionError = 'No database connection string environment variable found. Set DATABASE_URL in Netlify.'
+      this.connectionError = 'No database connection string environment variable found. Set DATABASE_URL or POSTGRES_URL in Vercel / Netlify.'
       this.isPostgresConnected = false
       return
     }
 
     if (rawDbUrl.includes('ep-sample-pooler') || rawDbUrl.includes('user:password')) {
-      this.connectionError = 'Sample placeholder database URL detected. Replace with real Supabase connection string.'
+      this.connectionError = 'Sample placeholder database URL detected. Replace with real Neon / Supabase connection string.'
       this.isPostgresConnected = false
       return
     }
 
     if (rawDbUrl.includes('[') && rawDbUrl.includes(']')) {
-      this.connectionError = 'Connection string contains placeholder brackets like [YOUR-PASSWORD]. Please replace with your actual Supabase database password in Netlify environment variables.'
+      this.connectionError = 'Connection string contains placeholder brackets like [YOUR-PASSWORD]. Please replace with your actual database password.'
       this.isPostgresConnected = false
       return
     }
