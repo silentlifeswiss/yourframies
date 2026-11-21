@@ -2,13 +2,13 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import { Heart, ShoppingBag } from 'lucide-react'
 import { useWishlist } from '../context/WishlistContext'
-import { INITIAL_PRODUCTS } from '../data/products'
+import { getStoreProducts } from '../data/products'
 import { ProductCard } from '../components/product/ProductCard'
 
 export const WishlistPage: React.FC = () => {
   const { wishlistIds, clearWishlist } = useWishlist()
 
-  const wishlistProducts = INITIAL_PRODUCTS.filter((p) => wishlistIds.includes(p.id))
+  const wishlistProducts = getStoreProducts().filter((p) => wishlistIds.includes(p.id))
 
   if (wishlistProducts.length === 0) {
     return (

@@ -57,7 +57,7 @@ export const OrderTrackingPage: React.FC = () => {
       setAdditionalOrders([])
       setError(
         res.message ||
-          `No order found matching "${clean}". Please verify your order number (e.g. YF-2026-1042) or registered 10-digit mobile number.`
+          `No order found matching "${clean}". Please verify your order number (e.g. YF-2026-XXXX) or registered 10-digit mobile number.`
       )
     } catch {
       const localMatch = getOrderById(clean)
@@ -140,7 +140,7 @@ export const OrderTrackingPage: React.FC = () => {
               required
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="e.g. YF-2026-1042 or 9876543210"
+              placeholder="e.g. YF-2026-XXXX or 9876543210"
               className="flex-1 px-4 py-3 bg-white border border-neutral-300 rounded text-xs uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-black font-mono"
             />
             <button
@@ -301,28 +301,12 @@ export const OrderTrackingPage: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div className="bg-white p-8 rounded-2xl border border-neutral-200 text-center space-y-4">
+          <div className="bg-white p-8 rounded-2xl border border-neutral-200 text-center space-y-3">
             <Package className="w-12 h-12 text-neutral-300 mx-auto" />
-            <h3 className="text-sm font-semibold text-neutral-800">Quick Demo Search</h3>
+            <h3 className="text-sm font-semibold text-neutral-800">Track Your Consignment</h3>
             <p className="text-xs text-neutral-500 max-w-sm mx-auto">
-              You can test the tracker immediately with sample orders in the system:
+              Enter your Order Number (e.g. YF-2026-XXXX) or your registered 10-digit mobile number above to see real-time courier dispatch and delivery milestones.
             </p>
-            <div className="flex flex-wrap justify-center gap-2 pt-2">
-              <button
-                type="button"
-                onClick={() => handleSearch('YF-2026-1042')}
-                className="px-3 py-1.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 text-xs font-mono rounded"
-              >
-                YF-2026-1042 (Shipped)
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSearch('YF-2026-1043')}
-                className="px-3 py-1.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 text-xs font-mono rounded"
-              >
-                YF-2026-1043 (Confirmed)
-              </button>
-            </div>
           </div>
         )}
       </div>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Lock, Mail, ShieldAlert, KeyRound, ArrowRight, ShieldCheck, Eye, EyeOff } from 'lucide-react'
+import { Lock, Mail, ShieldAlert, KeyRound, ArrowRight, Eye, EyeOff } from 'lucide-react'
 import { useAdminAuth } from '../context/AdminAuthContext'
 import { ADMIN_CONFIG } from '../config/adminConfig'
 
@@ -28,11 +28,6 @@ export const AdminLogin: React.FC = () => {
     } else {
       setErrorMsg(res.message || 'Authentication failed.')
     }
-  }
-
-  const handleFillDemoAdmin = () => {
-    setEmail('admin@yourframies.com')
-    setPassword('YourFramies2026!')
   }
 
   return (
@@ -150,23 +145,6 @@ export const AdminLogin: React.FC = () => {
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
-
-          {/* Quick Bootstrap Preset for Development Verification */}
-          <div className="pt-4 border-t border-neutral-800/80 text-center space-y-2">
-            <span className="text-[10px] uppercase tracking-wider text-neutral-500 font-semibold">
-              Development Bootstrap Preset
-            </span>
-            <div>
-              <button
-                type="button"
-                onClick={handleFillDemoAdmin}
-                className="px-3 py-1.5 rounded-full bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-xs font-mono inline-flex items-center gap-1.5"
-              >
-                <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
-                <span>Fill Super Admin (admin@yourframies.com)</span>
-              </button>
-            </div>
-          </div>
         </div>
 
         <p className="mt-6 text-center text-[11px] text-neutral-500">

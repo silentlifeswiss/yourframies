@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Lock, Mail, Phone, ArrowRight, ShieldCheck, UserCheck, KeyRound, Sparkles, RefreshCw, CheckCircle2 } from 'lucide-react'
+import { Lock, Mail, Phone, ArrowRight, ShieldCheck, KeyRound, Sparkles, RefreshCw, CheckCircle2 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
 export const LoginPage: React.FC = () => {
@@ -113,35 +113,6 @@ export const LoginPage: React.FC = () => {
     } else {
       setError(res.message || 'Login failed. Please verify credentials.')
     }
-  }
-
-  // Instant Demo Accounts
-  const handleQuickCustomerDemo = async () => {
-    setError('')
-    setPhone('9876543210')
-    setLoginMode('otp')
-    setIsSendingOtp(true)
-    try {
-      const res = await sendOtp('9876543210', 'login')
-      setOtpStep('code')
-      const preview = res.otpPreview || '123456'
-      setOtpPreview(preview)
-      setOtp(preview)
-      setInfoMsg(`Demo verification code generated: ${preview}`)
-    } catch {
-      setOtpStep('code')
-      setOtpPreview('123456')
-      setOtp('123456')
-    } finally {
-      setIsSendingOtp(false)
-    }
-  }
-
-  const handleQuickAdminDemo = () => {
-    setLoginMode('password')
-    setEmail('admin@yourframies.com')
-    setPassword('YourFramies2026!')
-    setError('')
   }
 
   return (
@@ -360,31 +331,6 @@ export const LoginPage: React.FC = () => {
               </button>
             </form>
           )}
-
-          {/* Quick Demo Fills for Immediate Validation */}
-          <div className="pt-4 border-t border-neutral-100 text-center">
-            <span className="text-[10px] text-neutral-400 uppercase font-semibold">
-              Instant Validation Credentials
-            </span>
-            <div className="flex justify-center gap-2 mt-2">
-              <button
-                type="button"
-                onClick={handleQuickCustomerDemo}
-                className="px-3 py-1.5 text-[11px] bg-neutral-100 hover:bg-neutral-200 text-neutral-800 rounded font-medium flex items-center gap-1.5"
-              >
-                <UserCheck className="w-3.5 h-3.5" />
-                Demo Customer (OTP)
-              </button>
-              <button
-                type="button"
-                onClick={handleQuickAdminDemo}
-                className="px-3 py-1.5 text-[11px] bg-neutral-100 hover:bg-neutral-200 text-neutral-800 rounded font-medium flex items-center gap-1.5"
-              >
-                <ShieldCheck className="w-3.5 h-3.5" />
-                Demo Director
-              </button>
-            </div>
-          </div>
 
           <div className="text-center pt-2">
             <p className="text-xs text-neutral-500">

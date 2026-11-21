@@ -1,14 +1,21 @@
-import React, { useState } from 'react'
-import { INITIAL_PRODUCTS } from '../../data/products'
+import React, { useState, useEffect } from 'react'
+import { getStoreProducts } from '../../data/products'
 import { ProductCard } from '../product/ProductCard'
 
 export const ProductCarousel: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'bestsellers' | 'new-arrivals'>('bestsellers')
+  const [productsList, setProductsList] = useState(() => getStoreProducts())
+
+  useEffect(() => {
+    const handleUpdate = () => setProductsList(getStoreProducts())
+    window.addEventListener('yourframies_products_updated', handleUpdate)
+    return () => window.removeEventListener('yourframies_products_updated', handleUpdate)
+  }, [])
 
   const productsToShow =
     activeTab === 'bestsellers'
-      ? INITIAL_PRODUCTS.slice(0, 4)
-      : INITIAL_PRODUCTS.slice(4, 8)
+      ? productsList.slice(0, 4)
+      : productsList.slice(4, 8)
 
   return (
     <section className="py-20 bg-white border-b border-neutral-200">

@@ -15,88 +15,25 @@ const OrderContext = createContext<OrderContextType | undefined>(undefined)
 
 const ORDERS_STORAGE_KEY = 'yourframies_orders'
 
-const INITIAL_DEMO_ORDERS: Order[] = [
-  {
-    id: 'ord-1001',
-    orderNumber: 'YF-2026-1042',
-    status: 'SHIPPED',
-    paymentMethod: 'PREPAID_RAZORPAY',
-    paymentStatus: 'CAPTURED',
-    currency: 'INR',
-    subtotalINR: 1499,
-    discountINR: 150,
-    shippingFeeINR: 0,
-    codChargeINR: 0,
-    totalINR: 1349,
-    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    shippingAddress: {
-      fullName: 'Vikramaditya S.',
-      phone: '9876543210',
-      addressLine1: 'Flat 302, Palm Meadows, Whitefield',
-      city: 'Bengaluru',
-      state: 'Karnataka',
-      pincode: '560066',
-    },
-    items: [
-      {
-        id: 'item-1',
-        orderId: 'ord-1001',
-        title: 'Porsche 911 GT3 RS Neon Night Frame',
-        priceINR: 1499,
-        quantity: 1,
-        customization: {
-          frameSize: '12x18',
-          moulding: 'Black Wood',
-          glassType: 'Acrylic Glaze',
-        },
-      },
-    ],
-  },
-  {
-    id: 'ord-1002',
-    orderNumber: 'YF-2026-1043',
-    status: 'CONFIRMED',
-    paymentMethod: 'COD',
-    paymentStatus: 'PENDING',
-    currency: 'INR',
-    subtotalINR: 1999,
-    discountINR: 0,
-    shippingFeeINR: 0,
-    codChargeINR: 50,
-    totalINR: 2049,
-    createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
-    shippingAddress: {
-      fullName: 'Ananya Mehta',
-      phone: '9812345678',
-      addressLine1: 'B-12, Green Acres, Powai',
-      city: 'Mumbai',
-      state: 'Maharashtra',
-      pincode: '400076',
-    },
-    items: [
-      {
-        id: 'item-2',
-        orderId: 'ord-1002',
-        title: 'The Memories Collage • 9-Photo Storyboard',
-        priceINR: 1999,
-        quantity: 1,
-        customization: {
-          frameSize: '16x24',
-          moulding: 'Natural Oak',
-          glassType: 'Anti-Glare UV Glass',
-        },
-      },
-    ],
-  },
-]
-
 export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [orders, setOrders] = useState<Order[]>(() => {
     try {
       const stored = localStorage.getItem(ORDERS_STORAGE_KEY)
-      return stored ? JSON.parse(stored) : INITIAL_DEMO_ORDERS
+      if (stored) {
+        const parsed = JSON.parse(stored)
+        // Clean out any legacy demo orders from cache
+        const cleaned = parsed.filter(
+          (o: Order) =>
+            o.id !== 'ord-1001' &&
+            o.id !== 'ord-1002' &&
+            o.orderNumber !== 'YF-2026-1042' &&
+            o.orderNumber !== 'YF-2026-1043'
+        )
+        return cleaned
+      }
+      return []
     } catch {
-      return INITIAL_DEMO_ORDERS
+      return []
     }
   })
 

@@ -21,7 +21,7 @@ export const CategoriesView: React.FC = () => {
     setName('')
     setSlug('')
     setDescription('')
-    setImageUrl('https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=80')
+    setImageUrl('')
     setShowModal(true)
   }
 

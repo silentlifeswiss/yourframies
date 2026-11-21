@@ -30,10 +30,10 @@ export const ShippingView: React.FC = () => {
       status: 'Connected (Live Production)',
     },
     shiprocket: {
-      enabled: true,
-      email: 'logistics@yourframies.com',
-      tokenStatus: 'Active Token (Valid for 10 days)',
-      autoSync: true,
+      enabled: false,
+      email: '',
+      tokenStatus: 'Not Connected',
+      autoSync: false,
     },
     nimbuspost: {
       enabled: false,
@@ -90,7 +90,7 @@ export const ShippingView: React.FC = () => {
   ])
 
   // Blocked PIN codes for high COD RTO
-  const [blockedPins, setBlockedPins] = useState('110006, 700024, 400009')
+  const [blockedPins, setBlockedPins] = useState('')
 
   const handleSaveShippingConfig = (e: React.FormEvent) => {
     e.preventDefault()

@@ -67,12 +67,10 @@ export const ProductsView: React.FC = () => {
     setSlug('')
     setCategoryId('cat-car-frames')
     setDescription('')
-    setBasePrice(1299)
-    setComparePrice(1899)
-    setStockQuantity(50)
-    setProductImages([
-      'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=1000&q=85',
-    ])
+    setBasePrice(0)
+    setComparePrice(0)
+    setStockQuantity(0)
+    setProductImages([])
     setManualUrl('')
     setIsCustomizable(true)
     setIsActive(true)

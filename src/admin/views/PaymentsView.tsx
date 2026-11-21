@@ -24,7 +24,7 @@ export const PaymentsView: React.FC = () => {
     mode: 'test' as 'test' | 'live',
     keyId: 'rzp_test_U2mMXjXIzuTfCg',
     keySecret: 'aGiMWkjge3MzDUj7JCfKqOA0',
-    webhookSecret: 'whsec_99a812bc8172df',
+    webhookSecret: '',
     autoCapture: true,
     methods: {
       upi: true,
@@ -39,7 +39,7 @@ export const PaymentsView: React.FC = () => {
   const [refundForm, setRefundForm] = useState({
     paymentId: '',
     amount: '',
-    reason: 'Customer cancelled prior to dispatch',
+    reason: '',
   })
 
   const handleSaveConfig = (e: React.FormEvent) => {
@@ -69,7 +69,7 @@ export const PaymentsView: React.FC = () => {
     )
 
     setRefundStatus(`Refund of ₹${refundForm.amount} initiated for ${refundForm.paymentId}. (Ref ID: rfd_${Date.now().toString(36)})`)
-    setRefundForm({ paymentId: '', amount: '', reason: 'Customer cancelled prior to dispatch' })
+    setRefundForm({ paymentId: '', amount: '', reason: '' })
     setTimeout(() => setRefundStatus(null), 5000)
   }
 

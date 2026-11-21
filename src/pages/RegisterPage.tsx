@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { User, Mail, Phone, Lock, ArrowRight, ShieldCheck, Sparkles, RefreshCw, CheckCircle2 } from 'lucide-react'
+import { User, Mail, Phone, Lock, ArrowRight, ShieldCheck, Sparkles, RefreshCw } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
 export const RegisterPage: React.FC = () => {
@@ -111,30 +111,6 @@ export const RegisterPage: React.FC = () => {
       setError('Registration service currently unavailable. Please retry.')
     } finally {
       setIsSubmitting(false)
-    }
-  }
-
-  // Quick Demo Auto-fill
-  const handleQuickDemoFill = async () => {
-    setName('Shaurya Prakash')
-    setEmail('shaurya@example.com')
-    setPhone('9876543210')
-    setPassword('customer123')
-    setError('')
-    setIsSendingOtp(true)
-    try {
-      const res = await sendOtp('9876543210', 'register')
-      setIsOtpSent(true)
-      const preview = res.otpPreview || '123456'
-      setOtpPreview(preview)
-      setOtp(preview)
-      setInfoMsg(`Demo verification code generated: ${preview}`)
-    } catch {
-      setIsOtpSent(true)
-      setOtpPreview('123456')
-      setOtp('123456')
-    } finally {
-      setIsSendingOtp(false)
     }
   }
 
@@ -314,23 +290,6 @@ export const RegisterPage: React.FC = () => {
               )}
             </button>
           </form>
-
-          {/* Quick Demo Fill */}
-          <div className="pt-4 border-t border-neutral-100 text-center">
-            <span className="text-[10px] text-neutral-400 uppercase font-semibold">
-              Instant Validation Helper
-            </span>
-            <div className="flex justify-center mt-2">
-              <button
-                type="button"
-                onClick={handleQuickDemoFill}
-                className="px-4 py-1.5 text-xs bg-neutral-100 hover:bg-neutral-200 text-neutral-800 rounded font-medium flex items-center gap-1.5"
-              >
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                Demo Register + OTP Auto-fill
-              </button>
-            </div>
-          </div>
 
           <div className="text-center pt-2">
             <p className="text-xs text-neutral-500">

@@ -15,7 +15,7 @@ import {
 import { useCart } from '../../context/CartContext'
 import { useWishlist } from '../../context/WishlistContext'
 import { useAuth } from '../../context/AuthContext'
-import { INITIAL_PRODUCTS } from '../../data/products'
+import { getStoreProducts } from '../../data/products'
 
 export const Navbar: React.FC = () => {
   const { itemCount, setIsCartOpen } = useCart()
@@ -36,7 +36,7 @@ export const Navbar: React.FC = () => {
   }
 
   const searchResults = searchQuery.trim()
-    ? INITIAL_PRODUCTS.filter(
+    ? getStoreProducts().filter(
       (p) =>
         p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.description.toLowerCase().includes(searchQuery.toLowerCase())

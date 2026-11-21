@@ -26,7 +26,6 @@ import {
 } from 'recharts'
 import { useOrders } from '../../context/OrderContext'
 import { useSiteContent } from '../../context/SiteContentContext'
-import { INITIAL_PRODUCTS } from '../../data/products'
 import { formatINR } from '../../utils/formatters'
 import { AdminViewType } from '../AdminLayout'
 
@@ -50,19 +49,40 @@ export const DashboardView: React.FC<{ onNavigate: (view: AdminViewType) => void
   const prepaidOrders = orders.filter((o) => o.paymentMethod === 'PREPAID_RAZORPAY').length
   const codOrders = orders.filter((o) => o.paymentMethod === 'COD').length
 
-  const monthlyChartData = [
-    { month: 'Jun', sales: 42000, profit: 24000 },
-    { month: 'Jul', sales: 61000, profit: 36000 },
-    { month: 'Aug', sales: 79000, profit: 48000 },
-    { month: 'Sep', sales: 94000, profit: 57000 },
-    { month: 'Oct', sales: 118000, profit: 71000 },
-    { month: 'Nov', sales: 145000, profit: 89000 },
-  ]
+  // Dynamically compute past 6 months from real store orders
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  const now = new Date()
+  const monthlyBuckets: Record<string, { month: string; sales: number; profit: number }> = {}
 
-  const paymentMixData = [
-    { name: 'Razorpay Online', value: prepaidOrders || 1, color: '#f59e0b' },
-    { name: 'Cash on Delivery', value: codOrders || 1, color: '#737373' },
-  ]
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    const key = `${d.getFullYear()}-${d.getMonth()}`
+    monthlyBuckets[key] = {
+      month: monthNames[d.getMonth()],
+      sales: 0,
+      profit: 0,
+    }
+  }
+
+  orders.forEach((o) => {
+    const d = new Date(o.createdAt)
+    const key = `${d.getFullYear()}-${d.getMonth()}`
+    if (monthlyBuckets[key]) {
+      monthlyBuckets[key].sales += o.totalINR || 0
+      const cogs = Math.round((o.totalINR || 0) * 0.35)
+      monthlyBuckets[key].profit += Math.max(0, (o.totalINR || 0) - cogs - 90)
+    }
+  })
+
+  const monthlyChartData = Object.values(monthlyBuckets)
+
+  const paymentMixData =
+    totalOrders > 0
+      ? [
+          { name: 'Razorpay Online', value: prepaidOrders, color: '#f59e0b' },
+          { name: 'Cash on Delivery', value: codOrders, color: '#737373' },
+        ].filter((p) => p.value > 0)
+      : [{ name: 'Awaiting Orders', value: 1, color: '#404040' }]
 
   return (
     <div className="space-y-8">
@@ -94,7 +114,7 @@ export const DashboardView: React.FC<{ onNavigate: (view: AdminViewType) => void
           <p className="text-2xl font-bold text-white mt-1">{formatINR(totalRevenue)}</p>
           <div className="flex items-center gap-1.5 text-[11px] text-emerald-400 mt-2 font-medium">
             <TrendingUp className="w-3.5 h-3.5" />
-            <span>+24.6% vs previous month</span>
+            <span>{totalOrders > 0 ? `${totalOrders} orders recorded in database` : 'Ready for live customer orders'}</span>
           </div>
         </div>
 
