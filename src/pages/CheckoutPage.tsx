@@ -251,6 +251,34 @@ export const CheckoutPage: React.FC = () => {
             },
             theme: {
               color: '#171717',
+              backdrop_color: 'rgba(0, 0, 0, 0.65)',
+            },
+            config: {
+              display: {
+                blocks: {
+                  upi: {
+                    name: 'Pay via UPI (GPay, PhonePe, Paytm, QR)',
+                    instruments: [
+                      {
+                        method: 'upi',
+                        flows: ['qr', 'intent', 'collect'],
+                      },
+                    ],
+                  },
+                  other: {
+                    name: 'Cards, Netbanking & Wallets',
+                    instruments: [
+                      { method: 'card' },
+                      { method: 'netbanking' },
+                      { method: 'wallet' },
+                    ],
+                  },
+                },
+                sequence: ['block.upi', 'block.other'],
+                preferences: {
+                  show_default_blocks: true,
+                },
+              },
             },
             modal: {
               ondismiss: () => {
