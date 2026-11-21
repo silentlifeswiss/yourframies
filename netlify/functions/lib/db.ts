@@ -1,6 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import { Pool } from 'pg'
+import { Pool as PgPool } from 'pg'
+import { Pool as NeonPool } from '@neondatabase/serverless'
 import {
   DBProduct,
   DBCategory,
@@ -268,7 +269,7 @@ class DataStore {
   private draftHomepageSections: DBHomepageSection[] = [...INITIAL_HOMEPAGE_SECTIONS]
   private draftSiteSettings: DBSiteSettings = { ...INITIAL_SITE_SETTINGS }
   private auditLogs: DBAuditLog[] = []
-  private pool: Pool | null = null
+  private pool: any = null
   private isPostgresConnected = false
   private connectionError: string | null = null
   private initPromise: Promise<void> | null = null
@@ -393,13 +394,17 @@ class DataStore {
 
     for (const url of candidateUrls) {
       try {
-        const cleanUrl = url.replace(/([?&])sslmode=[^&]+(&|$)/, '$1').replace(/[?&]$/, '')
-        const pool = new Pool({
+        const isNeon = url.includes('neon.tech')
+        const PoolClass = isNeon ? NeonPool : PgPool
+        const cleanUrl = isNeon
+          ? url
+          : url.replace(/([?&])sslmode=[^&]+(&|$)/, '$1').replace(/[?&]$/, '')
+        const pool = new (PoolClass as any)({
           connectionString: cleanUrl,
           ssl: cleanUrl.includes('localhost') ? false : { rejectUnauthorized: false },
           max: 3,
           idleTimeoutMillis: 10000,
-          connectionTimeoutMillis: 5000,
+          connectionTimeoutMillis: 10000,
         })
 
         const client = await pool.connect()
@@ -643,7 +648,7 @@ class DataStore {
            ORDER BY created_at DESC`
         )
         if (res.rows.length > 0) {
-          return res.rows.map((row) => ({
+          return res.rows.map((row: any) => ({
             ...row,
             subtotalINR: Number(row.subtotalINR),
             discountINR: Number(row.discountINR),
@@ -711,7 +716,7 @@ class DataStore {
           [clean]
         )
         if (res.rows.length > 0) {
-          return res.rows.map((row) => ({
+          return res.rows.map((row: any) => ({
             ...row,
             subtotalINR: Number(row.subtotalINR),
             discountINR: Number(row.discountINR),
