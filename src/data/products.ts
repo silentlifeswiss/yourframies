@@ -184,3 +184,28 @@ export const INITIAL_PRODUCTS: Product[] = [
     stockQuantity: 25,
   },
 ]
+
+export const PRODUCTS_STORAGE_KEY = 'yourframies_products_db'
+
+export function getStoreProducts(): Product[] {
+  try {
+    const raw = localStorage.getItem(PRODUCTS_STORAGE_KEY)
+    if (raw) {
+      const parsed = JSON.parse(raw)
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed
+    }
+  } catch (e) {
+    // fallback
+  }
+  return INITIAL_PRODUCTS
+}
+
+export function saveStoreProducts(products: Product[]): void {
+  try {
+    localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(products))
+    window.dispatchEvent(new Event('yourframies_products_updated'))
+  } catch (e) {
+    console.error('Error saving products:', e)
+  }
+}
+

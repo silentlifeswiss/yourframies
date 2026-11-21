@@ -99,33 +99,30 @@ export const AccountPage: React.FC = () => {
           <button
             type="button"
             onClick={() => setActiveTab('orders')}
-            className={`pb-3 px-4 text-xs font-semibold uppercase tracking-wider transition-all border-b-2 ${
-              activeTab === 'orders'
+            className={`pb-3 px-4 text-xs font-semibold uppercase tracking-wider transition-all border-b-2 ${activeTab === 'orders'
                 ? 'border-neutral-900 text-neutral-900'
                 : 'border-transparent text-neutral-500 hover:text-black'
-            }`}
+              }`}
           >
             My Orders ({orders.length})
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('addresses')}
-            className={`pb-3 px-4 text-xs font-semibold uppercase tracking-wider transition-all border-b-2 ${
-              activeTab === 'addresses'
+            className={`pb-3 px-4 text-xs font-semibold uppercase tracking-wider transition-all border-b-2 ${activeTab === 'addresses'
                 ? 'border-neutral-900 text-neutral-900'
                 : 'border-transparent text-neutral-500 hover:text-black'
-            }`}
+              }`}
           >
             Saved Addresses ({addresses.length})
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('profile')}
-            className={`pb-3 px-4 text-xs font-semibold uppercase tracking-wider transition-all border-b-2 ${
-              activeTab === 'profile'
+            className={`pb-3 px-4 text-xs font-semibold uppercase tracking-wider transition-all border-b-2 ${activeTab === 'profile'
                 ? 'border-neutral-900 text-neutral-900'
                 : 'border-transparent text-neutral-500 hover:text-black'
-            }`}
+              }`}
           >
             Profile Settings
           </button>

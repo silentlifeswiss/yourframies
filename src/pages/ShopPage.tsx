@@ -1,7 +1,7 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Filter, SlidersHorizontal, ArrowUpDown } from 'lucide-react'
-import { INITIAL_PRODUCTS } from '../data/products'
+import { getStoreProducts } from '../data/products'
 import { CATEGORIES } from '../data/categories'
 import { ProductCard } from '../components/product/ProductCard'
 
@@ -10,11 +10,19 @@ export const ShopPage: React.FC = () => {
   const activeCategorySlug = searchParams.get('category') || 'all'
   const searchQuery = searchParams.get('search') || ''
 
+  const [productsList, setProductsList] = useState(() => getStoreProducts())
+
+  useEffect(() => {
+    const handleUpdate = () => setProductsList(getStoreProducts())
+    window.addEventListener('yourframies_products_updated', handleUpdate)
+    return () => window.removeEventListener('yourframies_products_updated', handleUpdate)
+  }, [])
+
   const [sortBy, setSortBy] = useState<'featured' | 'price-asc' | 'price-desc' | 'name'>('featured')
   const [selectedSize, setSelectedSize] = useState<string>('all')
 
   const filteredProducts = useMemo(() => {
-    return INITIAL_PRODUCTS.filter((product) => {
+    return productsList.filter((product) => {
       // Category Filter
       if (activeCategorySlug !== 'all') {
         const cat = CATEGORIES.find((c) => c.slug === activeCategorySlug)

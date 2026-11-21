@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import {
   Package,
   Plus,
@@ -10,8 +10,11 @@ import {
   Search,
   Upload,
   Image as ImageIcon,
+  Star,
+  X,
+  FileImage,
 } from 'lucide-react'
-import { INITIAL_PRODUCTS } from '../../data/products'
+import { getStoreProducts, saveStoreProducts } from '../../data/products'
 import { CATEGORIES } from '../../data/categories'
 import { formatINR } from '../../utils/formatters'
 import { Product } from '../../types'
@@ -19,13 +22,16 @@ import { useMedia } from '../../context/MediaContext'
 import { useAdminAuth } from '../../context/AdminAuthContext'
 
 export const ProductsView: React.FC = () => {
-  const { openMediaPicker } = useMedia()
+  const { openMediaPicker, uploadFile } = useMedia()
   const { logAuditAction } = useAdminAuth()
-  const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS)
+  const [products, setProducts] = useState<Product[]>(() => getStoreProducts())
   const [search, setSearch] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('ALL')
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [isCreating, setIsCreating] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Form State
   const [title, setTitle] = useState('')
@@ -35,9 +41,16 @@ export const ProductsView: React.FC = () => {
   const [basePrice, setBasePrice] = useState<number>(1499)
   const [comparePrice, setComparePrice] = useState<number>(2199)
   const [stockQuantity, setStockQuantity] = useState<number>(50)
-  const [imageUrl, setImageUrl] = useState('')
+  const [productImages, setProductImages] = useState<string[]>([])
+  const [manualUrl, setManualUrl] = useState('')
   const [isCustomizable, setIsCustomizable] = useState(true)
   const [isActive, setIsActive] = useState(true)
+
+  // Save to persistent storage whenever products change
+  const updateProductsState = (newProducts: Product[]) => {
+    setProducts(newProducts)
+    saveStoreProducts(newProducts)
+  }
 
   const filtered = products.filter((p) => {
     if (categoryFilter !== 'ALL' && p.categoryId !== categoryFilter) return false
@@ -57,7 +70,10 @@ export const ProductsView: React.FC = () => {
     setBasePrice(1299)
     setComparePrice(1899)
     setStockQuantity(50)
-    setImageUrl('https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=1000&q=85')
+    setProductImages([
+      'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=1000&q=85',
+    ])
+    setManualUrl('')
     setIsCustomizable(true)
     setIsActive(true)
     setIsCreating(true)
@@ -72,7 +88,8 @@ export const ProductsView: React.FC = () => {
     setBasePrice(prod.basePriceINR)
     setComparePrice(prod.compareAtPriceINR || 0)
     setStockQuantity(prod.stockQuantity)
-    setImageUrl(prod.images[0] || '')
+    setProductImages(prod.images && prod.images.length > 0 ? [...prod.images] : [])
+    setManualUrl('')
     setIsCustomizable(prod.isCustomizable)
     setIsActive(prod.isActive)
     setIsCreating(true)
@@ -85,44 +102,108 @@ export const ProductsView: React.FC = () => {
       title: `${prod.title} (Copy)`,
       slug: `${prod.slug}-copy-${Math.floor(100 + Math.random() * 900)}`,
     }
-    setProducts((prev) => [dup, ...prev])
+    const updated = [dup, ...products]
+    updateProductsState(updated)
     logAuditAction('PRODUCT_DUPLICATED', 'PRODUCT', dup.id, `Duplicated ${prod.title}`)
   }
 
   const handleDelete = (id: string) => {
     if (confirm('Delete this product permanently?')) {
       const target = products.find((p) => p.id === id)
-      setProducts((prev) => prev.filter((p) => p.id !== id))
+      const updated = products.filter((p) => p.id !== id)
+      updateProductsState(updated)
       logAuditAction('PRODUCT_DELETED', 'PRODUCT', id, `Deleted ${target?.title}`)
     }
+  }
+
+  // Handle local file uploads (multiple images supported)
+  const processFiles = async (files: FileList | File[]) => {
+    if (!files || files.length === 0) return
+    setIsUploading(true)
+
+    const newUrls: string[] = []
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i]
+      if (!file.type.startsWith('image/')) continue
+
+      try {
+        const item = await uploadFile(file, 'automotive', title || file.name)
+        newUrls.push(item.url)
+      } catch (err) {
+        console.error('Failed to upload file:', err)
+      }
+    }
+
+    if (newUrls.length > 0) {
+      setProductImages((prev) => [...prev, ...newUrls])
+    }
+    setIsUploading(false)
+  }
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      processFiles(e.target.files)
+    }
+  }
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    setIsDragging(false)
+    if (e.dataTransfer.files) {
+      processFiles(e.dataTransfer.files)
+    }
+  }
+
+  const handleAddManualUrl = () => {
+    if (manualUrl.trim()) {
+      setProductImages((prev) => [...prev, manualUrl.trim()])
+      setManualUrl('')
+    }
+  }
+
+  const handleSetPrimaryImage = (index: number) => {
+    setProductImages((prev) => {
+      const copy = [...prev]
+      const selected = copy.splice(index, 1)[0]
+      return [selected, ...copy]
+    })
+  }
+
+  const handleRemoveImage = (index: number) => {
+    setProductImages((prev) => prev.filter((_, i) => i !== index))
   }
 
   const handleSaveProduct = (e: React.FormEvent) => {
     e.preventDefault()
     if (!title.trim() || !slug.trim()) return
 
+    const finalImages =
+      productImages.length > 0
+        ? productImages
+        : ['https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=1000&q=85']
+
     if (editingProduct) {
       // Update
-      setProducts((prev) =>
-        prev.map((p) =>
-          p.id === editingProduct.id
-            ? {
-                ...p,
-                title,
-                slug,
-                categoryId,
-                description,
-                basePriceINR: Number(basePrice),
-                compareAtPriceINR: Number(comparePrice) || undefined,
-                stockQuantity: Number(stockQuantity),
-                images: [imageUrl, ...(p.images.slice(1) || [])],
-                isCustomizable,
-                isActive,
-              }
-            : p
-        )
+      const updated = products.map((p) =>
+        p.id === editingProduct.id
+          ? {
+              ...p,
+              title,
+              slug,
+              categoryId,
+              description,
+              basePriceINR: Number(basePrice),
+              compareAtPriceINR: Number(comparePrice) || undefined,
+              stockQuantity: Number(stockQuantity),
+              images: finalImages,
+              isCustomizable,
+              isActive,
+            }
+          : p
       )
-      logAuditAction('PRODUCT_UPDATED', 'PRODUCT', editingProduct.id, `Updated ${title}`)
+      updateProductsState(updated)
+      logAuditAction('PRODUCT_UPDATED', 'PRODUCT', editingProduct.id, `Updated ${title} with ${finalImages.length} images`)
     } else {
       // Create
       const newProd: Product = {
@@ -134,14 +215,15 @@ export const ProductsView: React.FC = () => {
         basePriceINR: Number(basePrice),
         compareAtPriceINR: Number(comparePrice) || undefined,
         stockQuantity: Number(stockQuantity),
-        images: [imageUrl],
+        images: finalImages,
         availableSizes: ['8x10', '12x18', '16x24', '20x30'],
         availableMouldings: ['Black Wood', 'White Minimalist', 'Natural Oak', 'Walnut'],
         isCustomizable,
         isActive,
       }
-      setProducts((prev) => [newProd, ...prev])
-      logAuditAction('PRODUCT_CREATED', 'PRODUCT', newProd.id, `Created ${title}`)
+      const updated = [newProd, ...products]
+      updateProductsState(updated)
+      logAuditAction('PRODUCT_CREATED', 'PRODUCT', newProd.id, `Created ${title} with ${finalImages.length} images`)
     }
 
     setIsCreating(false)
@@ -156,14 +238,14 @@ export const ProductsView: React.FC = () => {
           </span>
           <h2 className="text-xl font-bold text-white mt-1">Products & Artwork Inventory</h2>
           <p className="text-xs text-neutral-400">
-            Create, duplicate, update prices, manage stock, and toggle store availability.
+            Upload custom artwork images, update prices, manage inventory, and toggle store availability.
           </p>
         </div>
 
         <button
           type="button"
           onClick={handleStartCreate}
-          className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-neutral-950 text-xs font-bold uppercase tracking-wider rounded-lg flex items-center gap-1.5 shadow-md"
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold text-xs uppercase tracking-wider rounded-lg shadow-lg transition"
         >
           <Plus className="w-4 h-4" />
           <span>Add New Artwork</span>
@@ -171,24 +253,23 @@ export const ProductsView: React.FC = () => {
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-neutral-950/80 p-4 rounded-xl border border-neutral-800">
-        <div className="relative w-full sm:w-80">
-          <Search className="absolute left-3 top-2.5 w-4 h-4 text-neutral-500" />
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1">
+          <Search className="w-4 h-4 absolute left-3 top-3 text-neutral-500" />
           <input
             type="text"
+            placeholder="Search by title or slug..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search products by title or slug..."
-            className="w-full pl-9 pr-3 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-xs text-white outline-none focus:border-amber-500"
+            className="w-full pl-9 pr-4 py-2 bg-neutral-950 border border-neutral-800 rounded-lg text-xs text-white placeholder-neutral-500 outline-none focus:border-amber-500"
           />
         </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-          <span className="text-xs text-neutral-400 font-semibold">Category:</span>
+        <div className="flex items-center gap-2">
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="p-2 bg-neutral-900 border border-neutral-700 rounded-lg text-xs text-white outline-none"
+            className="px-3 py-2 bg-neutral-950 border border-neutral-800 rounded-lg text-xs text-neutral-300 outline-none"
           >
             <option value="ALL">All Categories</option>
             {CATEGORIES.map((c) => (
@@ -206,7 +287,7 @@ export const ProductsView: React.FC = () => {
           <table className="w-full text-left text-xs">
             <thead className="bg-neutral-900/80 uppercase tracking-wider text-[10px] text-neutral-400 font-bold border-b border-neutral-800">
               <tr>
-                <th className="py-3 px-4">Image</th>
+                <th className="py-3 px-4">Artwork</th>
                 <th className="py-3 px-4">Title & Slug</th>
                 <th className="py-3 px-4">Category</th>
                 <th className="py-3 px-4">Price / Discount</th>
@@ -219,11 +300,18 @@ export const ProductsView: React.FC = () => {
               {filtered.map((prod) => (
                 <tr key={prod.id} className="hover:bg-neutral-900/40">
                   <td className="py-3 px-4">
-                    <img
-                      src={prod.images[0]}
-                      alt=""
-                      className="w-12 h-14 object-cover rounded border border-neutral-800"
-                    />
+                    <div className="relative group w-12 h-14">
+                      <img
+                        src={prod.images[0] || 'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=400&q=80'}
+                        alt=""
+                        className="w-12 h-14 object-cover rounded border border-neutral-800"
+                      />
+                      {prod.images.length > 1 && (
+                        <span className="absolute bottom-0 right-0 bg-neutral-950/90 text-amber-400 text-[9px] px-1 font-mono rounded-tl border-t border-l border-neutral-800">
+                          +{prod.images.length - 1}
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="py-3 px-4">
                     <p className="font-bold text-white">{prod.title}</p>
@@ -309,12 +397,148 @@ export const ProductsView: React.FC = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
           <form
             onSubmit={handleSaveProduct}
-            className="bg-neutral-900 border border-neutral-800 rounded-2xl max-w-2xl w-full p-6 space-y-4 text-xs shadow-2xl my-8"
+            className="bg-neutral-900 border border-neutral-800 rounded-2xl max-w-2xl w-full p-6 space-y-5 text-xs shadow-2xl my-8"
           >
-            <h3 className="text-sm font-bold uppercase tracking-wider text-white">
-              {editingProduct ? 'Edit Product Artwork' : 'Add New Product Artwork'}
-            </h3>
+            <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-white flex items-center gap-2">
+                <Package className="w-4 h-4 text-amber-500" />
+                <span>{editingProduct ? 'Edit Product Artwork' : 'Add New Product Artwork'}</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsCreating(false)}
+                className="text-neutral-400 hover:text-white p-1"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
 
+            {/* Direct Image Upload Box */}
+            <div className="space-y-3 bg-neutral-950 p-4 rounded-xl border border-neutral-800">
+              <div className="flex items-center justify-between">
+                <label className="text-neutral-200 font-bold flex items-center gap-2">
+                  <ImageIcon className="w-4 h-4 text-amber-400" />
+                  <span>Product Artwork Images ({productImages.length} uploaded)</span>
+                </label>
+                <span className="text-[11px] text-neutral-400">First image is primary cover</span>
+              </div>
+
+              {/* Drag and Drop Zone */}
+              <div
+                onDragOver={(e) => {
+                  e.preventDefault()
+                  setIsDragging(true)
+                }}
+                onDragLeave={() => setIsDragging(false)}
+                onDrop={handleDrop}
+                onClick={() => fileInputRef.current?.click()}
+                className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition ${
+                  isDragging
+                    ? 'border-amber-400 bg-amber-400/10'
+                    : 'border-neutral-800 hover:border-neutral-600 bg-neutral-900/50'
+                }`}
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  accept="image/png,image/jpeg,image/webp,image/jpg"
+                  onChange={handleFileInputChange}
+                  className="hidden"
+                />
+                <div className="flex flex-col items-center justify-center gap-2">
+                  <div className="p-3 rounded-full bg-neutral-800 text-amber-400">
+                    <Upload className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-white text-xs">
+                      {isUploading
+                        ? 'Uploading & Optimizing image...'
+                        : 'Click to upload your image from computer, or drag and drop'}
+                    </p>
+                    <p className="text-[11px] text-neutral-400 mt-0.5">
+                      Supports JPG, PNG, WEBP high-resolution photographs
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Uploaded Thumbnails Preview */}
+              {productImages.length > 0 && (
+                <div className="space-y-2 pt-2">
+                  <p className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">
+                    Gallery Previews:
+                  </p>
+                  <div className="grid grid-cols-4 sm:grid-cols-6 gap-3">
+                    {productImages.map((url, idx) => (
+                      <div
+                        key={idx}
+                        className={`relative aspect-[3/4] rounded-lg overflow-hidden border-2 group ${
+                          idx === 0 ? 'border-amber-400 shadow-md ring-1 ring-amber-400/50' : 'border-neutral-800'
+                        }`}
+                      >
+                        <img src={url} alt="" className="w-full h-full object-cover" />
+
+                        {idx === 0 && (
+                          <span className="absolute top-1 left-1 bg-amber-400 text-neutral-950 text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5 shadow">
+                            <Star className="w-2.5 h-2.5 fill-neutral-950" /> Cover
+                          </span>
+                        )}
+
+                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1 p-1">
+                          {idx !== 0 && (
+                            <button
+                              type="button"
+                              onClick={() => handleSetPrimaryImage(idx)}
+                              className="px-1.5 py-0.5 bg-amber-500 text-neutral-950 text-[9px] font-bold rounded"
+                              title="Set as primary cover"
+                            >
+                              Make Cover
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveImage(idx)}
+                            className="p-1 bg-red-600 hover:bg-red-500 text-white rounded text-[10px]"
+                            title="Remove image"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Alternative: Media Library Picker or Direct URL */}
+              <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t border-neutral-800/80">
+                <input
+                  type="text"
+                  placeholder="Or paste external image URL..."
+                  value={manualUrl}
+                  onChange={(e) => setManualUrl(e.target.value)}
+                  className="flex-1 p-2 bg-neutral-900 border border-neutral-800 rounded-lg text-white font-mono text-[11px] outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={handleAddManualUrl}
+                  className="px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 font-semibold rounded-lg"
+                >
+                  Add URL
+                </button>
+                <button
+                  type="button"
+                  onClick={() => openMediaPicker((url) => setProductImages((prev) => [...prev, url]))}
+                  className="px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-amber-400 font-semibold rounded-lg flex items-center justify-center gap-1.5"
+                >
+                  <FileImage className="w-3.5 h-3.5" />
+                  Media Library
+                </button>
+              </div>
+            </div>
+
+            {/* Title & Slug */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-neutral-400 font-semibold mb-1">Product Title</label>
@@ -328,7 +552,7 @@ export const ProductsView: React.FC = () => {
                       setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''))
                     }
                   }}
-                  className="w-full p-2.5 bg-neutral-950 border border-neutral-800 rounded-lg text-white outline-none"
+                  className="w-full p-2.5 bg-neutral-950 border border-neutral-800 rounded-lg text-white outline-none focus:border-amber-500"
                 />
               </div>
 
@@ -339,18 +563,19 @@ export const ProductsView: React.FC = () => {
                   required
                   value={slug}
                   onChange={(e) => setSlug(e.target.value)}
-                  className="w-full p-2.5 bg-neutral-950 border border-neutral-800 rounded-lg text-white font-mono outline-none"
+                  className="w-full p-2.5 bg-neutral-950 border border-neutral-800 rounded-lg text-white font-mono outline-none focus:border-amber-500"
                 />
               </div>
             </div>
 
+            {/* Category & Stock */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-neutral-400 font-semibold mb-1">Category</label>
                 <select
                   value={categoryId}
                   onChange={(e) => setCategoryId(e.target.value)}
-                  className="w-full p-2.5 bg-neutral-950 border border-neutral-800 rounded-lg text-white outline-none"
+                  className="w-full p-2.5 bg-neutral-950 border border-neutral-800 rounded-lg text-white outline-none focus:border-amber-500"
                 >
                   {CATEGORIES.map((c) => (
                     <option key={c.id} value={c.id}>
@@ -367,11 +592,12 @@ export const ProductsView: React.FC = () => {
                   required
                   value={stockQuantity}
                   onChange={(e) => setStockQuantity(Number(e.target.value))}
-                  className="w-full p-2.5 bg-neutral-950 border border-neutral-800 rounded-lg text-white outline-none"
+                  className="w-full p-2.5 bg-neutral-950 border border-neutral-800 rounded-lg text-white outline-none focus:border-amber-500"
                 />
               </div>
             </div>
 
+            {/* Pricing */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-neutral-400 font-semibold mb-1">Base Price (INR)</label>
@@ -380,7 +606,7 @@ export const ProductsView: React.FC = () => {
                   required
                   value={basePrice}
                   onChange={(e) => setBasePrice(Number(e.target.value))}
-                  className="w-full p-2.5 bg-neutral-950 border border-neutral-800 rounded-lg text-white outline-none"
+                  className="w-full p-2.5 bg-neutral-950 border border-neutral-800 rounded-lg text-white outline-none focus:border-amber-500"
                 />
               </div>
 
@@ -392,50 +618,32 @@ export const ProductsView: React.FC = () => {
                   type="number"
                   value={comparePrice}
                   onChange={(e) => setComparePrice(Number(e.target.value))}
-                  className="w-full p-2.5 bg-neutral-950 border border-neutral-800 rounded-lg text-white outline-none"
+                  className="w-full p-2.5 bg-neutral-950 border border-neutral-800 rounded-lg text-white outline-none focus:border-amber-500"
                 />
               </div>
             </div>
 
-            <div>
-              <label className="block text-neutral-400 font-semibold mb-1">Primary Image URL</label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  required
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                  className="flex-1 p-2.5 bg-neutral-950 border border-neutral-800 rounded-lg text-white outline-none font-mono text-[11px]"
-                />
-                <button
-                  type="button"
-                  onClick={() => openMediaPicker((url) => setImageUrl(url))}
-                  className="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-amber-400 font-bold rounded-lg"
-                >
-                  Media Library
-                </button>
-              </div>
-            </div>
-
+            {/* Description */}
             <div>
               <label className="block text-neutral-400 font-semibold mb-1">Description</label>
               <textarea
                 rows={3}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full p-2.5 bg-neutral-950 border border-neutral-800 rounded-lg text-white outline-none"
+                className="w-full p-2.5 bg-neutral-950 border border-neutral-800 rounded-lg text-white outline-none focus:border-amber-500"
               />
             </div>
 
-            <div className="flex items-center gap-6 pt-2">
+            {/* Checkboxes */}
+            <div className="flex items-center gap-6 pt-1">
               <label className="flex items-center gap-2 cursor-pointer text-neutral-300">
                 <input
                   type="checkbox"
                   checked={isCustomizable}
                   onChange={(e) => setIsCustomizable(e.target.checked)}
-                  className="accent-amber-500"
+                  className="accent-amber-500 w-4 h-4"
                 />
-                <span>Enable Bespoke Customizer</span>
+                <span>Enable Bespoke Customizer & Photo Uploads</span>
               </label>
 
               <label className="flex items-center gap-2 cursor-pointer text-neutral-300">
@@ -443,7 +651,7 @@ export const ProductsView: React.FC = () => {
                   type="checkbox"
                   checked={isActive}
                   onChange={(e) => setIsActive(e.target.checked)}
-                  className="accent-amber-500"
+                  className="accent-amber-500 w-4 h-4"
                 />
                 <span>Published to Storefront</span>
               </label>
@@ -453,13 +661,13 @@ export const ProductsView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsCreating(false)}
-                className="px-4 py-2 border border-neutral-700 text-neutral-300 rounded-lg"
+                className="px-4 py-2 border border-neutral-700 hover:border-neutral-500 text-neutral-300 rounded-lg transition"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-5 py-2 bg-amber-500 text-neutral-950 font-bold uppercase tracking-wider rounded-lg"
+                className="px-6 py-2 bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold uppercase tracking-wider rounded-lg transition"
               >
                 Save Product
               </button>

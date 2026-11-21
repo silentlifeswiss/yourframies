@@ -15,11 +15,9 @@ import {
 import { useCart } from '../../context/CartContext'
 import { useWishlist } from '../../context/WishlistContext'
 import { useAuth } from '../../context/AuthContext'
-import { useSiteContent } from '../../context/SiteContentContext'
 import { INITIAL_PRODUCTS } from '../../data/products'
 
 export const Navbar: React.FC = () => {
-  const { settings } = useSiteContent()
   const { itemCount, setIsCartOpen } = useCart()
   const { wishlistCount } = useWishlist()
   const { user, isAuthenticated, isAdmin, logout } = useAuth()
@@ -91,10 +89,10 @@ export const Navbar: React.FC = () => {
             <div className="flex-1 text-center lg:flex-initial">
               <Link to="/" className="inline-flex flex-col items-center group">
                 <span className="font-serif text-2xl sm:text-3xl font-light tracking-widest text-neutral-900 uppercase">
-                  {settings.logoText || 'Your Framies'}
+                  Your Framies
                 </span>
                 <span className="text-[9px] tracking-[0.3em] uppercase text-neutral-600 font-sans mt-0.5">
-                  {settings.tagline || 'Artisanal Wall Framing'}
+                  Artisanal Wall Framing
                 </span>
               </Link>
             </div>
