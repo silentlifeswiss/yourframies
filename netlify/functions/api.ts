@@ -501,7 +501,7 @@ export const handler: Handler = async (event: HandlerEvent, _context?: HandlerCo
       return makeResponse(200, {
         success: true,
         data: rzpResult.data,
-        keyId: process.env.RAZORPAY_KEY_ID || 'rzp_test_YourKeyIdHere',
+        keyId: payments.getKeyId(),
       })
     }
 

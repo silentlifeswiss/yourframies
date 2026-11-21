@@ -7,6 +7,9 @@
   NODE_VERSION = "26"
   DELHIVERY_API_TOKEN = "a83902984b7d61ecb111ccc79229c7a1e1f3e472"
   DELHIVERY_MODE = "production"
+  RAZORPAY_KEY_ID = "rzp_test_U2mMXjXIzuTfCg"
+  RAZORPAY_KEY_SECRET = "aGiMWkjge3MzDUj7JCfKqOA0"
+  VITE_RAZORPAY_KEY_ID = "rzp_test_U2mMXjXIzuTfCg"
 
 # Route API calls to Netlify Serverless Functions
 [[redirects]]
