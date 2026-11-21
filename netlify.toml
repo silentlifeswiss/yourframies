@@ -9,7 +9,7 @@
 # Route API calls to Netlify Serverless Functions
 [[redirects]]
   from = "/api/*"
-  to = "/.netlify/functions/:splat"
+  to = "/.netlify/functions/api/:splat"
   status = 200
 
 # Single Page Application (SPA) Client Routing
