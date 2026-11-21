@@ -21,6 +21,7 @@ coverage
 .env.production
 .env.development
 !.env.example
+.server_datastore.json
 
 # Editor and OS
 .vscode/*

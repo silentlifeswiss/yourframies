@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { Order, OrderStatus } from '../types'
+import { api } from '../services/api'
 
 interface OrderContextType {
   orders: Order[]
@@ -106,6 +107,24 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, [orders])
 
+  // Sync with backend if admin token is present
+  useEffect(() => {
+    const syncBackendOrders = async () => {
+      try {
+        const token = sessionStorage.getItem('yourframies_admin_jwt')
+        if (token) {
+          const res = await api.adminGetOrders()
+          if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+            setOrders(res.data)
+          }
+        }
+      } catch {
+        // Fallback to local
+      }
+    }
+    syncBackendOrders()
+  }, [])
+
   const createOrder = (orderData: Omit<Order, 'id' | 'orderNumber' | 'createdAt'>): Order => {
     const randomSuffix = Math.floor(1000 + Math.random() * 9000)
     const newOrder: Order = {
@@ -143,6 +162,16 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         return o
       })
     )
+
+    // Sync with backend
+    try {
+      api.adminUpdateOrderStatus(orderNumber, status, {
+        awbCode,
+        courierPartner: courier,
+      }).catch(() => {})
+    } catch {
+      // Ignore
+    }
   }
 
   const userOrders = (userId?: string) => {

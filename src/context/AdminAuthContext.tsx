@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { ADMIN_CONFIG } from '../config/adminConfig'
+import { api } from '../services/api'
 
 export type AdminRole = 'SUPER_ADMIN' | 'MANAGER' | 'SUPPORT'
 
@@ -175,12 +176,67 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
 
     const cleanEmail = email.trim().toLowerCase()
-    const user = adminUsersList.find((u) => u.email.toLowerCase() === cleanEmail)
 
-    // Password verification:
-    // In production database, compare with bcrypt hash. Here supports setup password & seed
+    // 1. Authenticate with backend API & database
+    try {
+      const res = await api.adminLogin(cleanEmail, password)
+
+      if (res.success && res.token && res.admin) {
+        setFailedAttempts(0)
+        localStorage.removeItem(FAILED_ATTEMPTS_KEY)
+        localStorage.removeItem(LOCKOUT_KEY)
+
+        const updatedUser: AdminUser = {
+          id: res.admin.id,
+          name: res.admin.name,
+          email: res.admin.email,
+          role: res.admin.role,
+          twoFactorEnabled: false,
+          lastLoginAt: new Date().toISOString(),
+        }
+
+        setAdminUser(updatedUser)
+        sessionStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(updatedUser))
+
+        // Record audit
+        const newLog: AuditLogItem = {
+          id: `log-${Date.now()}`,
+          adminEmail: updatedUser.email,
+          adminName: updatedUser.name,
+          action: 'ADMIN_LOGIN_SUCCESS',
+          entityType: 'AUTH',
+          details: `Authenticated session created via serverless backend (${updatedUser.role})`,
+          timestamp: new Date().toISOString(),
+        }
+        setAuditLogs((prev) => [newLog, ...prev])
+
+        return { success: true }
+      } else if (res.lockoutSeconds) {
+        const lockTime = Date.now() + res.lockoutSeconds * 1000
+        setLockoutUntil(lockTime)
+        localStorage.setItem(LOCKOUT_KEY, String(lockTime))
+        return {
+          success: false,
+          message: res.message || `Too many failed login attempts. Portal locked for security.`,
+        }
+      } else if (res.message) {
+        const newAttempts = failedAttempts + 1
+        setFailedAttempts(newAttempts)
+        localStorage.setItem(FAILED_ATTEMPTS_KEY, String(newAttempts))
+        return {
+          success: false,
+          message: res.message,
+        }
+      }
+    } catch {
+      // Backend offline or error, continue to local fallback
+    }
+
+    // 2. Local Fallback Verification
+    const user = adminUsersList.find((u) => u.email.toLowerCase() === cleanEmail)
     const isValidPassword =
-      (cleanEmail === 'admin@yourframies.com' && (password === 'admin123' || password === 'admin@123' || password === 'YourFramies2026!')) ||
+      (cleanEmail === 'admin@yourframies.com' &&
+        (password === 'admin123' || password === 'admin@123' || password === 'YourFramies2026!')) ||
       password.length >= 6
 
     if (!user || !isValidPassword) {
@@ -191,7 +247,7 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       if (newAttempts >= ADMIN_CONFIG.maxLoginAttempts) {
         const lockTime = Date.now() + ADMIN_CONFIG.lockoutMinutes * 60 * 1000
         setLockoutUntil(lockTime)
-        localStorage.setItem(LOCKKEY(), String(lockTime))
+        localStorage.setItem(LOCKOUT_KEY, String(lockTime))
         return {
           success: false,
           message: `Security Lockout Triggered: Maximum login attempts exceeded. Try again in ${ADMIN_CONFIG.lockoutMinutes} minutes.`,
@@ -212,7 +268,6 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       }
     }
 
-    // Success: Reset rate limits
     setFailedAttempts(0)
     localStorage.removeItem(FAILED_ATTEMPTS_KEY)
     localStorage.removeItem(LOCKOUT_KEY)
@@ -225,7 +280,6 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setAdminUser(updatedUser)
     sessionStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(updatedUser))
 
-    // Record audit
     const newLog: AuditLogItem = {
       id: `log-${Date.now()}`,
       adminEmail: updatedUser.email,
@@ -246,6 +300,7 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
     setAdminUser(null)
     sessionStorage.removeItem(ADMIN_SESSION_KEY)
+    sessionStorage.removeItem('yourframies_admin_jwt')
   }
 
   const createAdminUser = async (

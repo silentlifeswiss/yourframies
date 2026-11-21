@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
+import { api } from '../services/api'
 
 export interface HomepageSection {
   id: string
@@ -215,6 +216,27 @@ export const SiteContentProvider: React.FC<{ children: React.ReactNode }> = ({ c
     }
   }, [draftSettings, draftSections, publishedSettings, publishedSections])
 
+  // Sync live published content from backend database
+  useEffect(() => {
+    const fetchLiveContent = async () => {
+      try {
+        const [settingsRes, homepageRes] = await Promise.all([
+          api.getSiteSettings(),
+          api.getHomepageContent(),
+        ])
+        if (settingsRes.success && settingsRes.data) {
+          setPublishedSettings((prev) => ({ ...prev, ...settingsRes.data }))
+        }
+        if (homepageRes.success && Array.isArray(homepageRes.data) && homepageRes.data.length > 0) {
+          setPublishedSections(homepageRes.data)
+        }
+      } catch {
+        // Fallback to local
+      }
+    }
+    fetchLiveContent()
+  }, [])
+
   const updateSettings = (newSettings: Partial<SiteSettings>) => {
     setDraftSettings((prev) => ({ ...prev, ...newSettings }))
   }
@@ -265,6 +287,12 @@ export const SiteContentProvider: React.FC<{ children: React.ReactNode }> = ({ c
       setPublishedSettings(draftSettings)
       setPublishedSections(draftSections)
       setHasUnpublishedChanges(false)
+
+      // Sync to backend database
+      api.adminUpdateDraftSections(draftSections)
+        .then(() => api.adminPublishHomepage())
+        .catch(() => {})
+      api.adminUpdateSettings(draftSettings).catch(() => {})
     } catch {
       // Ignore
     }
