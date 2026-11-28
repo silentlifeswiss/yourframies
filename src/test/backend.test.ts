@@ -139,6 +139,70 @@ describe('Your Framies - Backend Serverless Architecture & APIs', () => {
     expect(delRes.statusCode).toBe(200)
   })
 
+  it('Admin can create, update, and delete products (including data URL images)', async () => {
+    const loginRes: any = await handler(
+      createEvent('/admin/login', 'POST', {
+        email: 'admin@yourframies.com',
+        password: 'YourFramies2026!',
+      }),
+      {} as any
+    )
+    const token = JSON.parse(loginRes.body).token
+
+    const createRes: any = await handler(
+      createEvent(
+        '/admin/products',
+        'POST',
+        {
+          title: 'Nissan Skyline GT-R R34 Frame',
+          slug: 'nissan-skyline-r34-frame',
+          categoryId: 'cat-car-frames',
+          description: 'Clean A4 print of the R34 GT-R.',
+          basePriceINR: 1399,
+          images: ['data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2w=='],
+          availableSizes: ['A4'],
+          availableMouldings: ['Deep Black', 'Minimalist White'],
+          stockQuantity: 25,
+        },
+        { authorization: `Bearer ${token}` }
+      ),
+      {} as any
+    )
+    expect(createRes.statusCode).toBe(201)
+    const created = JSON.parse(createRes.body).data
+    expect(created.title).toBe('Nissan Skyline GT-R R34 Frame')
+
+    const updateRes: any = await handler(
+      createEvent(
+        `/admin/products/${created.id}`,
+        'PUT',
+        {
+          title: 'Nissan Skyline GT-R R34 Night Edition',
+          slug: 'nissan-skyline-r34-frame',
+          categoryId: 'cat-car-frames',
+          description: 'Updated A4 description.',
+          basePriceINR: 1499,
+          images: ['data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2w=='],
+          availableSizes: ['A4'],
+          availableMouldings: ['Deep Black', 'Minimalist White'],
+          stockQuantity: 20,
+        },
+        { authorization: `Bearer ${token}` }
+      ),
+      {} as any
+    )
+    expect(updateRes.statusCode).toBe(200)
+    expect(JSON.parse(updateRes.body).data.basePriceINR).toBe(1499)
+
+    const delRes: any = await handler(
+      createEvent(`/admin/products/${created.id}`, 'DELETE', undefined, {
+        authorization: `Bearer ${token}`,
+      }),
+      {} as any
+    )
+    expect(delRes.statusCode).toBe(200)
+  })
+
   it('GET /products/:slug fetches single product or returns 404 for unknown slug', async () => {
     const validEvent = createEvent('/products/porsche-911-gt3-rs-neon-night-frame')
     const validRes: any = await handler(validEvent, {} as any)

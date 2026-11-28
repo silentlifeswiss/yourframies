@@ -77,15 +77,15 @@ export const ProductSchema = z.object({
   categoryId: z.string().optional(),
   title: z.string().min(2).max(255),
   slug: z.string().min(2).max(255),
-  description: z.string().max(2000),
+  description: z.string().max(2000).default(''),
   basePriceINR: z.number().positive(),
-  compareAtPriceINR: z.number().positive().optional(),
-  images: z.array(z.string().url()).min(1, 'At least one image is required'),
-  availableSizes: z.array(z.string()).default(['8x10', '12x18', '16x24', '20x30']),
-  availableMouldings: z.array(z.string()).default(['Black Wood', 'White Minimalist', 'Natural Oak', 'Walnut']),
+  compareAtPriceINR: z.number().nonnegative().optional().nullable(),
+  images: z.array(z.string().min(1)).min(1, 'At least one image is required'),
+  availableSizes: z.array(z.string()).default(['A4']),
+  availableMouldings: z.array(z.string()).default(['Deep Black', 'Minimalist White']),
   isCustomizable: z.boolean().default(true),
   isActive: z.boolean().default(true),
-  stockQuantity: z.number().int().nonnegative().default(50),
+  stockQuantity: z.number().int().nonnegative().default(25),
 })
 
 // Category Schema

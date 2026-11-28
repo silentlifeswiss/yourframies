@@ -84,22 +84,22 @@ export const OrderTrackingPage: React.FC = () => {
   )
 
   const trackingSteps = [
-    { label: 'Order Confirmed', desc: 'Received & routed to framing atelier studio', done: true },
+    { label: 'Order Confirmed', desc: 'Order received and verified', done: true },
     {
-      label: 'Archival Printing',
-      desc: '12-color ultra-chrome giclée print on 300 GSM cotton rag',
+      label: 'Print Preparation',
+      desc: 'High-resolution artwork & photo print prepared for A4 framing',
       done: Boolean(searchedOrder && isPrinting),
     },
     {
-      label: 'Moulding & Assembly',
-      desc: 'Solid hardwood custom joinery with anti-glare glazing & acid-free matting',
+      label: 'Framing & Quality Check',
+      desc: 'Fitted in A4 Deep Black or Minimalist White frame and packed',
       done: Boolean(searchedOrder && isFraming),
     },
     {
-      label: 'Shipped via Courier Partner',
+      label: 'Shipped',
       desc: searchedOrder?.awbCode
-        ? `Dispatched with protective casing. AWB: ${searchedOrder.awbCode}`
-        : 'Dispatched with protective shockproof multi-layer casing',
+        ? `Dispatched with protective packaging. AWB: ${searchedOrder.awbCode}`
+        : 'Dispatched with protective packaging',
       done: Boolean(searchedOrder && isShipped),
     },
     {

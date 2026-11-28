@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { getStoreProducts } from '../../data/products'
+import { getStoreProducts, syncProductsFromApi } from '../../data/products'
 import { ProductCard } from '../product/ProductCard'
 
 export const ProductCarousel: React.FC = () => {
@@ -9,24 +9,28 @@ export const ProductCarousel: React.FC = () => {
   useEffect(() => {
     const handleUpdate = () => setProductsList(getStoreProducts())
     window.addEventListener('yourframies_products_updated', handleUpdate)
+    syncProductsFromApi().then(setProductsList)
     return () => window.removeEventListener('yourframies_products_updated', handleUpdate)
   }, [])
 
+  const activeProducts = productsList.filter((p) => p.isActive !== false)
   const productsToShow =
     activeTab === 'bestsellers'
-      ? productsList.slice(0, 4)
-      : productsList.slice(4, 8)
+      ? activeProducts.slice(0, 4)
+      : activeProducts.slice(4, 8).length > 0
+      ? activeProducts.slice(4, 8)
+      : activeProducts.slice(0, 4)
 
   return (
-    <section className="py-12 sm:py-20 bg-white border-b border-neutral-200">
+    <section className="py-10 sm:py-16 bg-white border-b border-neutral-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 sm:mb-10 gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 sm:mb-10 gap-4">
           <div>
-            <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-neutral-400">
+            <span className="text-[11px] font-bold uppercase tracking-widest text-neutral-500">
               Popular Picks
             </span>
             <h2 className="font-serif text-2xl sm:text-4xl text-neutral-900 mt-1">
-              Curated for Modern Spaces
+              Popular A4 Frames
             </h2>
           </div>
 

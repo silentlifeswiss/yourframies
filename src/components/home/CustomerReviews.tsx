@@ -3,6 +3,8 @@ import { Star, CheckCircle } from 'lucide-react'
 import { REVIEWS } from '../../data/reviews'
 
 export const CustomerReviews: React.FC = () => {
+  if (REVIEWS.length === 0) return null
+
   return (
     <section className="py-12 sm:py-20 bg-white border-b border-neutral-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

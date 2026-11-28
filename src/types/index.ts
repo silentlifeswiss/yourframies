@@ -51,7 +51,7 @@ export interface FrameCustomization {
   moulding: 'Deep Black' | 'Minimalist White' | 'Black Wood' | 'White Minimalist' | 'Natural Oak' | 'Walnut' | 'Gold Leaf'
   matColor?: 'None' | 'Pure White' | 'Off-White' | 'Jet Black'
   matWidthInches?: number
-  glassType: 'Acrylic Glaze' | 'Anti-Glare UV Glass'
+  glassType?: 'Acrylic Glaze' | 'Anti-Glare UV Glass'
   orientation?: 'portrait' | 'landscape' | 'square'
 }
 

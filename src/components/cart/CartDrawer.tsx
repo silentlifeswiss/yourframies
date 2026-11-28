@@ -134,12 +134,9 @@ export const CartDrawer: React.FC = () => {
                         </button>
                       </div>
 
-                      <div className="text-[11px] text-neutral-500 mt-1 space-y-0.5">
+                      <div className="text-[11px] text-neutral-600 mt-1 space-y-0.5">
                         <p>
-                          Size: <strong className="text-neutral-700">{item.customization.frameSize === 'A4' ? 'A4' : `${item.customization.frameSize}"`}</strong> • Timber: <strong className="text-neutral-700">{item.customization.moulding}</strong>
-                        </p>
-                        <p>
-                          Mat: <span className="text-neutral-700">{item.customization.matColor || 'None'}</span> • Glass: <span className="text-neutral-700">{item.customization.glassType}</span>
+                          Size: <strong className="text-neutral-800">{item.customization.frameSize === 'A4' ? 'A4' : `${item.customization.frameSize}"`}</strong> • Color: <strong className="text-neutral-800">{item.customization.moulding}</strong>
                         </p>
                       </div>
                     </div>

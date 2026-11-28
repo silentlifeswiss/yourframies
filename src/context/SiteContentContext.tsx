@@ -45,16 +45,16 @@ export interface SiteSettings {
 
 export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   brandName: 'Your Framies',
-  tagline: 'Artisanal Wall Framing',
+  tagline: 'A4 Wall Art & Photo Frames',
   logoText: 'Your Framies',
   announcementText:
-    '✨ Handcrafted Museum-Quality Frames • Free Express Shipping on Orders Above ₹999 • Use Code WELCOME10 for 10% Off',
+    'A4 Frames in Deep Black & Minimalist White • Free Shipping Above ₹999 • Use Code WELCOME10 for 10% Off',
   announcementActive: true,
-  contactEmail: 'support@yourframies.com',
-  contactPhone: '+91 98765 43210',
-  workshopAddress: 'Outer Ring Road, Bellandur, Bengaluru, Karnataka 560103',
+  contactEmail: 'silentlifeswiss@gmail.com',
+  contactPhone: '+91 79009 43025',
+  workshopAddress: 'New Delhi, India',
   instagramHandle: '@yourframies',
-  whatsappNumber: '+919876543210',
+  whatsappNumber: '+917900943025',
   accentColor: '#171717',
   currencySymbol: '₹',
   freeShippingThreshold: 999,
@@ -66,23 +66,23 @@ export const DEFAULT_HOMEPAGE_SECTIONS: HomepageSection[] = [
   {
     id: 'sec-hero',
     type: 'hero',
-    title: 'Artisanal Frames. Timeless Preservation.',
+    title: 'A4 Wall Art & Custom Photo Frames.',
     subtitle:
-      'Bespoke solid wood framing for automotive photography, contemporary minimalist art, and your most treasured personal memories. Handcrafted with museum-grade precision in India.',
+      'Ready-to-hang A4 frames featuring iconic supercar photography, clean botanical prints, and your own personal memories — in Deep Black or Minimalist White.',
     isActive: true,
     backgroundStyle: 'neutral-900',
     order: 0,
     imageUrl:
-      'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=2000&q=85',
+      'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=1400&q=80',
     ctaText: 'Explore Collections',
     ctaLink: '/shop',
-    badgeText: "India's Premier Framing Atelier",
+    badgeText: 'Standard A4 Frames • Black & White',
   },
   {
     id: 'sec-categories',
     type: 'categories',
     title: 'Shop by Category',
-    subtitle: 'Explore our specialized frame and artwork collections',
+    subtitle: 'Car frames, minimalist prints, and personalised photo gifts',
     isActive: true,
     backgroundStyle: 'neutral-50',
     order: 1,
@@ -90,8 +90,8 @@ export const DEFAULT_HOMEPAGE_SECTIONS: HomepageSection[] = [
   {
     id: 'sec-bestsellers',
     type: 'bestsellers',
-    title: 'Curated for Modern Spaces',
-    subtitle: 'Popular automotive legends and serene aesthetic studies',
+    title: 'Popular A4 Frames',
+    subtitle: 'Automotive legends, calm interiors, and custom photo keepsakes',
     isActive: true,
     backgroundStyle: 'white',
     order: 2,
@@ -99,9 +99,9 @@ export const DEFAULT_HOMEPAGE_SECTIONS: HomepageSection[] = [
   {
     id: 'sec-customizer',
     type: 'customizer_banner',
-    title: 'Customize Your Own Frame Live',
+    title: 'Frame Your Own Photo Live',
     subtitle:
-      'Upload personal photos, choose from 5 handcrafted hardwood mouldings, custom matting and museum-grade anti-glare glass.',
+      'Upload your photo and preview how it looks in our A4 Deep Black or Minimalist White frame before you order.',
     isActive: true,
     backgroundStyle: 'neutral-50',
     order: 3,
@@ -109,9 +109,9 @@ export const DEFAULT_HOMEPAGE_SECTIONS: HomepageSection[] = [
   {
     id: 'sec-why-us',
     type: 'why_choose_us',
-    title: 'Why Discerning Collectors Choose Us',
+    title: 'Built Clean. Ready to Hang.',
     subtitle:
-      'Every frame is assembled by master framers with meticulous attention to joint geometry, colour depth, and preservation.',
+      'Consistent A4 sizing, clean finishes, and safe doorstep delivery across India.',
     isActive: true,
     backgroundStyle: 'neutral-50',
     order: 4,
@@ -119,8 +119,8 @@ export const DEFAULT_HOMEPAGE_SECTIONS: HomepageSection[] = [
   {
     id: 'sec-instagram',
     type: 'instagram',
-    title: 'Follow Our Journey on Instagram',
-    subtitle: '#YourFramiesInTheWild',
+    title: 'Follow Us on Instagram',
+    subtitle: '#YourFramies',
     isActive: true,
     backgroundStyle: 'neutral-900',
     order: 5,
@@ -128,9 +128,9 @@ export const DEFAULT_HOMEPAGE_SECTIONS: HomepageSection[] = [
   {
     id: 'sec-newsletter',
     type: 'newsletter',
-    title: 'Receive ₹200 Off Your First Order',
+    title: 'Get ₹200 Off Your First Order',
     subtitle:
-      'Subscribe for early access to limited edition automotive prints, seasonal releases, and private studio promotions.',
+      'Sign up for new automotive frame drops and member offers.',
     isActive: true,
     backgroundStyle: 'neutral-50',
     order: 6,
@@ -160,12 +160,32 @@ const SECTIONS_STORAGE_KEY = 'yourframies_homepage_sections_published'
 const DRAFT_SECTIONS_STORAGE_KEY = 'yourframies_homepage_sections_draft'
 const DRAFT_SETTINGS_STORAGE_KEY = 'yourframies_site_settings_draft'
 
+function normalizeSettings(raw: Partial<SiteSettings>): SiteSettings {
+  const merged = { ...DEFAULT_SITE_SETTINGS, ...raw }
+  if (!raw.contactEmail || raw.contactEmail === 'support@yourframies.com') {
+    merged.contactEmail = DEFAULT_SITE_SETTINGS.contactEmail
+  }
+  if (!raw.contactPhone || raw.contactPhone === '+91 98765 43210') {
+    merged.contactPhone = DEFAULT_SITE_SETTINGS.contactPhone
+  }
+  if (!raw.whatsappNumber || raw.whatsappNumber === '+919876543210') {
+    merged.whatsappNumber = DEFAULT_SITE_SETTINGS.whatsappNumber
+  }
+  if (raw.announcementText?.includes('Museum-Quality Frames')) {
+    merged.announcementText = DEFAULT_SITE_SETTINGS.announcementText
+  }
+  if (raw.tagline === 'Artisanal Wall Framing') {
+    merged.tagline = DEFAULT_SITE_SETTINGS.tagline
+  }
+  return merged
+}
+
 export const SiteContentProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Published State
   const [publishedSettings, setPublishedSettings] = useState<SiteSettings>(() => {
     try {
       const stored = localStorage.getItem(SETTINGS_STORAGE_KEY)
-      return stored ? { ...DEFAULT_SITE_SETTINGS, ...JSON.parse(stored) } : DEFAULT_SITE_SETTINGS
+      return stored ? normalizeSettings(JSON.parse(stored)) : DEFAULT_SITE_SETTINGS
     } catch {
       return DEFAULT_SITE_SETTINGS
     }
@@ -174,9 +194,14 @@ export const SiteContentProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [publishedSections, setPublishedSections] = useState<HomepageSection[]>(() => {
     try {
       const stored = localStorage.getItem(SECTIONS_STORAGE_KEY)
-      return stored
-        ? JSON.parse(stored).filter((s: HomepageSection) => s.type !== 'reviews')
-        : DEFAULT_HOMEPAGE_SECTIONS
+      if (stored) {
+        const parsed = JSON.parse(stored).filter((s: HomepageSection) => s.type !== 'reviews')
+        if (parsed.some((s: HomepageSection) => s.subtitle?.includes('5 handcrafted hardwood'))) {
+          return DEFAULT_HOMEPAGE_SECTIONS
+        }
+        return parsed
+      }
+      return DEFAULT_HOMEPAGE_SECTIONS
     } catch {
       return DEFAULT_HOMEPAGE_SECTIONS
     }

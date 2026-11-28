@@ -1,8 +1,14 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { Mail, Phone, MapPin, ShieldCheck, RefreshCw, Truck } from 'lucide-react'
+import { Mail, Phone, ShieldCheck, RefreshCw, Truck } from 'lucide-react'
+import { useSiteContent } from '../../context/SiteContentContext'
 
 export const Footer: React.FC = () => {
+  const { settings } = useSiteContent()
+  const contactEmail = settings.contactEmail || 'silentlifeswiss@gmail.com'
+  const contactPhone = settings.contactPhone || '+91 79009 43025'
+  const telHref = `tel:${contactPhone.replace(/[^+\d]/g, '')}`
+
   return (
     <footer className="bg-neutral-950 text-neutral-400 text-xs border-t border-neutral-800 pb-20 lg:pb-0">
       {/* Value Badges Banner */}
@@ -14,10 +20,10 @@ export const Footer: React.FC = () => {
             </div>
             <div>
               <h4 className="text-sm font-semibold text-neutral-200 uppercase tracking-wider">
-                100% Solid Wood Craftsmanship
+                Standard A4 • Black & White
               </h4>
-              <p className="mt-1 text-neutral-500">
-                Sustainably sourced pinewood & teak moulding with archival cotton rag prints.
+              <p className="mt-1 text-neutral-400">
+                Clean A4 frames (21 × 29.7 cm) finished in Deep Black and Minimalist White.
               </p>
             </div>
           </div>
@@ -28,10 +34,10 @@ export const Footer: React.FC = () => {
             </div>
             <div>
               <h4 className="text-sm font-semibold text-neutral-200 uppercase tracking-wider">
-                Pan-India Safe Transit
+                Pan-India Express Shipping
               </h4>
-              <p className="mt-1 text-neutral-500">
-                Multi-layer protective bubble wrap & shatter-resistant museum acrylic glaze.
+              <p className="mt-1 text-neutral-400">
+                Packed with protective layers for safe delivery across India.
               </p>
             </div>
           </div>
@@ -42,10 +48,10 @@ export const Footer: React.FC = () => {
             </div>
             <div>
               <h4 className="text-sm font-semibold text-neutral-200 uppercase tracking-wider">
-                Zero-Risk Damage Guarantee
+                Transit Damage Replacement
               </h4>
-              <p className="mt-1 text-neutral-500">
-                Any transit damage? We send an instant, hassle-free replacement within 48 hours.
+              <p className="mt-1 text-neutral-400">
+                Damaged on arrival? Send us a photo within 48 hours for a free replacement.
               </p>
             </div>
           </div>
@@ -59,21 +65,21 @@ export const Footer: React.FC = () => {
           <span className="font-serif text-2xl tracking-widest text-neutral-100 uppercase">
             Your Framies
           </span>
-          <p className="text-neutral-500 max-w-sm leading-relaxed">
-            India's destination for contemporary automotive wall art, bespoke photo preservation, and studio-grade custom framing.
+          <p className="text-neutral-400 max-w-sm leading-relaxed text-xs sm:text-sm">
+            A4 framed automotive prints, minimalist wall art, and custom personal photo frames delivered across India.
           </p>
-          <div className="pt-2 text-neutral-400 space-y-2">
+          <div className="pt-2 text-neutral-300 space-y-2.5 text-xs">
             <p className="flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-neutral-500" />
-              <span>Studio & Workshop: Outer Ring Road, Bengaluru, Karnataka 560103</span>
+              <Mail className="w-4 h-4 text-neutral-400 shrink-0" />
+              <a href={`mailto:${contactEmail}`} className="hover:text-white transition-colors">
+                {contactEmail}
+              </a>
             </p>
             <p className="flex items-center gap-2">
-              <Mail className="w-4 h-4 text-neutral-500" />
-              <span>support@yourframies.com</span>
-            </p>
-            <p className="flex items-center gap-2">
-              <Phone className="w-4 h-4 text-neutral-500" />
-              <span>+91 98765 43210 (Mon-Sat, 10 AM - 7 PM IST)</span>
+              <Phone className="w-4 h-4 text-neutral-400 shrink-0" />
+              <a href={telHref} className="hover:text-white transition-colors">
+                {contactPhone} (Mon–Sat, 10 AM – 7 PM IST)
+              </a>
             </p>
           </div>
         </div>
@@ -184,8 +190,8 @@ export const Footer: React.FC = () => {
       {/* Bottom Bar: Payments & Copyright */}
       <div className="border-t border-neutral-900 py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-neutral-600">
-            &copy; {new Date().getFullYear()} Your Framies Pvt. Ltd. All rights reserved. Designed & hand-assembled in India.
+          <p className="text-neutral-500">
+            &copy; {new Date().getFullYear()} Your Framies. All rights reserved.
           </p>
           <div className="flex items-center gap-4 text-neutral-400">
             <span className="text-[11px] uppercase tracking-wider text-neutral-500">

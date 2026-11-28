@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react'
 import { FolderTree, Plus, Edit2, Trash2, ExternalLink, CheckCircle2, AlertCircle } from 'lucide-react'
 import { getStoreCategories, saveStoreCategories, Category } from '../../data/categories'
+import { getStoreProducts } from '../../data/products'
 import { useMedia } from '../../context/MediaContext'
 import { useAdminAuth } from '../../context/AdminAuthContext'
 import { api } from '../../services/api'
 
+const slugify = (val: string) =>
+  val.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+
 export const CategoriesView: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>(() => getStoreCategories())
+  const [productsCountMap, setProductsCountMap] = useState<Record<string, number>>({})
   const [isLoading, setIsLoading] = useState(false)
   const [saveSuccess, setSaveSuccess] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
@@ -20,8 +25,22 @@ export const CategoriesView: React.FC = () => {
   const [imageUrl, setImageUrl] = useState('')
   const [showModal, setShowModal] = useState(false)
 
-  // Sync latest categories from Neon DB on mount
+  // Compute live item counts & sync latest categories from backend
   useEffect(() => {
+    const recomputeCounts = () => {
+      const prods = getStoreProducts()
+      const counts: Record<string, number> = {}
+      prods.forEach((p) => {
+        if (p.categoryId) {
+          counts[p.categoryId] = (counts[p.categoryId] || 0) + 1
+        }
+      })
+      setProductsCountMap(counts)
+    }
+
+    recomputeCounts()
+    window.addEventListener('yourframies_products_updated', recomputeCounts)
+
     let isMounted = true
     const fetchLatest = async () => {
       try {
@@ -35,12 +54,15 @@ export const CategoriesView: React.FC = () => {
       }
     }
     fetchLatest()
+
     return () => {
       isMounted = false
+      window.removeEventListener('yourframies_products_updated', recomputeCounts)
     }
   }, [])
 
   const handleStartCreate = () => {
+    setErrorMsg('')
     setEditingCat(null)
     setName('')
     setSlug('')
@@ -50,6 +72,7 @@ export const CategoriesView: React.FC = () => {
   }
 
   const handleStartEdit = (cat: Category) => {
+    setErrorMsg('')
     setEditingCat(cat)
     setName(cat.name)
     setSlug(cat.slug)
@@ -63,67 +86,91 @@ export const CategoriesView: React.FC = () => {
       return
     }
 
+    setErrorMsg('')
+    const prevCats = [...categories]
     const nextCats = categories.filter((c) => c.id !== cat.id)
     setCategories(nextCats)
     saveStoreCategories(nextCats)
 
     try {
-      await api.adminDeleteCategory(cat.id)
+      const res = await api.adminDeleteCategory(cat.id)
+      if (!res.success && res.message && res.message !== 'Category not found') {
+        setErrorMsg(`Local update applied, server sync note: ${res.message}`)
+      }
       logAuditAction('CATEGORY_DELETED', 'CATEGORY', cat.id, `Deleted category ${cat.name}`)
-    } catch (err) {
-      console.warn('API category delete failed:', err)
+    } catch (err: any) {
+      setCategories(prevCats)
+      saveStoreCategories(prevCats)
+      setErrorMsg(err?.message || 'Failed to delete category.')
     }
   }
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!name.trim()) return
+    const cleanName = name.trim()
+    const cleanSlug = slugify(slug || cleanName)
+
+    if (cleanName.length < 2) {
+      setErrorMsg('Category name must be at least 2 characters.')
+      return
+    }
+    if (cleanSlug.length < 2) {
+      setErrorMsg('Category slug must be at least 2 characters.')
+      return
+    }
 
     setIsLoading(true)
     setErrorMsg('')
 
+    const defaultCover =
+      imageUrl.trim() ||
+      'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=80'
+
     try {
-      if (editingCat) {
-        const cleanSlug = slug.trim() || name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
-        const updatedCat: Category = {
-          ...editingCat,
-          name: name.trim(),
-          slug: cleanSlug,
-          description: description.trim(),
-          imageUrl: imageUrl.trim() || 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=80',
-        }
+      const isEditing = Boolean(editingCat)
+      const catPayload: Category = editingCat
+        ? {
+            ...editingCat,
+            name: cleanName,
+            slug: cleanSlug,
+            description: description.trim(),
+            imageUrl: defaultCover,
+          }
+        : {
+            id: `cat-${cleanSlug}-${Date.now().toString().slice(-4)}`,
+            name: cleanName,
+            slug: cleanSlug,
+            description: description.trim() || `${cleanName} in A4 Deep Black & Minimalist White frames.`,
+            imageUrl: defaultCover,
+            itemCount: 0,
+            featured: true,
+          }
 
-        const nextCats = categories.map((c) => (c.id === editingCat.id ? updatedCat : c))
-        setCategories(nextCats)
-        saveStoreCategories(nextCats)
+      const res = await api.adminSaveCategory(catPayload, isEditing)
+      const finalCat = res.success && res.data ? { ...catPayload, ...res.data } : catPayload
 
-        await api.adminSaveCategory(updatedCat)
-        logAuditAction('CATEGORY_UPDATED', 'CATEGORY', editingCat.id, `Updated category ${name}`)
-      } else {
-        const cleanSlug = slug.trim() || name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
-        const newCat: Category = {
-          id: `cat-${cleanSlug || Date.now()}`,
-          name: name.trim(),
-          slug: cleanSlug,
-          description: description.trim(),
-          imageUrl: imageUrl.trim() || 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=80',
-          itemCount: 0,
-          featured: true,
-        }
-
-        const nextCats = [...categories, newCat]
-        setCategories(nextCats)
-        saveStoreCategories(nextCats)
-
-        await api.adminSaveCategory(newCat)
-        logAuditAction('CATEGORY_CREATED', 'CATEGORY', newCat.id, `Created category ${name}`)
+      if (!res.success) {
+        setErrorMsg(res.message || 'Saved locally, but server sync returned an error. Please check your admin session.')
       }
+
+      const nextCats = isEditing
+        ? categories.map((c) => (c.id === editingCat!.id ? finalCat : c))
+        : [...categories, finalCat]
+
+      setCategories(nextCats)
+      saveStoreCategories(nextCats)
+      logAuditAction(
+        isEditing ? 'CATEGORY_UPDATED' : 'CATEGORY_CREATED',
+        'CATEGORY',
+        finalCat.id,
+        `${isEditing ? 'Updated' : 'Created'} category ${cleanName}`
+      )
 
       setSaveSuccess(true)
       setTimeout(() => setSaveSuccess(false), 3000)
       setShowModal(false)
     } catch (err: any) {
-      setErrorMsg(err.message || 'Failed to save category to backend.')
+      setErrorMsg(err?.message || 'Failed to save category.')
     } finally {
       setIsLoading(false)
     }
@@ -186,7 +233,9 @@ export const CategoriesView: React.FC = () => {
             <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
               <p className="text-xs text-neutral-400 line-clamp-2">{cat.description}</p>
               <div className="pt-3 border-t border-neutral-800/80 flex items-center justify-between text-xs">
-                <span className="text-[11px] text-neutral-500">{cat.itemCount || 0} Active Items</span>
+                <span className="text-[11px] text-neutral-400">
+                  {productsCountMap[cat.id] ?? cat.itemCount ?? 0} Active Items
+                </span>
                 <div className="flex items-center gap-2">
                   <button
                     type="button"

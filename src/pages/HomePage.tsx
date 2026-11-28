@@ -52,16 +52,16 @@ export const HomePage: React.FC = () => {
             }`}
           >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="text-center max-w-2xl mx-auto mb-12">
-                <span className="text-[11px] font-bold uppercase tracking-widest text-neutral-400">
-                  Interactive 2D Studio
+              <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-12">
+                <span className="text-[11px] font-bold uppercase tracking-widest text-neutral-500">
+                  Live Frame Preview
                 </span>
-                <h2 className="font-serif text-3xl sm:text-4xl text-neutral-900 mt-1">
-                  {section.title || 'Customize Your Own Frame Live'}
+                <h2 className="font-serif text-2xl sm:text-4xl text-neutral-900 mt-1">
+                  {section.title || 'Frame Your Own Photo Live'}
                 </h2>
-                <p className="mt-2 text-xs sm:text-sm text-neutral-500 font-light">
+                <p className="mt-2 text-sm text-neutral-600">
                   {section.subtitle ||
-                    'Upload personal photos, choose from 5 handcrafted hardwood mouldings, custom matting and museum-grade anti-glare glass.'}
+                    'Upload your photo and preview how it looks in our A4 Deep Black or Minimalist White frame before ordering.'}
                 </p>
               </div>
 

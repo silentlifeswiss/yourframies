@@ -6,13 +6,13 @@ export const INITIAL_PRODUCTS: Product[] = [
     categoryId: 'cat-car-frames',
     title: 'Porsche 911 GT3 RS Neon Night Frame',
     slug: 'porsche-911-gt3-rs-neon-night-frame',
-    description: 'High-definition shot of the legendary GT3 RS bathed in atmospheric Tokyo night lights. Encased in a handcrafted A4 frame with shatterproof anti-glare acrylic.',
+    description: 'Sharp night photography of the Porsche 911 GT3 RS under neon street lights, framed in standard A4.',
     basePriceINR: 1499,
     compareAtPriceINR: 2199,
     images: [
-      'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=1000&q=85',
-      'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1000&q=85',
-      'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=1000&q=85',
+      'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=800&q=80',
     ],
     availableSizes: ['A4'],
     availableMouldings: ['Deep Black', 'Minimalist White'],
@@ -25,12 +25,12 @@ export const INITIAL_PRODUCTS: Product[] = [
     categoryId: 'cat-car-frames',
     title: 'Vintage BMW E30 M3 Heritage Edition',
     slug: 'vintage-bmw-e30-m3-heritage-edition',
-    description: 'Iconic box-flare silhouette of the E30 M3 in classic Alpine White. Printed on archival 300 GSM lustre paper in an A4 precision-crafted frame.',
+    description: 'Classic Alpine White BMW E30 M3 print in an A4 frame. Clean desk or garage wall statement.',
     basePriceINR: 1599,
     compareAtPriceINR: 2299,
     images: [
-      'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1000&q=85',
-      'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=1000&q=85',
+      'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=800&q=80',
     ],
     availableSizes: ['A4'],
     availableMouldings: ['Deep Black', 'Minimalist White'],
@@ -43,12 +43,12 @@ export const INITIAL_PRODUCTS: Product[] = [
     categoryId: 'cat-car-frames',
     title: 'Formula 1 Monaco Grand Prix Retro Wall Art',
     slug: 'formula-1-monaco-grand-prix-retro-wall-art',
-    description: 'Vintage circuit racing illustration celebrating the Casino hairpin in Monte Carlo. A standout A4 gallery piece for motorsport lovers.',
+    description: 'Retro Monte Carlo circuit racing illustration printed crisp in A4.',
     basePriceINR: 1399,
     compareAtPriceINR: 1999,
     images: [
-      'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=1000&q=85',
-      'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1000&q=85',
+      'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80',
     ],
     availableSizes: ['A4'],
     availableMouldings: ['Deep Black', 'Minimalist White'],
@@ -61,12 +61,12 @@ export const INITIAL_PRODUCTS: Product[] = [
     categoryId: 'cat-aesthetic-frames',
     title: 'Serene Botanical Fern Minimalist Frame',
     slug: 'serene-botanical-fern-minimalist-frame',
-    description: 'Crisp, organic Scandinavian fern study in classic A4 size with clean ivory matting. Understated calm and elegance for modern interiors.',
+    description: 'Clean botanical fern print in A4 size. Fits bedrooms, studies, and bright workspaces.',
     basePriceINR: 1199,
     compareAtPriceINR: 1799,
     images: [
-      'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=1000&q=85',
-      'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=1000&q=85',
+      'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=800&q=80',
     ],
     availableSizes: ['A4'],
     availableMouldings: ['Deep Black', 'Minimalist White'],
@@ -79,12 +79,12 @@ export const INITIAL_PRODUCTS: Product[] = [
     categoryId: 'cat-aesthetic-frames',
     title: 'Abstract Architectural Arches in Sandstone',
     slug: 'abstract-architectural-arches-in-sandstone',
-    description: 'Warm terracotta and soft neutral arches inspired by Mediterranean architecture in an A4 exhibition mount.',
+    description: 'Warm terracotta and neutral geometric arches printed for clean A4 framing.',
     basePriceINR: 1299,
     compareAtPriceINR: 1899,
     images: [
-      'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=1000&q=85',
-      'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=1000&q=85',
+      'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=80',
     ],
     availableSizes: ['A4'],
     availableMouldings: ['Deep Black', 'Minimalist White'],
@@ -97,12 +97,12 @@ export const INITIAL_PRODUCTS: Product[] = [
     categoryId: 'cat-personalised-frames',
     title: 'The Memories Collage • 9-Photo Storyboard',
     slug: 'the-memories-collage-9-photo-storyboard',
-    description: 'Upload 9 of your favorite photos. We professionally color-correct, crop, print on fine art satin, and frame in an A4 multi-window layout.',
+    description: 'Upload your favourite photos and arrange them in a crisp A4 multi-photo storyboard frame.',
     basePriceINR: 1999,
     compareAtPriceINR: 2899,
     images: [
-      'https://images.unsplash.com/photo-1544717302-de2939b7ef71?auto=format&fit=crop&w=1000&q=85',
-      'https://images.unsplash.com/photo-1582561424760-0321d75e81fa?auto=format&fit=crop&w=1000&q=85',
+      'https://images.unsplash.com/photo-1544717302-de2939b7ef71?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1582561424760-0321d75e81fa?auto=format&fit=crop&w=800&q=80',
     ],
     availableSizes: ['A4'],
     availableMouldings: ['Deep Black', 'Minimalist White'],
@@ -115,12 +115,12 @@ export const INITIAL_PRODUCTS: Product[] = [
     categoryId: 'cat-personalised-frames',
     title: 'Custom Soundwave & Spotify Code Keepsake',
     slug: 'custom-soundwave-and-spotify-code-keepsake',
-    description: 'Frame your couple song, wedding vow, or first dance in an A4 frame with a scannable Spotify code and soundwave overlay.',
+    description: 'Pair your favorite photo with a scannable song code inside a clean A4 Deep Black or Minimalist White frame.',
     basePriceINR: 1699,
     compareAtPriceINR: 2399,
     images: [
-      'https://images.unsplash.com/photo-1582561424760-0321d75e81fa?auto=format&fit=crop&w=1000&q=85',
-      'https://images.unsplash.com/photo-1544717302-de2939b7ef71?auto=format&fit=crop&w=1000&q=85',
+      'https://images.unsplash.com/photo-1582561424760-0321d75e81fa?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1544717302-de2939b7ef71?auto=format&fit=crop&w=800&q=80',
     ],
     availableSizes: ['A4'],
     availableMouldings: ['Deep Black', 'Minimalist White'],
@@ -131,14 +131,14 @@ export const INITIAL_PRODUCTS: Product[] = [
   {
     id: 'yf-cust-01',
     categoryId: 'cat-custom-frames',
-    title: 'Bespoke Studio Custom Frame (Upload Your Photo)',
+    title: 'Custom A4 Photo Frame (Upload Your Photo)',
     slug: 'bespoke-studio-custom-frame',
-    description: 'Design your own A4 frame from scratch. Upload any photo, select Deep Black or Minimalist White finish, and choose premium glass.',
+    description: 'Upload any photo from your phone or computer and choose Deep Black or Minimalist White A4 finish.',
     basePriceINR: 1299,
     compareAtPriceINR: 1899,
     images: [
-      'https://images.unsplash.com/photo-1582561424760-0321d75e81fa?auto=format&fit=crop&w=1000&q=85',
-      'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=1000&q=85',
+      'https://images.unsplash.com/photo-1582561424760-0321d75e81fa?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=80',
     ],
     availableSizes: ['A4'],
     availableMouldings: ['Deep Black', 'Minimalist White'],
@@ -149,14 +149,14 @@ export const INITIAL_PRODUCTS: Product[] = [
   {
     id: 'yf-post-01',
     categoryId: 'cat-posters',
-    title: 'Typographic "Do Good & Be Kind" Archival Print',
+    title: 'Typographic "Do Good & Be Kind" Framed Print',
     slug: 'typographic-do-good-and-be-kind-archival-print',
-    description: 'High-contrast Swiss typographic layout printed on heavy 310 GSM paper in an A4 minimalist frame.',
+    description: 'Bold monochrome typography printed crisp on heavy art paper and fitted into a clean A4 frame.',
     basePriceINR: 899,
     compareAtPriceINR: 1299,
     images: [
-      'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=1000&q=85',
-      'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=1000&q=85',
+      'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=80',
     ],
     availableSizes: ['A4'],
     availableMouldings: ['Deep Black', 'Minimalist White'],
@@ -167,15 +167,15 @@ export const INITIAL_PRODUCTS: Product[] = [
   {
     id: 'yf-wall-01',
     categoryId: 'cat-wall-art',
-    title: 'Nordic Forest Triptych (3-Piece Gallery Set)',
+    title: 'Nordic Forest Triptych (3-Piece A4 Set)',
     slug: 'nordic-forest-triptych-3-piece-gallery-set',
-    description: 'A cohesive three-frame A4 collection capturing misty pine forests. Handcrafted in Deep Black or Minimalist White.',
+    description: 'Set of three coordinated A4 wall frames capturing misty pine forests, ready to hang together.',
     basePriceINR: 3499,
     compareAtPriceINR: 4999,
     images: [
-      'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=1000&q=85',
-      'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=1000&q=85',
-      'https://images.unsplash.com/photo-1582561424760-0321d75e81fa?auto=format&fit=crop&w=1000&q=85',
+      'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1582561424760-0321d75e81fa?auto=format&fit=crop&w=800&q=80',
     ],
     availableSizes: ['A4'],
     availableMouldings: ['Deep Black', 'Minimalist White'],
@@ -187,35 +187,53 @@ export const INITIAL_PRODUCTS: Product[] = [
 
 export const PRODUCTS_STORAGE_KEY = 'yourframies_products_db'
 
+export function normalizeProduct(p: Product): Product {
+  return {
+    ...p,
+    availableSizes: ['A4'],
+    availableMouldings: ['Deep Black', 'Minimalist White'],
+  }
+}
+
 export function getStoreProducts(): Product[] {
   try {
     const raw = localStorage.getItem(PRODUCTS_STORAGE_KEY)
     if (raw) {
       const parsed = JSON.parse(raw)
       if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed.map((p) => ({
-          ...p,
-          availableSizes: ['A4'],
-          availableMouldings: ['Deep Black', 'Minimalist White'],
-        }))
+        return parsed.map(normalizeProduct)
       }
     }
   } catch (e) {
     // fallback
   }
-  return INITIAL_PRODUCTS.map((p) => ({
-    ...p,
-    availableSizes: ['A4'],
-    availableMouldings: ['Deep Black', 'Minimalist White'],
-  }))
+  return INITIAL_PRODUCTS.map(normalizeProduct)
 }
 
 export function saveStoreProducts(products: Product[]): void {
   try {
-    localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(products))
+    const normalized = products.map(normalizeProduct)
+    localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(normalized))
     window.dispatchEvent(new Event('yourframies_products_updated'))
   } catch (e) {
     console.error('Error saving products:', e)
   }
+}
+
+export async function syncProductsFromApi(): Promise<Product[]> {
+  try {
+    const res = await fetch('/api/products')
+    if (res.ok) {
+      const json = await res.json()
+      if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+        const normalized = json.data.map(normalizeProduct)
+        saveStoreProducts(normalized)
+        return normalized
+      }
+    }
+  } catch {
+    // Offline fallback
+  }
+  return getStoreProducts()
 }
 

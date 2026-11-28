@@ -94,6 +94,49 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, [media])
 
+  const compressDataUrl = (rawDataUrl: string, maxDimension = 1200, quality = 0.82): Promise<string> => {
+    return new Promise((resolve) => {
+      if (typeof Image === 'undefined') {
+        resolve(rawDataUrl)
+        return
+      }
+      const img = new window.Image()
+      img.onload = () => {
+        try {
+          let { width, height } = img
+          if (width <= maxDimension && height <= maxDimension && rawDataUrl.length < 250_000) {
+            resolve(rawDataUrl)
+            return
+          }
+          if (width > maxDimension || height > maxDimension) {
+            if (width >= height) {
+              height = Math.round((height * maxDimension) / width)
+              width = maxDimension
+            } else {
+              width = Math.round((width * maxDimension) / height)
+              height = maxDimension
+            }
+          }
+          const canvas = document.createElement('canvas')
+          canvas.width = width
+          canvas.height = height
+          const ctx = canvas.getContext('2d')
+          if (!ctx) {
+            resolve(rawDataUrl)
+            return
+          }
+          ctx.drawImage(img, 0, 0, width, height)
+          const compressed = canvas.toDataURL('image/jpeg', quality)
+          resolve(compressed.length < rawDataUrl.length ? compressed : rawDataUrl)
+        } catch {
+          resolve(rawDataUrl)
+        }
+      }
+      img.onerror = () => resolve(rawDataUrl)
+      img.src = rawDataUrl
+    })
+  }
+
   const uploadFile = async (
     file: File,
     folder: MediaItem['folder'] = 'general',
@@ -101,15 +144,17 @@ export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   ): Promise<MediaItem> => {
     return new Promise((resolve) => {
       const reader = new FileReader()
-      reader.onload = (event) => {
-        const dataUrl = event.target?.result as string
+      reader.onload = async (event) => {
+        const rawUrl = event.target?.result as string
+        const dataUrl = await compressDataUrl(rawUrl)
+        const approxBytes = Math.round((dataUrl.length * 3) / 4)
         const newItem: MediaItem = {
           id: `med-${Date.now()}`,
           filename: file.name,
           url: dataUrl,
           folder,
           altText: altText || file.name.replace(/\.[^/.]+$/, ''),
-          fileSizeKB: Math.round(file.size / 1024),
+          fileSizeKB: Math.max(1, Math.round(approxBytes / 1024)),
           uploadedAt: new Date().toISOString().slice(0, 10),
         }
         setMedia((prev) => [newItem, ...prev])

@@ -60,7 +60,7 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({ product }) => {
   const avgRating =
     totalReviews > 0
       ? (reviews.reduce((acc, r) => acc + r.rating, 0) / totalReviews).toFixed(1)
-      : '5.0'
+      : '0.0'
 
   const countsByStar = [5, 4, 3, 2, 1].map((s) => ({
     stars: s,
@@ -153,14 +153,16 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({ product }) => {
         {/* Section Heading */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between pb-8 border-b border-neutral-200 gap-4">
           <div>
-            <span className="text-[11px] font-bold uppercase tracking-widest text-neutral-400">
-              Collector Testimonials
+            <span className="text-[11px] font-bold uppercase tracking-widest text-neutral-500">
+              Customer Feedback
             </span>
             <h2 className="font-serif text-2xl sm:text-3xl text-neutral-900 mt-1">
-              Verified Customer Reviews
+              Customer Reviews
             </h2>
-            <p className="text-xs text-neutral-500 mt-1">
-              Genuine reviews from art and photography collectors who purchased this frame.
+            <p className="text-sm text-neutral-600 mt-1">
+              {totalReviews > 0
+                ? 'Verified feedback from customers who ordered this frame.'
+                : 'No reviews yet for this frame. Be the first to share a photo and review.'}
             </p>
           </div>
 
@@ -180,67 +182,66 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({ product }) => {
             <div>
               <p className="font-semibold">Thank you for your feedback!</p>
               <p className="text-neutral-600 mt-0.5">
-                Your review has been verified and published to this artwork's page.
+                Your review has been published to this product page.
               </p>
             </div>
           </div>
         )}
 
-        {/* Rating Breakdown & Summary */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 py-10 border-b border-neutral-200 items-center">
-          {/* Average Score */}
-          <div className="lg:col-span-4 text-center lg:text-left space-y-2 lg:border-r lg:border-neutral-200 lg:pr-8">
-            <div className="flex items-baseline justify-center lg:justify-start gap-2">
-              <span className="font-serif text-5xl font-light text-neutral-900">{avgRating}</span>
-              <span className="text-neutral-400 text-sm">/ 5.0</span>
-            </div>
-            <div className="flex items-center justify-center lg:justify-start gap-1">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  className={`w-4 h-4 ${
-                    i < Math.round(Number(avgRating))
-                      ? 'fill-amber-400 text-amber-400'
-                      : 'text-neutral-300'
-                  }`}
-                />
-              ))}
-              <span className="text-xs font-semibold text-neutral-700 ml-1.5">
-                ({totalReviews} Reviews)
-              </span>
-            </div>
-            <p className="text-xs text-neutral-500 pt-1">
-              100% of verified customers recommend this framing profile.
-            </p>
-          </div>
-
-          {/* Star Bars */}
-          <div className="lg:col-span-8 space-y-2">
-            {countsByStar.map((item) => (
-              <button
-                key={item.stars}
-                type="button"
-                onClick={() =>
-                  setFilterRating(filterRating === item.stars ? 'ALL' : item.stars)
-                }
-                className={`w-full flex items-center gap-3 text-xs text-left p-1 rounded transition hover:bg-neutral-50 ${
-                  filterRating === item.stars ? 'bg-neutral-100 font-bold' : ''
-                }`}
-              >
-                <span className="w-14 text-neutral-600 font-medium">{item.stars} Stars</span>
-                <div className="flex-1 h-2 bg-neutral-100 rounded-full overflow-hidden border border-neutral-200">
-                  <div
-                    className="h-full bg-amber-400 transition-all duration-500"
-                    style={{ width: `${item.percentage}%` }}
+        {/* Rating Breakdown & Summary (only shown when real reviews exist) */}
+        {totalReviews > 0 && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 py-10 border-b border-neutral-200 items-center">
+            {/* Average Score */}
+            <div className="lg:col-span-4 text-center lg:text-left space-y-2 lg:border-r lg:border-neutral-200 lg:pr-8">
+              <div className="flex items-baseline justify-center lg:justify-start gap-2">
+                <span className="font-serif text-5xl font-light text-neutral-900">{avgRating}</span>
+                <span className="text-neutral-400 text-sm">/ 5.0</span>
+              </div>
+              <div className="flex items-center justify-center lg:justify-start gap-1">
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={i}
+                    className={`w-4 h-4 ${
+                      i < Math.round(Number(avgRating))
+                        ? 'fill-amber-400 text-amber-400'
+                        : 'text-neutral-300'
+                    }`}
                   />
-                </div>
-                <span className="w-12 text-right text-neutral-400 font-mono text-[11px]">
-                  {item.count} ({item.percentage}%)
+                ))}
+                <span className="text-xs font-semibold text-neutral-700 ml-1.5">
+                  ({totalReviews} {totalReviews === 1 ? 'Review' : 'Reviews'})
                 </span>
-              </button>
-            ))}
+              </div>
+            </div>
+
+            {/* Star Bars */}
+            <div className="lg:col-span-8 space-y-2">
+              {countsByStar.map((item) => (
+                <button
+                  key={item.stars}
+                  type="button"
+                  onClick={() =>
+                    setFilterRating(filterRating === item.stars ? 'ALL' : item.stars)
+                  }
+                  className={`w-full flex items-center gap-3 text-xs text-left p-1 rounded transition hover:bg-neutral-50 ${
+                    filterRating === item.stars ? 'bg-neutral-100 font-bold' : ''
+                  }`}
+                >
+                  <span className="w-14 text-neutral-600 font-medium">{item.stars} Stars</span>
+                  <div className="flex-1 h-2 bg-neutral-100 rounded-full overflow-hidden border border-neutral-200">
+                    <div
+                      className="h-full bg-amber-400 transition-all duration-500"
+                      style={{ width: `${item.percentage}%` }}
+                    />
+                  </div>
+                  <span className="w-12 text-right text-neutral-400 font-mono text-[11px]">
+                    {item.count} ({item.percentage}%)
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Review Form Drawer / Modal */}
         {showReviewForm && (
@@ -298,8 +299,8 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({ product }) => {
                       required
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      placeholder="e.g. Vikramaditya S."
-                      className="w-full p-2.5 bg-white border border-neutral-300 rounded-md text-xs text-neutral-900 outline-none focus:border-neutral-900"
+                      placeholder="Your name"
+                      className="w-full p-2.5 bg-white border border-neutral-300 rounded-md text-base sm:text-xs text-neutral-900 outline-none focus:border-neutral-900"
                     />
                   </div>
 
@@ -310,8 +311,8 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({ product }) => {
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="vikram@example.com"
-                      className="w-full p-2.5 bg-white border border-neutral-300 rounded-md text-xs text-neutral-900 outline-none focus:border-neutral-900"
+                      placeholder="you@example.com"
+                      className="w-full p-2.5 bg-white border border-neutral-300 rounded-md text-base sm:text-xs text-neutral-900 outline-none focus:border-neutral-900"
                     />
                   </div>
 
@@ -321,8 +322,8 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({ product }) => {
                       type="text"
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
-                      placeholder="e.g. Bengaluru, KA"
-                      className="w-full p-2.5 bg-white border border-neutral-300 rounded-md text-xs text-neutral-900 outline-none focus:border-neutral-900"
+                      placeholder="e.g. New Delhi"
+                      className="w-full p-2.5 bg-white border border-neutral-300 rounded-md text-base sm:text-xs text-neutral-900 outline-none focus:border-neutral-900"
                     />
                   </div>
                 </div>
@@ -337,8 +338,8 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({ product }) => {
                     required
                     value={headline}
                     onChange={(e) => setHeadline(e.target.value)}
-                    placeholder="e.g. Mind-blowing frame quality & safe packaging!"
-                    className="w-full p-2.5 bg-white border border-neutral-300 rounded-md text-xs text-neutral-900 outline-none focus:border-neutral-900"
+                    placeholder="e.g. Clean finish and crisp print!"
+                    className="w-full p-2.5 bg-white border border-neutral-300 rounded-md text-base sm:text-xs text-neutral-900 outline-none focus:border-neutral-900"
                   />
                 </div>
 
@@ -352,8 +353,8 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({ product }) => {
                     required
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
-                    placeholder="Write your honest opinion about the solid wood moulding, anti-glare glass clarity, and safe transit packaging..."
-                    className="w-full p-3 bg-white border border-neutral-300 rounded-md text-xs text-neutral-900 outline-none focus:border-neutral-900 leading-relaxed"
+                    placeholder="Share how the frame looks in your room, print quality, and packaging..."
+                    className="w-full p-3 bg-white border border-neutral-300 rounded-md text-base sm:text-xs text-neutral-900 outline-none focus:border-neutral-900 leading-relaxed"
                   />
                 </div>
 

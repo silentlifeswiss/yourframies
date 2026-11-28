@@ -1,8 +1,8 @@
 import React, { useState, useMemo, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Filter, SlidersHorizontal, ArrowUpDown } from 'lucide-react'
-import { getStoreProducts } from '../data/products'
-import { getStoreCategories, Category } from '../data/categories'
+import { getStoreProducts, syncProductsFromApi } from '../data/products'
+import { getStoreCategories, syncCategoriesFromApi, Category } from '../data/categories'
 import { ProductCard } from '../components/product/ProductCard'
 
 export const ShopPage: React.FC = () => {
@@ -20,6 +20,9 @@ export const ShopPage: React.FC = () => {
     window.addEventListener('yourframies_products_updated', handleUpdate)
     window.addEventListener('yourframies_categories_updated', handleCatUpdate)
 
+    syncProductsFromApi().then(setProductsList)
+    syncCategoriesFromApi().then(setCategoriesList)
+
     return () => {
       window.removeEventListener('yourframies_products_updated', handleUpdate)
       window.removeEventListener('yourframies_categories_updated', handleCatUpdate)
@@ -31,6 +34,8 @@ export const ShopPage: React.FC = () => {
 
   const filteredProducts = useMemo(() => {
     return productsList.filter((product) => {
+      if (product.isActive === false) return false
+
       // Category Filter
       if (activeCategorySlug !== 'all') {
         const cat = categoriesList.find((c) => c.slug === activeCategorySlug)
@@ -59,7 +64,7 @@ export const ShopPage: React.FC = () => {
       if (sortBy === 'name') return a.title.localeCompare(b.title)
       return 0
     })
-  }, [activeCategorySlug, searchQuery, sortBy, selectedSize])
+  }, [productsList, categoriesList, activeCategorySlug, searchQuery, sortBy, selectedSize])
 
   const handleCategoryChange = (slug: string) => {
     if (slug === 'all') {
@@ -80,7 +85,7 @@ export const ShopPage: React.FC = () => {
           </span>
           <h1 className="font-serif text-2xl sm:text-5xl text-neutral-900 mt-1">
             {activeCategorySlug === 'all'
-              ? 'All Handcrafted Frames'
+              ? 'All A4 Framed Prints'
               : categoriesList.find((c) => c.slug === activeCategorySlug)?.name || 'Collection'}
           </h1>
           {searchQuery && (
@@ -127,7 +132,7 @@ export const ShopPage: React.FC = () => {
             <select
               value={selectedSize}
               onChange={(e) => setSelectedSize(e.target.value)}
-              className="w-full text-xs bg-neutral-50 border border-neutral-300 rounded px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-black"
+              className="w-full text-base sm:text-xs bg-neutral-50 border border-neutral-300 rounded px-2.5 py-2 focus:outline-none focus:ring-1 focus:ring-black"
             >
               <option value="all">All Finishes (A4 Frame)</option>
               <option value="Deep Black">Deep Black</option>
@@ -140,7 +145,7 @@ export const ShopPage: React.FC = () => {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="w-full text-xs bg-neutral-50 border border-neutral-300 rounded px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-black"
+              className="w-full text-base sm:text-xs bg-neutral-50 border border-neutral-300 rounded px-2.5 py-2 focus:outline-none focus:ring-1 focus:ring-black"
             >
               <option value="featured">Featured</option>
               <option value="price-asc">Price: Low to High</option>

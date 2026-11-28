@@ -21,7 +21,8 @@ const INITIAL_CATEGORIES: DBCategory[] = [
     id: 'cat-car-frames',
     name: 'Car Photo Frames',
     slug: 'car-photo-frames',
-    description: 'High-definition motorsport legends, supercar silhouettes, and trackside photography.',
+    description: 'High-contrast supercars, Tokyo night shoots, and classic motorsport prints framed in A4.',
+    imageUrl: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=800&q=80',
     displayOrder: 1,
     isActive: true,
   },
@@ -29,7 +30,8 @@ const INITIAL_CATEGORIES: DBCategory[] = [
     id: 'cat-aesthetic-frames',
     name: 'Aesthetic Photo Frames',
     slug: 'aesthetic-photo-frames',
-    description: 'Minimalist Japandi botanicals, monochrome architecture, and calm gallery pieces.',
+    description: 'Clean botanical prints and calm architectural art ready to hang in A4.',
+    imageUrl: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=80',
     displayOrder: 2,
     isActive: true,
   },
@@ -37,7 +39,8 @@ const INITIAL_CATEGORIES: DBCategory[] = [
     id: 'cat-personalised-frames',
     name: 'Personalised Photo Frames',
     slug: 'personalised-photo-frames',
-    description: 'Custom archival photo prints of your own family, wedding, and travel memories.',
+    description: 'Turn your photos, collages, and song keepsakes into A4 wall frames.',
+    imageUrl: 'https://images.unsplash.com/photo-1544717302-de2939b7ef71?auto=format&fit=crop&w=800&q=80',
     displayOrder: 3,
     isActive: true,
   },
@@ -45,16 +48,27 @@ const INITIAL_CATEGORIES: DBCategory[] = [
     id: 'cat-custom-frames',
     name: 'Custom Photo Frames',
     slug: 'custom-photo-frames',
-    description: 'Interactive studio customizer for bespoke frame sizing and custom moulding finishes.',
+    description: 'Upload any photo and preview it live in Deep Black or Minimalist White A4 frames.',
+    imageUrl: 'https://images.unsplash.com/photo-1582561424760-0321d75e81fa?auto=format&fit=crop&w=800&q=80',
     displayOrder: 4,
     isActive: true,
   },
   {
     id: 'cat-posters',
-    name: 'Posters & Wall Art',
+    name: 'Posters & Typography',
     slug: 'posters',
-    description: 'Swiss typographic posters and contemporary artistic graphic prints.',
+    description: 'Crisp typography quotes and graphic prints framed in standard A4.',
+    imageUrl: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=800&q=80',
     displayOrder: 5,
+    isActive: true,
+  },
+  {
+    id: 'cat-wall-art',
+    name: 'Wall Art Collections',
+    slug: 'wall-art',
+    description: 'Matching 3-piece A4 frame sets built for clean bedroom and workspace walls.',
+    imageUrl: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=800&q=80',
+    displayOrder: 6,
     isActive: true,
   },
 ]
@@ -65,82 +79,201 @@ const INITIAL_PRODUCTS: DBProduct[] = [
     categoryId: 'cat-car-frames',
     title: 'Porsche 911 GT3 RS Neon Night Frame',
     slug: 'porsche-911-gt3-rs-neon-night-frame',
-    description:
-      'High-definition shot of the legendary GT3 RS bathed in atmospheric Tokyo night lights. Encased in a matte black wooden frame with shatterproof anti-glare acrylic.',
+    description: 'Sharp night photography of the Porsche 911 GT3 RS under neon street lights, framed in standard A4.',
     basePriceINR: 1499,
     compareAtPriceINR: 2199,
     images: [
-      'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=1000&q=85',
-      'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1000&q=85',
+      'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=800&q=80',
     ],
-    availableSizes: ['8x10', '12x18', '16x24', '20x30'],
-    availableMouldings: ['Black Wood', 'White Minimalist', 'Natural Oak', 'Walnut'],
+    availableSizes: ['A4'],
+    availableMouldings: ['Deep Black', 'Minimalist White'],
     isCustomizable: true,
     isActive: true,
     stockQuantity: 45,
     createdAt: '2026-11-15T00:00:00.000Z',
-    updatedAt: '2026-11-21T00:00:00.000Z',
+    updatedAt: '2026-11-28T00:00:00.000Z',
   },
   {
     id: 'yf-car-02',
     categoryId: 'cat-car-frames',
     title: 'Vintage BMW E30 M3 Heritage Edition',
     slug: 'vintage-bmw-e30-m3-heritage-edition',
-    description:
-      'Iconic box-flare silhouette of the E30 M3 in classic Alpine White. Printed on archival 300 GSM lustre paper and mounted with pure white border matting.',
+    description: 'Classic Alpine White BMW E30 M3 print in an A4 frame. Clean desk or garage wall statement.',
     basePriceINR: 1599,
     compareAtPriceINR: 2299,
     images: [
-      'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1000&q=85',
-      'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=1000&q=85',
+      'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=800&q=80',
     ],
-    availableSizes: ['8x10', '12x18', '16x24', '20x30'],
-    availableMouldings: ['Black Wood', 'Natural Oak', 'Walnut'],
+    availableSizes: ['A4'],
+    availableMouldings: ['Deep Black', 'Minimalist White'],
     isCustomizable: true,
     isActive: true,
     stockQuantity: 30,
     createdAt: '2026-11-16T00:00:00.000Z',
-    updatedAt: '2026-11-21T00:00:00.000Z',
+    updatedAt: '2026-11-28T00:00:00.000Z',
+  },
+  {
+    id: 'yf-car-03',
+    categoryId: 'cat-car-frames',
+    title: 'Formula 1 Monaco Grand Prix Retro Wall Art',
+    slug: 'formula-1-monaco-grand-prix-retro-wall-art',
+    description: 'Retro Monte Carlo circuit racing illustration printed crisp in A4.',
+    basePriceINR: 1399,
+    compareAtPriceINR: 1999,
+    images: [
+      'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80',
+    ],
+    availableSizes: ['A4'],
+    availableMouldings: ['Deep Black', 'Minimalist White'],
+    isCustomizable: false,
+    isActive: true,
+    stockQuantity: 60,
+    createdAt: '2026-11-16T00:00:00.000Z',
+    updatedAt: '2026-11-28T00:00:00.000Z',
   },
   {
     id: 'yf-aes-01',
     categoryId: 'cat-aesthetic-frames',
-    title: 'Scandinavian Botanical Fern Minimalist Frame',
-    slug: 'scandinavian-botanical-fern-minimalist-frame',
-    description:
-      'Deep emerald forest fern captured in macro detail. Ideal for minimalist, Japandi, and modern living spaces.',
+    title: 'Serene Botanical Fern Minimalist Frame',
+    slug: 'serene-botanical-fern-minimalist-frame',
+    description: 'Clean botanical fern print in A4 size. Fits bedrooms, studies, and bright workspaces.',
     basePriceINR: 1199,
     compareAtPriceINR: 1799,
     images: [
-      'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=1000&q=85',
+      'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=800&q=80',
     ],
-    availableSizes: ['8x10', '12x18', '16x24'],
-    availableMouldings: ['White Minimalist', 'Natural Oak'],
+    availableSizes: ['A4'],
+    availableMouldings: ['Deep Black', 'Minimalist White'],
     isCustomizable: true,
     isActive: true,
     stockQuantity: 60,
     createdAt: '2026-11-17T00:00:00.000Z',
-    updatedAt: '2026-11-21T00:00:00.000Z',
+    updatedAt: '2026-11-28T00:00:00.000Z',
+  },
+  {
+    id: 'yf-aes-02',
+    categoryId: 'cat-aesthetic-frames',
+    title: 'Abstract Architectural Arches in Sandstone',
+    slug: 'abstract-architectural-arches-in-sandstone',
+    description: 'Warm terracotta and neutral geometric arches printed for clean A4 framing.',
+    basePriceINR: 1299,
+    compareAtPriceINR: 1899,
+    images: [
+      'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=80',
+    ],
+    availableSizes: ['A4'],
+    availableMouldings: ['Deep Black', 'Minimalist White'],
+    isCustomizable: true,
+    isActive: true,
+    stockQuantity: 40,
+    createdAt: '2026-11-17T00:00:00.000Z',
+    updatedAt: '2026-11-28T00:00:00.000Z',
+  },
+  {
+    id: 'yf-pers-01',
+    categoryId: 'cat-personalised-frames',
+    title: 'The Memories Collage • 9-Photo Storyboard',
+    slug: 'the-memories-collage-9-photo-storyboard',
+    description: 'Upload your favourite photos and arrange them in a crisp A4 multi-photo storyboard frame.',
+    basePriceINR: 1999,
+    compareAtPriceINR: 2899,
+    images: [
+      'https://images.unsplash.com/photo-1544717302-de2939b7ef71?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1582561424760-0321d75e81fa?auto=format&fit=crop&w=800&q=80',
+    ],
+    availableSizes: ['A4'],
+    availableMouldings: ['Deep Black', 'Minimalist White'],
+    isCustomizable: true,
+    isActive: true,
+    stockQuantity: 100,
+    createdAt: '2026-11-18T00:00:00.000Z',
+    updatedAt: '2026-11-28T00:00:00.000Z',
+  },
+  {
+    id: 'yf-pers-02',
+    categoryId: 'cat-personalised-frames',
+    title: 'Custom Soundwave & Spotify Code Keepsake',
+    slug: 'custom-soundwave-and-spotify-code-keepsake',
+    description: 'Pair your favorite photo with a scannable song code inside a clean A4 Deep Black or Minimalist White frame.',
+    basePriceINR: 1699,
+    compareAtPriceINR: 2399,
+    images: [
+      'https://images.unsplash.com/photo-1582561424760-0321d75e81fa?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1544717302-de2939b7ef71?auto=format&fit=crop&w=800&q=80',
+    ],
+    availableSizes: ['A4'],
+    availableMouldings: ['Deep Black', 'Minimalist White'],
+    isCustomizable: true,
+    isActive: true,
+    stockQuantity: 80,
+    createdAt: '2026-11-18T00:00:00.000Z',
+    updatedAt: '2026-11-28T00:00:00.000Z',
   },
   {
     id: 'yf-cust-01',
     categoryId: 'cat-custom-frames',
-    title: 'Bespoke Studio Custom Frame (Upload Your Photo)',
+    title: 'Custom A4 Photo Frame (Upload Your Photo)',
     slug: 'bespoke-studio-custom-frame',
-    description:
-      'Upload your personal high-resolution photograph. Handcrafted with precision joinery and museum glass.',
+    description: 'Upload any photo from your phone or computer and choose Deep Black or Minimalist White A4 finish.',
     basePriceINR: 1299,
     compareAtPriceINR: 1899,
     images: [
-      'https://images.unsplash.com/photo-1582561424760-0321d75e81fa?auto=format&fit=crop&w=1000&q=85',
+      'https://images.unsplash.com/photo-1582561424760-0321d75e81fa?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=80',
     ],
-    availableSizes: ['8x10', '12x18', '16x24', '20x30', '24x36'],
-    availableMouldings: ['Black Wood', 'White Minimalist', 'Natural Oak', 'Walnut', 'Gold Leaf'],
+    availableSizes: ['A4'],
+    availableMouldings: ['Deep Black', 'Minimalist White'],
     isCustomizable: true,
     isActive: true,
-    stockQuantity: 999,
+    stockQuantity: 200,
     createdAt: '2026-11-18T00:00:00.000Z',
-    updatedAt: '2026-11-21T00:00:00.000Z',
+    updatedAt: '2026-11-28T00:00:00.000Z',
+  },
+  {
+    id: 'yf-post-01',
+    categoryId: 'cat-posters',
+    title: 'Typographic "Do Good & Be Kind" Framed Print',
+    slug: 'typographic-do-good-and-be-kind-archival-print',
+    description: 'Bold monochrome typography printed crisp on heavy art paper and fitted into a clean A4 frame.',
+    basePriceINR: 899,
+    compareAtPriceINR: 1299,
+    images: [
+      'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=80',
+    ],
+    availableSizes: ['A4'],
+    availableMouldings: ['Deep Black', 'Minimalist White'],
+    isCustomizable: false,
+    isActive: true,
+    stockQuantity: 75,
+    createdAt: '2026-11-18T00:00:00.000Z',
+    updatedAt: '2026-11-28T00:00:00.000Z',
+  },
+  {
+    id: 'yf-wall-01',
+    categoryId: 'cat-wall-art',
+    title: 'Nordic Forest Triptych (3-Piece A4 Set)',
+    slug: 'nordic-forest-triptych-3-piece-gallery-set',
+    description: 'Set of three coordinated A4 wall frames capturing misty pine forests, ready to hang together.',
+    basePriceINR: 3499,
+    compareAtPriceINR: 4999,
+    images: [
+      'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=80',
+    ],
+    availableSizes: ['A4'],
+    availableMouldings: ['Deep Black', 'Minimalist White'],
+    isCustomizable: false,
+    isActive: true,
+    stockQuantity: 25,
+    createdAt: '2026-11-18T00:00:00.000Z',
+    updatedAt: '2026-11-28T00:00:00.000Z',
   },
 ]
 
@@ -148,23 +281,23 @@ const INITIAL_HOMEPAGE_SECTIONS: DBHomepageSection[] = [
   {
     id: 'sec-hero',
     type: 'hero',
-    title: 'Artisanal Frames. Timeless Preservation.',
+    title: 'A4 Wall Art & Custom Photo Frames.',
     subtitle:
-      'Bespoke solid wood framing for automotive photography, contemporary minimalist art, and your most treasured personal memories. Handcrafted with museum-grade precision in India.',
+      'Ready-to-hang A4 frames featuring iconic supercar photography, clean botanical prints, and your own personal memories — in Deep Black or Minimalist White.',
     isActive: true,
     backgroundStyle: 'neutral-900',
     order: 0,
     imageUrl:
-      'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=2000&q=85',
+      'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=1400&q=80',
     ctaText: 'Explore Collections',
     ctaLink: '/shop',
-    badgeText: "India's Premier Framing Atelier",
+    badgeText: 'Standard A4 Frames • Black & White',
   },
   {
     id: 'sec-categories',
     type: 'categories',
     title: 'Shop by Category',
-    subtitle: 'Explore our specialized frame and artwork collections',
+    subtitle: 'Car frames, minimalist prints, and personalised photo gifts',
     isActive: true,
     backgroundStyle: 'neutral-50',
     order: 1,
@@ -172,8 +305,8 @@ const INITIAL_HOMEPAGE_SECTIONS: DBHomepageSection[] = [
   {
     id: 'sec-bestsellers',
     type: 'bestsellers',
-    title: 'Curated for Modern Spaces',
-    subtitle: 'Popular automotive legends and serene aesthetic studies',
+    title: 'Popular A4 Frames',
+    subtitle: 'Automotive legends, calm interiors, and custom photo keepsakes',
     isActive: true,
     backgroundStyle: 'white',
     order: 2,
@@ -181,9 +314,9 @@ const INITIAL_HOMEPAGE_SECTIONS: DBHomepageSection[] = [
   {
     id: 'sec-customizer',
     type: 'customizer_banner',
-    title: 'Customize Your Own Frame Live',
+    title: 'Frame Your Own Photo Live',
     subtitle:
-      'Upload personal photos, choose from 5 handcrafted hardwood mouldings, custom matting and museum-grade anti-glare glass.',
+      'Upload your photo and preview how it looks in our A4 Deep Black or Minimalist White frame before you order.',
     isActive: true,
     backgroundStyle: 'neutral-50',
     order: 3,
@@ -191,9 +324,9 @@ const INITIAL_HOMEPAGE_SECTIONS: DBHomepageSection[] = [
   {
     id: 'sec-why-us',
     type: 'why_choose_us',
-    title: 'Why Discerning Collectors Choose Us',
+    title: 'Built Clean. Ready to Hang.',
     subtitle:
-      'Every frame is assembled by master framers with meticulous attention to joint geometry, colour depth, and preservation.',
+      'Consistent A4 sizing, clean finishes, and safe doorstep delivery across India.',
     isActive: true,
     backgroundStyle: 'neutral-50',
     order: 4,
@@ -201,8 +334,8 @@ const INITIAL_HOMEPAGE_SECTIONS: DBHomepageSection[] = [
   {
     id: 'sec-instagram',
     type: 'instagram',
-    title: 'Follow Our Journey on Instagram',
-    subtitle: '#YourFramiesInTheWild',
+    title: 'Follow Us on Instagram',
+    subtitle: '#YourFramies',
     isActive: true,
     backgroundStyle: 'neutral-900',
     order: 5,
@@ -210,9 +343,9 @@ const INITIAL_HOMEPAGE_SECTIONS: DBHomepageSection[] = [
   {
     id: 'sec-newsletter',
     type: 'newsletter',
-    title: 'Receive ₹200 Off Your First Order',
+    title: 'Get ₹200 Off Your First Order',
     subtitle:
-      'Subscribe for early access to limited edition automotive prints, seasonal releases, and private studio promotions.',
+      'Sign up for new automotive frame drops and member offers.',
     isActive: true,
     backgroundStyle: 'neutral-50',
     order: 6,
@@ -221,16 +354,16 @@ const INITIAL_HOMEPAGE_SECTIONS: DBHomepageSection[] = [
 
 const INITIAL_SITE_SETTINGS: DBSiteSettings = {
   brandName: 'Your Framies',
-  tagline: 'Artisanal Wall Framing',
+  tagline: 'A4 Wall Art & Photo Frames',
   logoText: 'Your Framies',
   announcementText:
-    '✨ Handcrafted Museum-Quality Frames • Free Express Shipping on Orders Above ₹999 • Use Code WELCOME10 for 10% Off',
+    'A4 Frames in Deep Black & Minimalist White • Free Shipping Above ₹999 • Code WELCOME10 for 10% Off',
   announcementActive: true,
-  contactEmail: 'support@yourframies.com',
-  contactPhone: '+91 98765 43210',
-  workshopAddress: 'Outer Ring Road, Bellandur, Bengaluru, Karnataka 560103',
+  contactEmail: 'silentlifeswiss@gmail.com',
+  contactPhone: '+91 79009 43025',
+  workshopAddress: 'New Delhi, India',
   instagramHandle: '@yourframies',
-  whatsappNumber: '+919876543210',
+  whatsappNumber: '+917900943025',
   accentColor: '#171717',
   currencySymbol: '₹',
   freeShippingThreshold: 999,
@@ -553,6 +686,49 @@ class DataStore {
       )
       ON CONFLICT (email) DO NOTHING;
     `)
+
+    // Seed initial categories if table is empty
+    const catCountRes = await client.query(`SELECT COUNT(*)::int AS count FROM categories`)
+    if ((catCountRes.rows[0]?.count ?? 0) === 0) {
+      for (const cat of INITIAL_CATEGORIES) {
+        await client.query(
+          `INSERT INTO categories (id, name, slug, description, image_url, display_order, is_active)
+           VALUES ($1, $2, $3, $4, $5, $6, $7)
+           ON CONFLICT (id) DO NOTHING`,
+          [cat.id, cat.name, cat.slug, cat.description || '', cat.imageUrl || '', cat.displayOrder || 0, cat.isActive ?? true]
+        )
+      }
+    }
+
+    // Seed initial products if table is empty
+    const prodCountRes = await client.query(`SELECT COUNT(*)::int AS count FROM products`)
+    if ((prodCountRes.rows[0]?.count ?? 0) === 0) {
+      for (const prod of INITIAL_PRODUCTS) {
+        await client.query(
+          `INSERT INTO products (
+             id, category_id, title, slug, description, base_price_inr, compare_at_price_inr,
+             images, available_sizes, available_mouldings, is_customizable, is_active, stock_quantity
+           )
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb, $9::jsonb, $10::jsonb, $11, $12, $13)
+           ON CONFLICT (id) DO NOTHING`,
+          [
+            prod.id,
+            prod.categoryId || null,
+            prod.title,
+            prod.slug,
+            prod.description || '',
+            prod.basePriceINR,
+            prod.compareAtPriceINR || null,
+            JSON.stringify(prod.images || []),
+            JSON.stringify(prod.availableSizes || ['A4']),
+            JSON.stringify(prod.availableMouldings || ['Deep Black', 'Minimalist White']),
+            prod.isCustomizable ?? true,
+            prod.isActive ?? true,
+            prod.stockQuantity ?? 25,
+          ]
+        )
+      }
+    }
   }
 
   public async ensureConnected(): Promise<void> {
@@ -594,29 +770,170 @@ class DataStore {
   // Products
   // ----------------------------------------------------------------------------
   public async getProducts(): Promise<DBProduct[]> {
-    return this.products
+    if (this.pool && this.isPostgresConnected) {
+      try {
+        const res = await this.pool.query(
+          `SELECT id, category_id AS "categoryId", title, slug, description,
+                  base_price_inr AS "basePriceINR", compare_at_price_inr AS "compareAtPriceINR",
+                  images, available_sizes AS "availableSizes", available_mouldings AS "availableMouldings",
+                  is_customizable AS "isCustomizable", is_active AS "isActive",
+                  stock_quantity AS "stockQuantity", created_at AS "createdAt", updated_at AS "updatedAt"
+           FROM products
+           ORDER BY created_at DESC`
+        )
+        if (res.rows.length > 0) {
+          return res.rows.map((row: any) => ({
+            ...row,
+            basePriceINR: Number(row.basePriceINR),
+            compareAtPriceINR: row.compareAtPriceINR ? Number(row.compareAtPriceINR) : undefined,
+            availableSizes: ['A4'],
+            availableMouldings: ['Deep Black', 'Minimalist White'],
+          }))
+        }
+      } catch (err) {
+        console.warn('Postgres getProducts query failed, falling back:', err)
+      }
+    }
+    return this.products.map((p) => ({
+      ...p,
+      availableSizes: ['A4'],
+      availableMouldings: ['Deep Black', 'Minimalist White'],
+    }))
   }
 
   public async getProductBySlug(slug: string): Promise<DBProduct | undefined> {
-    return this.products.find((p) => p.slug === slug || p.id === slug)
+    if (this.pool && this.isPostgresConnected) {
+      try {
+        const res = await this.pool.query(
+          `SELECT id, category_id AS "categoryId", title, slug, description,
+                  base_price_inr AS "basePriceINR", compare_at_price_inr AS "compareAtPriceINR",
+                  images, available_sizes AS "availableSizes", available_mouldings AS "availableMouldings",
+                  is_customizable AS "isCustomizable", is_active AS "isActive",
+                  stock_quantity AS "stockQuantity", created_at AS "createdAt", updated_at AS "updatedAt"
+           FROM products
+           WHERE slug = $1 OR id = $1
+           LIMIT 1`,
+          [slug]
+        )
+        if (res.rows.length > 0) {
+          const row = res.rows[0]
+          return {
+            ...row,
+            basePriceINR: Number(row.basePriceINR),
+            compareAtPriceINR: row.compareAtPriceINR ? Number(row.compareAtPriceINR) : undefined,
+            availableSizes: ['A4'],
+            availableMouldings: ['Deep Black', 'Minimalist White'],
+          }
+        }
+      } catch (err) {
+        console.warn('Postgres getProductBySlug query failed, falling back:', err)
+      }
+    }
+    const found = this.products.find((p) => p.slug === slug || p.id === slug)
+    return found
+      ? {
+          ...found,
+          availableSizes: ['A4'],
+          availableMouldings: ['Deep Black', 'Minimalist White'],
+        }
+      : undefined
   }
 
   public async saveProduct(product: DBProduct): Promise<DBProduct> {
-    const idx = this.products.findIndex((p) => p.id === product.id)
+    const normalized: DBProduct = {
+      ...product,
+      availableSizes: ['A4'],
+      availableMouldings: ['Deep Black', 'Minimalist White'],
+      updatedAt: new Date().toISOString(),
+    }
+
+    if (this.pool && this.isPostgresConnected) {
+      try {
+        const res = await this.pool.query(
+          `INSERT INTO products (
+             id, category_id, title, slug, description, base_price_inr, compare_at_price_inr,
+             images, available_sizes, available_mouldings, is_customizable, is_active, stock_quantity, updated_at
+           )
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb, $9::jsonb, $10::jsonb, $11, $12, $13, NOW())
+           ON CONFLICT (id) DO UPDATE SET
+             category_id = EXCLUDED.category_id,
+             title = EXCLUDED.title,
+             slug = EXCLUDED.slug,
+             description = EXCLUDED.description,
+             base_price_inr = EXCLUDED.base_price_inr,
+             compare_at_price_inr = EXCLUDED.compare_at_price_inr,
+             images = EXCLUDED.images,
+             available_sizes = EXCLUDED.available_sizes,
+             available_mouldings = EXCLUDED.available_mouldings,
+             is_customizable = EXCLUDED.is_customizable,
+             is_active = EXCLUDED.is_active,
+             stock_quantity = EXCLUDED.stock_quantity,
+             updated_at = NOW()
+           RETURNING id, category_id AS "categoryId", title, slug, description,
+                     base_price_inr AS "basePriceINR", compare_at_price_inr AS "compareAtPriceINR",
+                     images, available_sizes AS "availableSizes", available_mouldings AS "availableMouldings",
+                     is_customizable AS "isCustomizable", is_active AS "isActive",
+                     stock_quantity AS "stockQuantity", created_at AS "createdAt", updated_at AS "updatedAt"`,
+          [
+            normalized.id,
+            normalized.categoryId || null,
+            normalized.title,
+            normalized.slug,
+            normalized.description || '',
+            normalized.basePriceINR,
+            normalized.compareAtPriceINR || null,
+            JSON.stringify(normalized.images || []),
+            JSON.stringify(normalized.availableSizes),
+            JSON.stringify(normalized.availableMouldings),
+            normalized.isCustomizable ?? true,
+            normalized.isActive ?? true,
+            normalized.stockQuantity ?? 25,
+          ]
+        )
+        if (res.rows.length > 0) {
+          const saved = {
+            ...res.rows[0],
+            basePriceINR: Number(res.rows[0].basePriceINR),
+            compareAtPriceINR: res.rows[0].compareAtPriceINR ? Number(res.rows[0].compareAtPriceINR) : undefined,
+          }
+          const idx = this.products.findIndex((p) => p.id === saved.id)
+          if (idx >= 0) this.products[idx] = saved
+          else this.products.unshift(saved)
+          this.saveToFile()
+          return saved
+        }
+      } catch (err) {
+        console.warn('Postgres saveProduct query failed, saving in-memory:', err)
+      }
+    }
+
+    const idx = this.products.findIndex((p) => p.id === normalized.id)
     if (idx >= 0) {
-      this.products[idx] = { ...product, updatedAt: new Date().toISOString() }
+      this.products[idx] = normalized
     } else {
       this.products.unshift({
-        ...product,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        ...normalized,
+        createdAt: normalized.createdAt || new Date().toISOString(),
       })
     }
     this.saveToFile()
-    return product
+    return normalized
   }
 
   public async deleteProduct(id: string): Promise<boolean> {
+    if (this.pool && this.isPostgresConnected) {
+      try {
+        const res = await this.pool.query(`DELETE FROM products WHERE id = $1 OR slug = $1`, [id])
+        if ((res.rowCount || 0) > 0) {
+          this.products = this.products.filter((p) => p.id !== id && p.slug !== id)
+          this.saveToFile()
+          return true
+        }
+      } catch (err) {
+        console.warn('Postgres deleteProduct query failed, deleting in-memory:', err)
+      }
+    }
+
     const prevLen = this.products.length
     this.products = this.products.filter((p) => p.id !== id && p.slug !== id)
     this.saveToFile()

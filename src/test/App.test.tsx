@@ -19,7 +19,7 @@ describe('Your Framies E-Commerce App', () => {
 
   it('renders hero banner and call to action', () => {
     render(<App />)
-    expect(screen.getByText(/Artisanal Frames/i)).toBeInTheDocument()
+    expect(screen.getByText(/A4 Wall Art/i)).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /Explore Collections/i })).toBeInTheDocument()
   })
 })

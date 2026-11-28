@@ -15,8 +15,9 @@ import {
   RefreshCw,
   Star,
 } from 'lucide-react'
-import { getStoreProducts } from '../data/products'
-import { getStoreCategories } from '../data/categories'
+import { getStoreProducts, syncProductsFromApi } from '../data/products'
+import { getStoreCategories, syncCategoriesFromApi } from '../data/categories'
+import { getReviewsForProduct } from '../data/reviews'
 import { ProductReviews } from '../components/product/ProductReviews'
 import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
@@ -31,20 +32,26 @@ export const ProductDetailPage: React.FC = () => {
   const { isInWishlist, toggleWishlist } = useWishlist()
 
   const [productsList, setProductsList] = useState(() => getStoreProducts())
+  const [categoriesList, setCategoriesList] = useState(() => getStoreCategories())
 
   useEffect(() => {
     const handleUpdate = () => setProductsList(getStoreProducts())
+    const handleCatUpdate = () => setCategoriesList(getStoreCategories())
     window.addEventListener('yourframies_products_updated', handleUpdate)
-    return () => window.removeEventListener('yourframies_products_updated', handleUpdate)
+    window.addEventListener('yourframies_categories_updated', handleCatUpdate)
+    syncProductsFromApi().then(setProductsList)
+    syncCategoriesFromApi().then(setCategoriesList)
+    return () => {
+      window.removeEventListener('yourframies_products_updated', handleUpdate)
+      window.removeEventListener('yourframies_categories_updated', handleCatUpdate)
+    }
   }, [])
 
   const product = productsList.find((p) => p.slug === slug)
 
   const [activeImageIndex, setActiveImageIndex] = useState(0)
-  const [selectedSize, setSelectedSize] = useState<FrameCustomization['frameSize']>('A4')
+  const [selectedSize] = useState<FrameCustomization['frameSize']>('A4')
   const [selectedMoulding, setSelectedMoulding] = useState<FrameCustomization['moulding']>('Deep Black')
-  const [selectedMat, setSelectedMat] = useState<FrameCustomization['matColor']>('Pure White')
-  const [selectedGlass, setSelectedGlass] = useState<FrameCustomization['glassType']>('Acrylic Glaze')
 
   // Customer Photo Upload State
   const [uploadedPhotoUrl, setUploadedPhotoUrl] = useState<string | null>(null)
@@ -74,13 +81,12 @@ export const ProductDetailPage: React.FC = () => {
     )
   }
 
-  const category = getStoreCategories().find((c) => c.id === product.categoryId)
+  const category = categoriesList.find((c) => c.id === product.categoryId)
   const inWishlist = isInWishlist(product.id)
+  const productReviews = getReviewsForProduct(product.slug, product.title)
 
-  // Price calculations (Handcrafted A4 size standard, zero size surcharge)
-  const sizeAddon = 0
-  const glassAddon = selectedGlass === 'Anti-Glare UV Glass' ? 350 : 0
-  const finalPrice = product.basePriceINR + glassAddon
+  // Price calculations (Standard A4, single price)
+  const finalPrice = product.basePriceINR
 
   const handlePincodeCheck = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -140,8 +146,6 @@ export const ProductDetailPage: React.FC = () => {
         photoUrl: uploadedPhotoUrl || undefined,
         frameSize: selectedSize,
         moulding: selectedMoulding,
-        matColor: selectedMat,
-        glassType: selectedGlass,
       },
       1,
       finalPrice
@@ -236,76 +240,79 @@ export const ProductDetailPage: React.FC = () => {
           {/* Right: Specifications & Purchasing Controls */}
           <div className="lg:col-span-5 space-y-6">
             <div>
-              <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-neutral-400">
-                {category?.name || 'Exclusive Frame'}
+              <span className="text-[11px] font-bold uppercase tracking-widest text-neutral-500">
+                {category?.name || 'A4 Framed Print'}
               </span>
               <h1 className="font-serif text-2xl sm:text-4xl text-neutral-900 mt-1">
                 {product.title}
               </h1>
-              <div className="flex items-center gap-2 mt-2">
-                <a
-                  href="#product-reviews"
-                  className="flex items-center gap-1.5 group"
-                >
-                  <div className="flex items-center gap-0.5">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                    ))}
-                  </div>
-                  <span className="text-xs font-semibold text-neutral-800 group-hover:underline">
-                    4.9 / 5.0
-                  </span>
-                  <span className="text-neutral-400">•</span>
-                  <span className="text-xs text-amber-600 font-semibold group-hover:underline">
-                    Read & Write Reviews
-                  </span>
-                </a>
-              </div>
-              <p className="mt-3 text-xs sm:text-sm text-neutral-600 font-light leading-relaxed">
+              {productReviews.length > 0 && (
+                <div className="flex items-center gap-2 mt-2">
+                  <a href="#product-reviews" className="flex items-center gap-1.5 group">
+                    <div className="flex items-center gap-0.5">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                      ))}
+                    </div>
+                    <span className="text-xs font-semibold text-neutral-800 group-hover:underline">
+                      {(
+                        productReviews.reduce((acc, r) => acc + r.rating, 0) /
+                        productReviews.length
+                      ).toFixed(1)}{' '}
+                      / 5.0
+                    </span>
+                    <span className="text-neutral-400">•</span>
+                    <span className="text-xs text-neutral-700 font-medium group-hover:underline">
+                      {productReviews.length} {productReviews.length === 1 ? 'Review' : 'Reviews'}
+                    </span>
+                  </a>
+                </div>
+              )}
+              <p className="mt-3 text-sm text-neutral-700 leading-relaxed">
                 {product.description}
               </p>
             </div>
 
             {/* Price Display */}
-            <div className="flex items-baseline gap-3 pb-6 border-b border-neutral-200">
+            <div className="flex items-baseline gap-3 pb-5 border-b border-neutral-200 flex-wrap">
               <span className="text-3xl font-bold text-neutral-900">
                 {formatINR(finalPrice)}
               </span>
               {product.compareAtPriceINR && (
                 <span className="text-sm text-neutral-400 line-through">
-                  {formatINR(product.compareAtPriceINR + sizeAddon)}
+                  {formatINR(product.compareAtPriceINR)}
                 </span>
               )}
-              <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">
-                Free Pan-India Delivery
+              <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded">
+                Free Delivery Above ₹999
               </span>
             </div>
 
             {/* 1. Size Specification (A4 Only) */}
             <div>
               <div className="flex justify-between items-center text-xs font-semibold uppercase tracking-wider text-neutral-800 mb-2">
-                <span>1. Frame Dimensions</span>
-                <span className="text-neutral-500 normal-case font-normal text-[11px]">
-                  Standard Atelier A4
+                <span>1. Frame Size</span>
+                <span className="text-neutral-500 normal-case font-normal text-xs">
+                  Standard A4 Only
                 </span>
               </div>
               <div className="p-3.5 bg-neutral-50 border border-neutral-900 rounded-lg flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded bg-neutral-900 text-white flex items-center justify-center font-bold text-xs">
+                  <div className="w-9 h-9 rounded bg-neutral-900 text-white flex items-center justify-center font-bold text-xs shrink-0">
                     A4
                   </div>
                   <div>
-                    <p className="font-bold text-xs text-neutral-900">A4 Classic Art Frame</p>
-                    <p className="text-[11px] text-neutral-500 font-mono mt-0.5">21.0 × 29.7 cm (8.3 × 11.7 in)</p>
+                    <p className="font-bold text-sm text-neutral-900">A4 Frame</p>
+                    <p className="text-xs text-neutral-600 font-mono mt-0.5">21.0 × 29.7 cm (8.3 × 11.7 in)</p>
                   </div>
                 </div>
-                <span className="text-[10px] bg-neutral-200 text-neutral-800 font-semibold px-2 py-0.5 rounded">
-                  Exclusive A4
+                <span className="text-[11px] bg-neutral-200 text-neutral-800 font-semibold px-2.5 py-1 rounded">
+                  Ready to Hang
                 </span>
               </div>
             </div>
 
-            {/* 2. Color / Moulding Selection (Deep Black & Minimalist White Only) */}
+            {/* 2. Color Selection (Deep Black & Minimalist White Only) */}
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-800 mb-2">
                 2. Frame Color
@@ -314,7 +321,7 @@ export const ProductDetailPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setSelectedMoulding('Deep Black')}
-                  className={`p-3 rounded-lg border text-left flex items-center gap-3 transition-all ${
+                  className={`p-3.5 rounded-lg border text-left flex items-center gap-3 transition-all min-h-[56px] ${
                     selectedMoulding === 'Deep Black'
                       ? 'border-neutral-900 bg-neutral-900 text-white shadow-sm ring-1 ring-black'
                       : 'border-neutral-200 text-neutral-800 hover:border-neutral-400 bg-white'
@@ -322,9 +329,9 @@ export const ProductDetailPage: React.FC = () => {
                 >
                   <div className="w-5 h-5 rounded-full bg-black border border-neutral-700 shadow-inner shrink-0" />
                   <div>
-                    <p className="text-xs font-bold leading-tight">Deep Black</p>
-                    <p className={`text-[10px] mt-0.5 ${selectedMoulding === 'Deep Black' ? 'text-neutral-300' : 'text-neutral-500'}`}>
-                      Matte wood finish
+                    <p className="text-xs sm:text-sm font-bold leading-tight">Deep Black</p>
+                    <p className={`text-[11px] mt-0.5 ${selectedMoulding === 'Deep Black' ? 'text-neutral-300' : 'text-neutral-500'}`}>
+                      Matte black finish
                     </p>
                   </div>
                 </button>
@@ -332,7 +339,7 @@ export const ProductDetailPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setSelectedMoulding('Minimalist White')}
-                  className={`p-3 rounded-lg border text-left flex items-center gap-3 transition-all ${
+                  className={`p-3.5 rounded-lg border text-left flex items-center gap-3 transition-all min-h-[56px] ${
                     selectedMoulding === 'Minimalist White'
                       ? 'border-neutral-900 bg-neutral-100 text-neutral-900 shadow-sm ring-2 ring-neutral-900'
                       : 'border-neutral-200 text-neutral-800 hover:border-neutral-400 bg-white'
@@ -340,72 +347,16 @@ export const ProductDetailPage: React.FC = () => {
                 >
                   <div className="w-5 h-5 rounded-full bg-white border border-neutral-300 shadow-sm shrink-0" />
                   <div>
-                    <p className="text-xs font-bold leading-tight">Minimalist White</p>
-                    <p className="text-[10px] text-neutral-500 mt-0.5">
-                      Clean architectural finish
+                    <p className="text-xs sm:text-sm font-bold leading-tight">Minimalist White</p>
+                    <p className="text-[11px] text-neutral-500 mt-0.5">
+                      Clean white finish
                     </p>
                   </div>
                 </button>
               </div>
             </div>
 
-            {/* 3. Mat Option */}
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-800 mb-2">
-                3. Matboard Border
-              </label>
-              <div className="grid grid-cols-3 gap-2">
-                {(['None', 'Pure White', 'Off-White'] as const).map((mat) => (
-                  <button
-                    key={mat}
-                    type="button"
-                    onClick={() => setSelectedMat(mat)}
-                    className={`py-2 px-2 text-center rounded-md border text-xs font-medium transition-all ${
-                      selectedMat === mat
-                        ? 'border-neutral-900 bg-neutral-900 text-white'
-                        : 'border-neutral-200 text-neutral-700 hover:border-black bg-white'
-                    }`}
-                  >
-                    {mat}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* 4. Glass Selector */}
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-800 mb-2">
-                4. Glazing Glass
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setSelectedGlass('Acrylic Glaze')}
-                  className={`p-2.5 rounded-md border text-left text-xs transition-all ${
-                    selectedGlass === 'Acrylic Glaze'
-                      ? 'border-neutral-900 bg-neutral-50 ring-1 ring-black'
-                      : 'border-neutral-200 hover:border-black bg-white'
-                  }`}
-                >
-                  <p className="font-semibold text-neutral-900">Acrylic Glaze</p>
-                  <p className="text-[10px] text-neutral-500">Standard Shatterproof</p>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSelectedGlass('Anti-Glare UV Glass')}
-                  className={`p-2.5 rounded-md border text-left text-xs transition-all ${
-                    selectedGlass === 'Anti-Glare UV Glass'
-                      ? 'border-neutral-900 bg-neutral-50 ring-1 ring-black'
-                      : 'border-neutral-200 hover:border-black bg-white'
-                  }`}
-                >
-                  <p className="font-semibold text-neutral-900">Anti-Glare UV (+₹350)</p>
-                  <p className="text-[10px] text-neutral-500">99% UV Protection</p>
-                </button>
-              </div>
-            </div>
-
-            {/* 5. Custom Photo Upload Section */}
+            {/* 3. Custom Photo Upload Section */}
             <div className="border border-neutral-200 bg-neutral-50/70 p-4 rounded-xl space-y-3">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-semibold uppercase tracking-wider text-neutral-900 flex items-center gap-2">
@@ -520,7 +471,7 @@ export const ProductDetailPage: React.FC = () => {
                     value={pincodeInput}
                     onChange={(e) => setPincodeInput(e.target.value.replace(/\D/g, ''))}
                     placeholder="Enter 6-digit PIN (e.g. 560001, 110001)"
-                    className="w-full pl-9 pr-3 py-2.5 border border-neutral-300 rounded-sm text-xs focus:outline-none focus:ring-1 focus:ring-black"
+                    className="w-full pl-9 pr-3 py-2.5 border border-neutral-300 rounded-sm text-base sm:text-xs focus:outline-none focus:ring-1 focus:ring-black"
                   />
                 </div>
                 <button
@@ -554,33 +505,33 @@ export const ProductDetailPage: React.FC = () => {
                     </div>
                   ) : (
                     <p className="font-semibold">
-                      PIN Code is currently unserviceable for fragile glass frames. Please contact support.
+                      PIN code is currently unserviceable for delivery. Please contact support.
                     </p>
                   )}
                 </div>
               )}
             </div>
 
-            {/* Atelier Guarantees */}
-            <div className="pt-6 border-t border-neutral-200 grid grid-cols-2 gap-4 text-xs text-neutral-600">
+            {/* Guarantees */}
+            <div className="pt-6 border-t border-neutral-200 grid grid-cols-2 gap-4 text-xs text-neutral-700">
               <div className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-neutral-800" />
-                <span>Zero-Breakage Transit Guarantee</span>
+                <ShieldCheck className="w-4 h-4 text-neutral-900 shrink-0" />
+                <span>Damage Replacement Guarantee</span>
               </div>
               <div className="flex items-center gap-2">
-                <Truck className="w-4 h-4 text-neutral-800" />
-                <span>Insured Pan-India Express Courier</span>
+                <Truck className="w-4 h-4 text-neutral-900 shrink-0" />
+                <span>Tracked Pan-India Delivery</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Customer Reviews & Write-A-Review Mechanism */}
+        {/* Customer Reviews & Write-A-Review */}
         <ProductReviews product={product} />
       </div>
 
       {/* Sticky Mobile Add-to-Bag Bar */}
-      <div className="sm:hidden fixed bottom-16 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-neutral-200/90 p-3 shadow-lg flex items-center justify-between gap-3">
+      <div className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-neutral-200/90 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] shadow-[0_-4px_20px_rgba(0,0,0,0.08)] flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
           <img
             src={product.images[0]}
@@ -588,9 +539,9 @@ export const ProductDetailPage: React.FC = () => {
             className="w-10 h-10 object-cover rounded border border-neutral-200 shrink-0"
           />
           <div className="min-w-0">
-            <div className="text-sm font-bold text-neutral-900">{formatINR(finalPrice)}</div>
-            <div className="text-[10px] text-neutral-500 truncate">
-              {selectedSize}" • {selectedMoulding}
+            <div className="text-base font-bold text-neutral-900 leading-tight">{formatINR(finalPrice)}</div>
+            <div className="text-xs text-neutral-600 truncate">
+              A4 • {selectedMoulding}
             </div>
           </div>
         </div>
@@ -598,9 +549,9 @@ export const ProductDetailPage: React.FC = () => {
         <button
           type="button"
           onClick={handleAddToCart}
-          className="py-2.5 px-5 bg-neutral-950 text-white text-xs uppercase tracking-widest font-semibold rounded-sm shadow-md active:scale-95 transition-transform flex items-center gap-1.5 shrink-0"
+          className="py-3 px-5 min-h-[44px] bg-neutral-950 text-white text-xs uppercase tracking-widest font-semibold rounded-sm shadow-md active:scale-95 transition-transform flex items-center gap-1.5 shrink-0"
         >
-          <ShoppingBag className="w-3.5 h-3.5" />
+          <ShoppingBag className="w-4 h-4" />
           <span>Add To Bag</span>
         </button>
       </div>

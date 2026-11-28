@@ -4,55 +4,55 @@ import { Shield, Sparkles, Truck, RefreshCcw } from 'lucide-react'
 export const WhyChooseUs: React.FC = () => {
   const pillars = [
     {
-      icon: <Shield className="w-7 h-7 text-neutral-900" />,
-      title: 'Museum-Quality Craftsmanship',
-      desc: 'Precision corner splines, FSC-certified solid pinewood, and archival 300 GSM fine art giclée printing.',
+      icon: <Shield className="w-6 h-6 text-neutral-900" />,
+      title: 'Standard A4 Size',
+      desc: 'Every artwork and custom photo arrives in a clean 21 × 29.7 cm A4 frame ready to hang on your wall or place on a desk.',
     },
     {
-      icon: <Sparkles className="w-7 h-7 text-neutral-900" />,
-      title: 'Shatterproof Anti-Glare Glaze',
-      desc: 'Optical-grade acrylic that eliminates reflections and ensures 100% safe transit to your doorstep.',
+      icon: <Sparkles className="w-6 h-6 text-neutral-900" />,
+      title: 'Deep Black & Minimalist White',
+      desc: 'Focused on two clean finishes crafted to complement both bold automotive prints and quiet minimalist interiors.',
     },
     {
-      icon: <Truck className="w-7 h-7 text-neutral-900" />,
-      title: 'Free Express Pan-India Delivery',
-      desc: 'Dispatched via premium express couriers (Delhivery, Shiprocket) with end-to-end tracking updates.',
+      icon: <Truck className="w-6 h-6 text-neutral-900" />,
+      title: 'Express Pan-India Delivery',
+      desc: 'Dispatched with protective packaging and live order tracking across serviceable Indian PIN codes.',
     },
     {
-      icon: <RefreshCcw className="w-7 h-7 text-neutral-900" />,
-      title: 'Zero-Risk Transit Guarantee',
-      desc: 'If your frame arrives damaged or misaligned in any way, we ship a brand-new replacement within 48 hours.',
+      icon: <RefreshCcw className="w-6 h-6 text-neutral-900" />,
+      title: 'Damage Replacement Guarantee',
+      desc: 'If a frame arrives damaged in transit, send us a photo within 48 hours and we ship a free replacement.',
     },
   ]
 
   return (
-    <section className="py-12 sm:py-20 bg-neutral-50 border-b border-neutral-200">
+    <section className="py-10 sm:py-16 bg-neutral-50 border-b border-neutral-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-16">
-          <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-neutral-400">
-            The Atelier Standard
+        <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-12">
+          <span className="text-[11px] font-bold uppercase tracking-widest text-neutral-500">
+            Why Your Framies
           </span>
           <h2 className="font-serif text-2xl sm:text-4xl text-neutral-900 mt-1">
-            Why Discerning Collectors Choose Us
+            Built Clean. Ready to Hang.
           </h2>
-          <p className="mt-2 sm:mt-3 text-xs sm:text-sm text-neutral-500">
-            Every frame is assembled by master framers with meticulous attention to joint geometry, colour depth, and preservation.
+          <p className="mt-2 sm:mt-3 text-sm text-neutral-600 leading-relaxed">
+            Consistent A4 sizing, crisp print clarity, and protective Pan-India shipping on every frame.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {pillars.map((p, idx) => (
             <div
               key={idx}
-              className="bg-white p-5 sm:p-8 rounded-xl border border-neutral-200/80 shadow-xs flex flex-col items-start hover:-translate-y-1 transition-transform"
+              className="bg-white p-5 sm:p-6 rounded-xl border border-neutral-200/80 shadow-xs flex flex-col items-start"
             >
-              <div className="w-12 h-12 rounded-lg bg-neutral-100 flex items-center justify-center mb-5">
+              <div className="w-11 h-11 rounded-lg bg-neutral-100 flex items-center justify-center mb-4">
                 {p.icon}
               </div>
               <h3 className="text-sm font-semibold uppercase tracking-wider text-neutral-900 mb-2">
                 {p.title}
               </h3>
-              <p className="text-xs text-neutral-500 leading-relaxed font-light">{p.desc}</p>
+              <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed">{p.desc}</p>
             </div>
           ))}
         </div>

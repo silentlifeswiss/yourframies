@@ -88,11 +88,11 @@ export const Navbar: React.FC = () => {
             {/* Center: Brand Logo */}
             <div className="flex-1 text-center lg:flex-initial">
               <Link to="/" className="inline-flex flex-col items-center group">
-                <span className="font-serif text-lg sm:text-3xl font-light tracking-widest text-neutral-900 uppercase">
+                <span className="font-serif text-lg sm:text-3xl font-normal tracking-widest text-neutral-900 uppercase">
                   Your Framies
                 </span>
-                <span className="text-[8px] sm:text-[9px] tracking-[0.25em] sm:tracking-[0.3em] uppercase text-neutral-600 font-sans mt-0.5">
-                  Artisanal Wall Framing
+                <span className="text-[9px] tracking-[0.2em] sm:tracking-[0.25em] uppercase text-neutral-600 font-sans mt-0.5">
+                  A4 Frames • Black & White
                 </span>
               </Link>
             </div>
@@ -206,8 +206,8 @@ export const Navbar: React.FC = () => {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search frames by name, style, car model (e.g. Porsche, Minimalist, Collage)..."
-                  className="w-full pl-12 pr-10 py-3 rounded-full border border-neutral-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all"
+                  placeholder="Search frames by name, style, car model (e.g. Porsche, Fern, Collage)..."
+                  className="w-full pl-12 pr-10 py-3 rounded-full border border-neutral-300 bg-white text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all"
                   autoFocus
                 />
                 <button

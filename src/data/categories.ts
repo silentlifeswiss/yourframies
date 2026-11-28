@@ -13,54 +13,54 @@ export const CATEGORIES: Category[] = [
     id: 'cat-car-frames',
     name: 'Car Photo Frames',
     slug: 'car-photo-frames',
-    description: 'Iconic automotive photography, legendary supercars, and classic motorsport frames for enthusiasts.',
+    description: 'High-contrast supercars, Tokyo night shoots, and classic motorsport prints framed in A4.',
     imageUrl: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=800&q=80',
-    itemCount: 18,
+    itemCount: 3,
     featured: true,
   },
   {
     id: 'cat-aesthetic-frames',
     name: 'Aesthetic Photo Frames',
     slug: 'aesthetic-photo-frames',
-    description: 'Minimalist Scandinavian line art, soothing architectural geometry, and tranquil botanical prints.',
+    description: 'Clean botanical prints and calm architectural art ready to hang in A4.',
     imageUrl: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=80',
-    itemCount: 24,
+    itemCount: 2,
     featured: true,
   },
   {
     id: 'cat-personalised-frames',
     name: 'Personalised Photo Frames',
     slug: 'personalised-photo-frames',
-    description: 'Transform your cherished memories, wedding moments, and travel milestones into timeless framed art.',
+    description: 'Turn your photos, collages, and song keepsakes into A4 wall frames.',
     imageUrl: 'https://images.unsplash.com/photo-1544717302-de2939b7ef71?auto=format&fit=crop&w=800&q=80',
-    itemCount: 15,
+    itemCount: 2,
     featured: true,
   },
   {
     id: 'cat-custom-frames',
     name: 'Custom Photo Frames',
     slug: 'custom-photo-frames',
-    description: 'Studio-grade bespoke framing. Choose custom sizes, handcrafted wood mouldings, mats, and museum glass.',
+    description: 'Upload any photo and preview it live in Deep Black or Minimalist White A4 frames.',
     imageUrl: 'https://images.unsplash.com/photo-1582561424760-0321d75e81fa?auto=format&fit=crop&w=800&q=80',
-    itemCount: 30,
+    itemCount: 1,
     featured: true,
   },
   {
     id: 'cat-posters',
     name: 'Posters & Typography',
     slug: 'posters',
-    description: 'Bold typographic quotes, retro cinema prints, and modern contemporary art on heavyweight paper.',
+    description: 'Crisp typography quotes and graphic prints framed in standard A4.',
     imageUrl: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=800&q=80',
-    itemCount: 20,
+    itemCount: 1,
     featured: false,
   },
   {
     id: 'cat-wall-art',
     name: 'Wall Art Collections',
     slug: 'wall-art',
-    description: 'Curated 3-piece gallery wall sets, oversized canvas frames, and panoramic landscape series.',
+    description: 'Matching 3-piece A4 frame sets built for clean bedroom and workspace walls.',
     imageUrl: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=800&q=80',
-    itemCount: 12,
+    itemCount: 1,
     featured: false,
   },
 ]
@@ -87,4 +87,20 @@ export function saveStoreCategories(categories: Category[]): void {
   } catch (e) {
     console.error('Error saving categories:', e)
   }
+}
+
+export async function syncCategoriesFromApi(): Promise<Category[]> {
+  try {
+    const res = await fetch('/api/categories')
+    if (res.ok) {
+      const json = await res.json()
+      if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+        saveStoreCategories(json.data)
+        return json.data
+      }
+    }
+  } catch {
+    // Offline fallback
+  }
+  return getStoreCategories()
 }

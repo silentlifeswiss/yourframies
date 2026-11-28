@@ -6,28 +6,24 @@ export const FaqPage: React.FC = () => {
 
   const faqs = [
     {
-      q: 'What materials are used for the frames and prints?',
-      a: 'We use 100% solid natural timber (FSC-certified pinewood, seasoned teak, and American walnut). Our prints are rendered with 12-color archival giclée inks on 300 GSM acid-free cotton rag paper, ensuring colors remain true for generations.',
+      q: 'What frame sizes and colors do you offer?',
+      a: 'We craft all our frames in standard A4 size (21.0 × 29.7 cm / 8.3 × 11.7 in) and offer two clean finishes: Deep Black and Minimalist White.',
     },
     {
-      q: 'What is the difference between Acrylic Glaze and Anti-Glare Glass?',
-      a: 'Our standard Acrylic Glaze is optical-grade, shatterproof, lightweight, and 100% transit-safe. The optional Museum Anti-Glare UV Glass features specialized optical coating that eliminates surface glare under room lights while filtering 99% of harmful UV rays.',
-    },
-    {
-      q: 'How does the Live Customizer photo upload work?',
-      a: 'You can upload high-resolution photos (JPG, PNG, WebP up to 15MB) directly from your phone or PC. Our visualizer lets you preview your image mounted in different frame mouldings, sizes, and matboard borders. Before printing, our master framers review resolution and aspect ratio.',
+      q: 'How does the Custom Photo Upload work?',
+      a: 'Upload a high-resolution photo (JPG, PNG, or WebP) directly from your phone or computer on any customizable product or on the Custom Frame Builder page. You can preview how it looks in Deep Black or Minimalist White right away before ordering.',
     },
     {
       q: 'What happens if my frame arrives damaged during transit?',
-      a: 'We offer an unconditional Zero-Risk Transit Guarantee. Every frame is shipped in multi-layer bubble cushioning with corner caps and industrial double-fluted cardboard. In the rare event of transit damage, simply WhatsApp us a photo within 48 hours and we immediately dispatch a brand-new replacement free of cost.',
+      a: 'Every frame is packed in protective cushioning and corrugated boxes. If your frame arrives damaged, send a photo on WhatsApp (+91 79009 43025) or email silentlifeswiss@gmail.com within 48 hours of delivery and we will send a free replacement.',
     },
     {
       q: 'Do you offer Cash on Delivery (COD)?',
-      a: 'Yes, Cash on Delivery is available across serviceable Indian PIN codes. To minimize RTO (Return to Origin) risks, COD orders are verified via phone/OTP and carry a nominal ₹50 handling charge.',
+      a: 'Yes, Cash on Delivery is available across serviceable Indian PIN codes with a nominal ₹50 handling fee. Orders of ₹999 or above qualify for free shipping.',
     },
     {
       q: 'How long does delivery take across India?',
-      a: 'Standard dispatch takes 24 to 48 hours from our Bengaluru atelier. Delivery to metros (Delhi, Mumbai, Bengaluru, Hyderabad, Chennai) takes 2 to 3 days, and rest of India takes 3 to 5 business days via insured express delivery.',
+      a: 'Orders dispatch within 24 to 48 hours. Delivery usually takes 2 to 3 business days in major metro cities and 3 to 5 business days across the rest of India.',
     },
   ]
 

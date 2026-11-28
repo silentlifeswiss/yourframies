@@ -21,7 +21,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     addToCart(product, {
       frameSize: 'A4',
       moulding: 'Deep Black',
-      glassType: 'Acrylic Glaze',
     })
   }
 
@@ -39,6 +38,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             alt={product.title}
             className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out"
             loading="lazy"
+            decoding="async"
           />
         </Link>
 

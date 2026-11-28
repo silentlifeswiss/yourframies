@@ -9,9 +9,10 @@ export const MobileBottomNav: React.FC = () => {
   const { itemCount, setIsCartOpen } = useCart()
   const { wishlistCount } = useWishlist()
 
-  // Hide bottom bar during checkout or on admin pages
+  // Hide bottom bar during checkout, product detail sticky CTA, or on admin pages
   const isHidden =
     location.pathname.startsWith('/checkout') ||
+    location.pathname.startsWith('/product/') ||
     location.pathname.startsWith('/admin') ||
     location.pathname.startsWith('/order-confirmation')
 

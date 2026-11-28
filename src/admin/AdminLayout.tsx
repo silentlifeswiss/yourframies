@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard,
   Layers,
@@ -73,8 +73,7 @@ export const AdminLayout: React.FC = () => {
   // Protect Admin Portal
   if (!isAuthenticated || !adminUser) {
     const loginTarget = window.location.pathname.startsWith('/admin') ? '/admin/login' : `${ADMIN_CONFIG.basePath}/login`
-    navigate(loginTarget)
-    return null
+    return <Navigate to={loginTarget} replace />
   }
 
   const handlePublish = () => {

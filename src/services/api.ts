@@ -188,10 +188,10 @@ export const api = {
     return res.json()
   },
 
-  async adminSaveProduct(product: any) {
-    const isEdit = Boolean(product.id && !product.id.startsWith('yf-new'))
-    const endpoint = isEdit ? `${API_BASE}/admin/products/${product.id}` : `${API_BASE}/admin/products`
-    const method = isEdit ? 'PUT' : 'POST'
+  async adminSaveProduct(product: any, isEdit?: boolean) {
+    const editing = isEdit !== undefined ? isEdit : Boolean(product.id && !product.id.startsWith('yf-new'))
+    const endpoint = editing ? `${API_BASE}/admin/products/${encodeURIComponent(product.id)}` : `${API_BASE}/admin/products`
+    const method = editing ? 'PUT' : 'POST'
 
     const res = await fetch(endpoint, {
       method,
@@ -209,10 +209,10 @@ export const api = {
     return res.json()
   },
 
-  async adminSaveCategory(category: any) {
-    const isEdit = Boolean(category.id && !category.id.startsWith('cat-new') && !category.id.startsWith('cat-temp'))
-    const endpoint = isEdit ? `${API_BASE}/admin/categories/${encodeURIComponent(category.id)}` : `${API_BASE}/admin/categories`
-    const method = isEdit ? 'PUT' : 'POST'
+  async adminSaveCategory(category: any, isEdit?: boolean) {
+    const editing = isEdit !== undefined ? isEdit : Boolean(category.id && !category.id.startsWith('cat-new') && !category.id.startsWith('cat-temp'))
+    const endpoint = editing ? `${API_BASE}/admin/categories/${encodeURIComponent(category.id)}` : `${API_BASE}/admin/categories`
+    const method = editing ? 'PUT' : 'POST'
 
     const res = await fetch(endpoint, {
       method,

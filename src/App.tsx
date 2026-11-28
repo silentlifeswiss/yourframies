@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { Suspense, lazy } from 'react'
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
 import { CartProvider } from './context/CartContext'
 import { WishlistProvider } from './context/WishlistContext'
@@ -17,27 +17,35 @@ import { CartDrawer } from './components/cart/CartDrawer'
 import { MobileBottomNav } from './components/layout/MobileBottomNav'
 import { ScrollToTop } from './components/common/ScrollToTop'
 
-// Public Store Pages
+// Primary Home Route (eager for instant First Contentful Paint)
 import { HomePage } from './pages/HomePage'
-import { ShopPage } from './pages/ShopPage'
-import { ProductDetailPage } from './pages/ProductDetailPage'
-import { CustomizerPage } from './pages/CustomizerPage'
-import { CartPage } from './pages/CartPage'
-import { CheckoutPage } from './pages/CheckoutPage'
-import { OrderConfirmationPage } from './pages/OrderConfirmationPage'
-import { OrderTrackingPage } from './pages/OrderTrackingPage'
-import { LoginPage } from './pages/LoginPage'
-import { RegisterPage } from './pages/RegisterPage'
-import { AccountPage } from './pages/AccountPage'
-import { WishlistPage } from './pages/WishlistPage'
-import { AboutPage } from './pages/AboutPage'
-import { ContactPage } from './pages/ContactPage'
-import { FaqPage } from './pages/FaqPage'
-import { PolicyPage } from './pages/PolicyPage'
 
-// Private Dedicated Admin Portal
-import { AdminLayout } from './admin/AdminLayout'
-import { AdminLogin } from './admin/AdminLogin'
+// Code-split secondary routes & admin portal for fast mobile loading
+const ShopPage = lazy(() => import('./pages/ShopPage').then((m) => ({ default: m.ShopPage })))
+const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage').then((m) => ({ default: m.ProductDetailPage })))
+const CustomizerPage = lazy(() => import('./pages/CustomizerPage').then((m) => ({ default: m.CustomizerPage })))
+const CartPage = lazy(() => import('./pages/CartPage').then((m) => ({ default: m.CartPage })))
+const CheckoutPage = lazy(() => import('./pages/CheckoutPage').then((m) => ({ default: m.CheckoutPage })))
+const OrderConfirmationPage = lazy(() => import('./pages/OrderConfirmationPage').then((m) => ({ default: m.OrderConfirmationPage })))
+const OrderTrackingPage = lazy(() => import('./pages/OrderTrackingPage').then((m) => ({ default: m.OrderTrackingPage })))
+const LoginPage = lazy(() => import('./pages/LoginPage').then((m) => ({ default: m.LoginPage })))
+const RegisterPage = lazy(() => import('./pages/RegisterPage').then((m) => ({ default: m.RegisterPage })))
+const AccountPage = lazy(() => import('./pages/AccountPage').then((m) => ({ default: m.AccountPage })))
+const WishlistPage = lazy(() => import('./pages/WishlistPage').then((m) => ({ default: m.WishlistPage })))
+const AboutPage = lazy(() => import('./pages/AboutPage').then((m) => ({ default: m.AboutPage })))
+const ContactPage = lazy(() => import('./pages/ContactPage').then((m) => ({ default: m.ContactPage })))
+const FaqPage = lazy(() => import('./pages/FaqPage').then((m) => ({ default: m.FaqPage })))
+const PolicyPage = lazy(() => import('./pages/PolicyPage').then((m) => ({ default: m.PolicyPage })))
+
+// Private Dedicated Admin Portal (completely isolated from storefront bundle)
+const AdminLayout = lazy(() => import('./admin/AdminLayout').then((m) => ({ default: m.AdminLayout })))
+const AdminLogin = lazy(() => import('./admin/AdminLogin').then((m) => ({ default: m.AdminLogin })))
+
+const RouteFallback: React.FC = () => (
+  <div className="min-h-[50vh] flex items-center justify-center p-8">
+    <div className="w-6 h-6 border-2 border-neutral-300 border-t-neutral-900 rounded-full animate-spin" aria-label="Loading" />
+  </div>
+)
 
 const AppContent: React.FC = () => {
   const location = useLocation()
@@ -47,12 +55,14 @@ const AppContent: React.FC = () => {
 
   if (isAdminRoute) {
     return (
-      <Routes>
-        <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/admin/*" element={<AdminLayout />} />
-        <Route path={`${ADMIN_CONFIG.basePath}/login`} element={<AdminLogin />} />
-        <Route path={`${ADMIN_CONFIG.basePath}/*`} element={<AdminLayout />} />
-      </Routes>
+      <Suspense fallback={<div className="min-h-screen bg-neutral-950 flex items-center justify-center text-neutral-400 text-xs">Loading admin...</div>}>
+        <Routes>
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/*" element={<AdminLayout />} />
+          <Route path={`${ADMIN_CONFIG.basePath}/login`} element={<AdminLogin />} />
+          <Route path={`${ADMIN_CONFIG.basePath}/*`} element={<AdminLayout />} />
+        </Routes>
+      </Suspense>
     )
   }
 
@@ -63,27 +73,29 @@ const AppContent: React.FC = () => {
       <CartDrawer />
 
       <main className="flex-1 pb-16 lg:pb-0">
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/shop" element={<ShopPage />} />
-          <Route path="/product/:slug" element={<ProductDetailPage />} />
-          <Route path="/customize" element={<CustomizerPage />} />
-          <Route path="/cart" element={<CartPage />} />
-          <Route path="/checkout" element={<CheckoutPage />} />
-          <Route path="/order-confirmation/:orderNumber" element={<OrderConfirmationPage />} />
-          <Route path="/track-order" element={<OrderTrackingPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/account" element={<AccountPage />} />
-          <Route path="/wishlist" element={<WishlistPage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/contact" element={<ContactPage />} />
-          <Route path="/faqs" element={<FaqPage />} />
-          <Route path="/policy/:type" element={<PolicyPage />} />
-          <Route path="/policy" element={<PolicyPage />} />
-          {/* Catch-all unknown routes redirect to home */}
-          <Route path="*" element={<HomePage />} />
-        </Routes>
+        <Suspense fallback={<RouteFallback />}>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/shop" element={<ShopPage />} />
+            <Route path="/product/:slug" element={<ProductDetailPage />} />
+            <Route path="/customize" element={<CustomizerPage />} />
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/order-confirmation/:orderNumber" element={<OrderConfirmationPage />} />
+            <Route path="/track-order" element={<OrderTrackingPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/account" element={<AccountPage />} />
+            <Route path="/wishlist" element={<WishlistPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/faqs" element={<FaqPage />} />
+            <Route path="/policy/:type" element={<PolicyPage />} />
+            <Route path="/policy" element={<PolicyPage />} />
+            {/* Catch-all unknown routes redirect to home */}
+            <Route path="*" element={<HomePage />} />
+          </Routes>
+        </Suspense>
       </main>
 
       <MobileBottomNav />

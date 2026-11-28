@@ -23,16 +23,12 @@ export const FrameCustomizer: React.FC<FrameCustomizerProps> = ({
   const [photoName, setPhotoName] = useState<string>('sample-artwork.jpg')
 
   // Customization State (A4 Exclusive & Deep Black / Minimalist White)
-  const [frameSize, setFrameSize] = useState<FrameCustomization['frameSize']>('A4')
+  const [frameSize] = useState<FrameCustomization['frameSize']>('A4')
   const [moulding, setMoulding] = useState<FrameCustomization['moulding']>('Deep Black')
-  const [matColor, setMatColor] = useState<FrameCustomization['matColor']>('Pure White')
-  const [glassType, setGlassType] = useState<FrameCustomization['glassType']>('Acrylic Glaze')
 
   // Pricing configuration
   const basePrice = baseProduct ? baseProduct.basePriceINR : 1299
-  const sizeAddon = 0
-  const glassAddon = glassType === 'Anti-Glare UV Glass' ? 350 : 0
-  const finalPrice = basePrice + glassAddon
+  const finalPrice = basePrice
 
   // Handle Photo Upload
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -74,28 +70,12 @@ export const FrameCustomizer: React.FC<FrameCustomizerProps> = ({
     }
   }
 
-  // Mat Board Padding & Background
-  const getMatStyle = () => {
-    switch (matColor) {
-      case 'None':
-        return 'p-0'
-      case 'Pure White':
-        return 'p-5 sm:p-8 bg-neutral-50 shadow-inner'
-      case 'Off-White':
-        return 'p-5 sm:p-8 bg-[#f7f5f0] shadow-inner'
-      case 'Jet Black':
-        return 'p-5 sm:p-8 bg-neutral-950 shadow-inner'
-      default:
-        return 'p-6 bg-white'
-    }
-  }
-
   const handleAddToCart = () => {
     const targetProduct: Product = baseProduct || {
       id: 'custom-bespoke-frame',
-      title: isCustomPhoto ? `Personalised Studio Frame (${photoName})` : 'Bespoke Studio Custom Frame',
+      title: isCustomPhoto ? `Custom A4 Frame (${photoName})` : 'Custom A4 Photo Frame',
       slug: 'custom-studio-frame',
-      description: `Custom ${frameSize} frame crafted in ${moulding} with ${matColor} matting and ${glassType}.`,
+      description: `A4 frame in ${moulding}.`,
       basePriceINR: basePrice,
       images: [uploadedImage],
       availableSizes: ['A4'],
@@ -110,8 +90,6 @@ export const FrameCustomizer: React.FC<FrameCustomizerProps> = ({
       {
         frameSize,
         moulding,
-        matColor,
-        glassType,
         photoUrl: uploadedImage,
       },
       1,
@@ -122,43 +100,31 @@ export const FrameCustomizer: React.FC<FrameCustomizerProps> = ({
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-10 items-start">
       {/* Left: Interactive Real-Time Visualizer Canvas */}
       <div className="lg:col-span-7 flex flex-col items-center">
-        <div className="w-full bg-neutral-100/80 rounded-2xl p-4 sm:p-12 flex items-center justify-center min-h-[320px] sm:min-h-[520px] relative border border-neutral-200">
-          {/* Wall Hanging Shadow & 2D Realistic Frame Bevel */}
+        <div className="w-full bg-neutral-100/80 rounded-2xl p-6 sm:p-12 flex items-center justify-center min-h-[300px] sm:min-h-[480px] relative border border-neutral-200">
+          {/* Wall Hanging Shadow & Direct A4 Frame (No Matboard Border) */}
           <div
-            className={`transition-all duration-300 relative max-w-[92%] sm:max-w-[440px] w-full flex items-center justify-center ${getMouldingStyle()}`}
+            className={`transition-all duration-300 relative max-w-[85%] sm:max-w-[380px] w-full flex items-center justify-center ${getMouldingStyle()}`}
             style={{
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.4), 0 10px 15px -3px rgba(0, 0, 0, 0.2)',
+              boxShadow: '0 22px 45px -12px rgba(0, 0, 0, 0.35), 0 8px 14px -3px rgba(0, 0, 0, 0.18)',
             }}
           >
-            {/* Matboard Mount */}
-            <div className={`w-full transition-all duration-300 ${getMatStyle()}`}>
-              {/* Photo Area */}
-              <div className="relative overflow-hidden aspect-[3/4] bg-neutral-200 shadow-sm">
-                <img
-                  src={uploadedImage}
-                  alt="Customized Artwork Preview"
-                  className="w-full h-full object-cover transition-all"
-                />
-
-                {/* Glaze Reflection Simulation */}
-                <div
-                  className={`absolute inset-0 pointer-events-none transition-opacity duration-300 ${
-                    glassType === 'Anti-Glare UV Glass'
-                      ? 'opacity-10 bg-gradient-to-tr from-transparent via-sky-200 to-transparent'
-                      : 'opacity-25 bg-gradient-to-tr from-transparent via-white to-transparent'
-                  }`}
-                />
-              </div>
+            {/* Photo Area directly inside frame */}
+            <div className="w-full relative overflow-hidden aspect-[3/4] bg-neutral-200">
+              <img
+                src={uploadedImage}
+                alt="Customized Artwork Preview"
+                className="w-full h-full object-cover transition-all"
+              />
             </div>
           </div>
 
           {/* Quick Info Pill */}
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 px-3 py-1 sm:px-4 sm:py-1.5 rounded-full bg-white/90 backdrop-blur-md border border-neutral-200 shadow-sm text-[10px] sm:text-[11px] font-medium text-neutral-600 tracking-wider uppercase flex items-center gap-2 whitespace-nowrap">
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 px-3.5 py-1.5 rounded-full bg-white/95 backdrop-blur-md border border-neutral-200 shadow-sm text-[11px] font-medium text-neutral-700 tracking-wider uppercase flex items-center gap-2 whitespace-nowrap">
             <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-            Live Preview • {frameSize === 'A4' ? 'A4 Frame' : `${frameSize}"`} • {moulding}
+            Live Preview • A4 • {moulding}
           </div>
         </div>
 
@@ -195,54 +161,54 @@ export const FrameCustomizer: React.FC<FrameCustomizerProps> = ({
       {/* Right: Customization Controls */}
       <div className="lg:col-span-5 space-y-6 sm:space-y-7 bg-white p-4 sm:p-8 rounded-2xl border border-neutral-200 shadow-sm">
         <div>
-          <span className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
-            Bespoke Customizer
+          <span className="text-[11px] font-bold tracking-widest text-neutral-500 uppercase">
+            Custom Frame Builder
           </span>
-          <h2 className="text-2xl font-serif text-neutral-900 mt-1">Design Your Perfect Frame</h2>
-          <p className="text-xs text-neutral-500 mt-1">
-            Hand-assembled with sustainably sourced wood and archival cotton giclée prints.
+          <h2 className="text-2xl font-serif text-neutral-900 mt-1">Frame Your Photo</h2>
+          <p className="text-sm text-neutral-600 mt-1">
+            Upload your photo and choose between Deep Black or Minimalist White A4 finish.
           </p>
         </div>
 
         {/* 1. Frame Size Selector */}
         <div>
-          <div className="flex justify-between items-center text-xs font-semibold uppercase tracking-wider text-neutral-800 mb-2.5">
-            <span>1. Frame Dimensions</span>
-            <span className="text-neutral-500 normal-case font-normal text-[11px]">
-              Standard Atelier A4
+          <div className="flex justify-between items-center text-xs font-semibold uppercase tracking-wider text-neutral-800 mb-2">
+            <span>1. Frame Size</span>
+            <span className="text-neutral-500 normal-case font-normal text-xs">
+              Standard A4 Only
             </span>
           </div>
           <div className="p-3 bg-neutral-50 border border-neutral-900 rounded-lg flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded bg-neutral-900 text-white flex items-center justify-center font-bold text-xs">
+              <div className="w-8 h-8 rounded bg-neutral-900 text-white flex items-center justify-center font-bold text-xs shrink-0">
                 A4
               </div>
               <div>
-                <p className="font-bold text-xs text-neutral-900">A4 Classic Art Frame</p>
-                <p className="text-[11px] text-neutral-500 font-mono mt-0.5">21.0 × 29.7 cm (8.3 × 11.7 in)</p>
+                <p className="font-bold text-sm text-neutral-900">A4 Frame</p>
+                <p className="text-xs text-neutral-600 font-mono mt-0.5">21.0 × 29.7 cm (8.3 × 11.7 in)</p>
               </div>
             </div>
-            <span className="text-[10px] bg-neutral-200 text-neutral-800 font-semibold px-2 py-0.5 rounded">
-              Exclusive A4
+            <span className="text-[11px] bg-neutral-200 text-neutral-800 font-semibold px-2 py-0.5 rounded">
+              Ready to Hang
             </span>
           </div>
         </div>
 
-        {/* 2. Moulding Timber Selector */}
+        {/* 2. Frame Color Selector */}
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-800 mb-2.5">
             2. Frame Color: <span className="text-neutral-900 font-bold">{moulding}</span>
           </label>
           <div className="grid grid-cols-2 gap-3">
             {[
-              { name: 'Deep Black', color: '#171717', desc: 'Matte gallery finish' },
-              { name: 'Minimalist White', color: '#ffffff', desc: 'Clean architectural finish' },
+              { name: 'Deep Black', color: '#171717', desc: 'Matte black finish' },
+              { name: 'Minimalist White', color: '#ffffff', desc: 'Clean white finish' },
             ].map((item) => (
               <button
                 key={item.name}
                 type="button"
                 onClick={() => setMoulding(item.name as any)}
-                className={`flex items-center gap-3 p-3 rounded-lg border text-xs font-medium text-left transition-all ${
+                className={`flex items-center gap-3 p-3 rounded-lg border text-xs font-medium text-left transition-all min-h-[56px] ${
                   moulding === item.name
                     ? 'border-neutral-900 bg-neutral-100 ring-2 ring-neutral-900 shadow-sm'
                     : 'border-neutral-200 hover:border-neutral-400 bg-white'
@@ -254,95 +220,10 @@ export const FrameCustomizer: React.FC<FrameCustomizerProps> = ({
                 />
                 <div>
                   <span className="block font-bold text-neutral-900">{item.name}</span>
-                  <span className="block text-[10px] text-neutral-500">{item.desc}</span>
+                  <span className="block text-[11px] text-neutral-500">{item.desc}</span>
                 </div>
               </button>
             ))}
-          </div>
-        </div>
-
-        {/* 3. Mat / Mount Board Selector */}
-        <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-800 mb-2.5">
-            3. Passe-Partout Matting: <span className="text-neutral-900">{matColor}</span>
-          </label>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            {(['None', 'Pure White', 'Off-White', 'Jet Black'] as const).map((mat) => (
-              <button
-                key={mat}
-                type="button"
-                onClick={() => setMatColor(mat)}
-                className={`py-2 px-2 text-center rounded-md border text-xs font-medium transition-all ${
-                  matColor === mat
-                    ? 'border-neutral-900 bg-neutral-900 text-white'
-                    : 'border-neutral-200 text-neutral-700 hover:border-neutral-400 bg-white'
-                }`}
-              >
-                {mat}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* 4. Glazing Glass Option */}
-        <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-800 mb-2.5">
-            4. Protective Glazing
-          </label>
-          <div className="space-y-2">
-            <label
-              className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-all ${
-                glassType === 'Acrylic Glaze'
-                  ? 'border-neutral-900 bg-neutral-50'
-                  : 'border-neutral-200 hover:border-neutral-300'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <input
-                  type="radio"
-                  name="glass"
-                  checked={glassType === 'Acrylic Glaze'}
-                  onChange={() => setGlassType('Acrylic Glaze')}
-                  className="accent-neutral-900"
-                />
-                <div>
-                  <p className="text-xs font-semibold text-neutral-900">
-                    Shatterproof Acrylic Glaze
-                  </p>
-                  <p className="text-[11px] text-neutral-500">
-                    Lightweight, 100% transit-safe & ultra clear (Standard)
-                  </p>
-                </div>
-              </div>
-              <span className="text-xs font-medium text-neutral-500">Included</span>
-            </label>
-
-            <label
-              className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-all ${
-                glassType === 'Anti-Glare UV Glass'
-                  ? 'border-neutral-900 bg-neutral-50'
-                  : 'border-neutral-200 hover:border-neutral-300'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <input
-                  type="radio"
-                  name="glass"
-                  checked={glassType === 'Anti-Glare UV Glass'}
-                  onChange={() => setGlassType('Anti-Glare UV Glass')}
-                  className="accent-neutral-900"
-                />
-                <div>
-                  <p className="text-xs font-semibold text-neutral-900">
-                    Museum Anti-Glare UV Glass (+₹350)
-                  </p>
-                  <p className="text-[11px] text-neutral-500">
-                    Zero reflections under room lighting & 99% UV fade resistance
-                  </p>
-                </div>
-              </div>
-              <span className="text-xs font-semibold text-neutral-900">+₹350</span>
-            </label>
           </div>
         </div>
 

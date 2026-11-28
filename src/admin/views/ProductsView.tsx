@@ -14,7 +14,7 @@ import {
   X,
   FileImage,
 } from 'lucide-react'
-import { getStoreProducts, saveStoreProducts } from '../../data/products'
+import { getStoreProducts, saveStoreProducts, normalizeProduct } from '../../data/products'
 import { getStoreCategories, Category } from '../../data/categories'
 import { api } from '../../services/api'
 import { formatINR } from '../../utils/formatters'
@@ -33,9 +33,12 @@ export const ProductsView: React.FC = () => {
   const [isCreating, setIsCreating] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [saveSuccess, setSaveSuccess] = useState('')
+  const [errorMsg, setErrorMsg] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Listen for category updates and sync from backend
+  // Listen for category updates and sync products + categories from backend
   useEffect(() => {
     const handleCatsUpdated = () => {
       setCategories(getStoreCategories())
@@ -45,6 +48,14 @@ export const ProductsView: React.FC = () => {
     api.getCategories().then((res) => {
       if (res.success && Array.isArray(res.data) && res.data.length > 0) {
         setCategories(res.data)
+      }
+    }).catch(() => {})
+
+    api.getProducts().then((res) => {
+      if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+        const normalized = res.data.map(normalizeProduct)
+        setProducts(normalized)
+        saveStoreProducts(normalized)
       }
     }).catch(() => {})
 
@@ -82,14 +93,15 @@ export const ProductsView: React.FC = () => {
   })
 
   const handleStartCreate = () => {
+    setErrorMsg('')
     setEditingProduct(null)
     setTitle('')
     setSlug('')
     setCategoryId(categories[0]?.id || 'cat-car-frames')
     setDescription('')
-    setBasePrice(0)
-    setComparePrice(0)
-    setStockQuantity(0)
+    setBasePrice(1299)
+    setComparePrice(1799)
+    setStockQuantity(25)
     setProductImages([])
     setManualUrl('')
     setIsCustomizable(true)
@@ -98,10 +110,11 @@ export const ProductsView: React.FC = () => {
   }
 
   const handleStartEdit = (prod: Product) => {
+    setErrorMsg('')
     setEditingProduct(prod)
     setTitle(prod.title)
     setSlug(prod.slug)
-    setCategoryId(prod.categoryId || 'cat-car-frames')
+    setCategoryId(prod.categoryId || categories[0]?.id || 'cat-car-frames')
     setDescription(prod.description)
     setBasePrice(prod.basePriceINR)
     setComparePrice(prod.compareAtPriceINR || 0)
@@ -113,24 +126,42 @@ export const ProductsView: React.FC = () => {
     setIsCreating(true)
   }
 
-  const handleDuplicate = (prod: Product) => {
+  const handleDuplicate = async (prod: Product) => {
+    setErrorMsg('')
     const dup: Product = {
       ...prod,
       id: `yf-dup-${Date.now()}`,
       title: `${prod.title} (Copy)`,
       slug: `${prod.slug}-copy-${Math.floor(100 + Math.random() * 900)}`,
+      availableSizes: ['A4'],
+      availableMouldings: ['Deep Black', 'Minimalist White'],
     }
     const updated = [dup, ...products]
     updateProductsState(updated)
+    try {
+      await api.adminSaveProduct(dup, false)
+    } catch {
+      // Local fallback retained
+    }
     logAuditAction('PRODUCT_DUPLICATED', 'PRODUCT', dup.id, `Duplicated ${prod.title}`)
+    setSaveSuccess(`Duplicated "${prod.title}"`)
+    setTimeout(() => setSaveSuccess(''), 3000)
   }
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm('Delete this product permanently?')) {
+      setErrorMsg('')
       const target = products.find((p) => p.id === id)
       const updated = products.filter((p) => p.id !== id)
       updateProductsState(updated)
+      try {
+        await api.adminDeleteProduct(id)
+      } catch {
+        // Local fallback retained
+      }
       logAuditAction('PRODUCT_DELETED', 'PRODUCT', id, `Deleted ${target?.title}`)
+      setSaveSuccess(`Deleted "${target?.title || 'Product'}"`)
+      setTimeout(() => setSaveSuccess(''), 3000)
     }
   }
 
@@ -146,7 +177,7 @@ export const ProductsView: React.FC = () => {
       if (!file.type.startsWith('image/')) continue
 
       try {
-        const item = await uploadFile(file, 'automotive', title || file.name)
+        const item = await uploadFile(file, 'general', title || file.name)
         newUrls.push(item.url)
       } catch (err) {
         console.error('Failed to upload file:', err)
@@ -192,63 +223,98 @@ export const ProductsView: React.FC = () => {
     setProductImages((prev) => prev.filter((_, i) => i !== index))
   }
 
-  const handleSaveProduct = (e: React.FormEvent) => {
+  const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!title.trim() || !slug.trim()) return
+    setErrorMsg('')
+
+    const cleanTitle = title.trim()
+    const cleanSlug = (slug.trim() || cleanTitle)
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '')
+
+    if (cleanTitle.length < 2) {
+      setErrorMsg('Product title must be at least 2 characters.')
+      return
+    }
+    if (cleanSlug.length < 2) {
+      setErrorMsg('URL slug must be at least 2 characters.')
+      return
+    }
+    if (!Number(basePrice) || Number(basePrice) <= 0) {
+      setErrorMsg('Base price must be greater than ₹0.')
+      return
+    }
+
+    setIsSaving(true)
 
     const finalImages =
       productImages.length > 0
         ? productImages
-        : ['https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=1000&q=85']
+        : ['https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=800&q=80']
 
-    if (editingProduct) {
-      // Update
-      const updated = products.map((p) =>
-        p.id === editingProduct.id
-          ? {
-              ...p,
-              title,
-              slug,
-              categoryId,
-              description,
-              basePriceINR: Number(basePrice),
-              compareAtPriceINR: Number(comparePrice) || undefined,
-              stockQuantity: Number(stockQuantity),
-              images: finalImages,
-              isCustomizable,
-              isActive,
-            }
-          : p
-      )
-      updateProductsState(updated)
-      logAuditAction('PRODUCT_UPDATED', 'PRODUCT', editingProduct.id, `Updated ${title} with ${finalImages.length} images`)
-    } else {
-      // Create
-      const newProd: Product = {
-        id: `yf-${Date.now()}`,
-        title,
-        slug,
-        categoryId,
-        description,
-        basePriceINR: Number(basePrice),
-        compareAtPriceINR: Number(comparePrice) || undefined,
-        stockQuantity: Number(stockQuantity),
-        images: finalImages,
-        availableSizes: ['A4'],
-        availableMouldings: ['Deep Black', 'Minimalist White'],
-        isCustomizable,
-        isActive,
-      }
-      const updated = [newProd, ...products]
-      updateProductsState(updated)
-      logAuditAction('PRODUCT_CREATED', 'PRODUCT', newProd.id, `Created ${title} with ${finalImages.length} images`)
+    const isEditing = Boolean(editingProduct)
+    const prodPayload: Product = {
+      id: editingProduct ? editingProduct.id : `yf-${Date.now()}`,
+      title: cleanTitle,
+      slug: cleanSlug,
+      categoryId: categoryId || categories[0]?.id || 'cat-car-frames',
+      description: description.trim() || `${cleanTitle} in a ready-to-hang A4 frame (Deep Black or Minimalist White).`,
+      basePriceINR: Number(basePrice),
+      compareAtPriceINR: Number(comparePrice) > 0 ? Number(comparePrice) : undefined,
+      stockQuantity: Math.max(0, Number(stockQuantity) || 0),
+      images: finalImages,
+      availableSizes: ['A4'],
+      availableMouldings: ['Deep Black', 'Minimalist White'],
+      isCustomizable,
+      isActive,
     }
 
-    setIsCreating(false)
+    try {
+      const res = await api.adminSaveProduct(prodPayload, isEditing)
+      const savedProd = res.success && res.data ? normalizeProduct(res.data) : prodPayload
+
+      if (!res.success) {
+        setErrorMsg(res.message || 'Saved locally, but server sync returned an error. Check admin login or fields.')
+      }
+
+      const updated = isEditing
+        ? products.map((p) => (p.id === editingProduct!.id ? savedProd : p))
+        : [savedProd, ...products]
+
+      updateProductsState(updated)
+      logAuditAction(
+        isEditing ? 'PRODUCT_UPDATED' : 'PRODUCT_CREATED',
+        'PRODUCT',
+        savedProd.id,
+        `${isEditing ? 'Updated' : 'Created'} ${cleanTitle} with ${finalImages.length} images`
+      )
+      setSaveSuccess(`Saved "${cleanTitle}" successfully.`)
+      setTimeout(() => setSaveSuccess(''), 3500)
+      setIsCreating(false)
+    } catch (err: any) {
+      setErrorMsg(err?.message || 'Unable to save product.')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   return (
     <div className="space-y-6">
+      {saveSuccess && (
+        <div className="p-3 bg-emerald-950/80 border border-emerald-800 text-emerald-200 text-xs rounded-xl flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+          <span>{saveSuccess}</span>
+        </div>
+      )}
+
+      {errorMsg && (
+        <div className="p-3 bg-red-950/80 border border-red-800 text-red-200 text-xs rounded-xl flex items-center gap-2">
+          <X className="w-4 h-4 text-red-400 shrink-0" />
+          <span>{errorMsg}</span>
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row justify-between sm:items-center pb-6 border-b border-neutral-800 gap-4">
         <div>
           <span className="text-[10px] uppercase font-bold tracking-widest text-amber-500">
@@ -675,6 +741,16 @@ export const ProductsView: React.FC = () => {
               </label>
             </div>
 
+            <div className="p-2.5 bg-neutral-950 border border-neutral-800 rounded-lg text-[11px] text-neutral-400">
+              Format: <strong className="text-neutral-200">Standard A4 (21 × 29.7 cm)</strong> • Finishes: <strong className="text-neutral-200">Deep Black & Minimalist White</strong>
+            </div>
+
+            {errorMsg && (
+              <div className="p-2.5 bg-red-950/80 border border-red-800 text-red-200 text-xs rounded-lg">
+                {errorMsg}
+              </div>
+            )}
+
             <div className="flex justify-end gap-2 pt-4 border-t border-neutral-800">
               <button
                 type="button"
@@ -685,9 +761,10 @@ export const ProductsView: React.FC = () => {
               </button>
               <button
                 type="submit"
-                className="px-6 py-2 bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold uppercase tracking-wider rounded-lg transition"
+                disabled={isSaving}
+                className="px-6 py-2 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-neutral-950 font-bold uppercase tracking-wider rounded-lg transition"
               >
-                Save Product
+                {isSaving ? 'Saving...' : 'Save Product'}
               </button>
             </div>
           </form>

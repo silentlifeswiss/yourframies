@@ -62,11 +62,13 @@ export const handler: Handler = async (event: HandlerEvent, _context?: HandlerCo
   }
 
   try {
+    // Ensure database connection & auto-migrations are ready on cold starts
+    await db.ensureConnected()
+
     // ==========================================================================
     // 1. Health & Environment Status
     // ==========================================================================
     if (path === '/health' && method === 'GET') {
-      await db.ensureConnected()
       return makeResponse(200, {
         status: 'ok',
         success: true,
@@ -235,7 +237,7 @@ export const handler: Handler = async (event: HandlerEvent, _context?: HandlerCo
       const body = JSON.parse(event.body || '{}')
       const validation = ProductSchema.safeParse(body)
       if (!validation.success) {
-        return makeResponse(400, { success: false, errors: validation.error.format() })
+        return makeResponse(400, { success: false, message: 'Invalid product data', errors: validation.error.format() })
       }
 
       const pData = validation.data
@@ -246,7 +248,7 @@ export const handler: Handler = async (event: HandlerEvent, _context?: HandlerCo
         slug: pData.slug,
         description: pData.description,
         basePriceINR: pData.basePriceINR,
-        compareAtPriceINR: pData.compareAtPriceINR,
+        compareAtPriceINR: pData.compareAtPriceINR || undefined,
         images: pData.images,
         availableSizes: pData.availableSizes,
         availableMouldings: pData.availableMouldings,
@@ -279,18 +281,30 @@ export const handler: Handler = async (event: HandlerEvent, _context?: HandlerCo
       const auth = await authenticateAdmin(event, ['SUPER_ADMIN', 'MANAGER'])
       if (auth.error) return makeResponse(auth.status || 401, { success: false, message: auth.error })
 
-      const id = path.replace('/admin/products/', '')
+      const id = decodeURIComponent(path.replace('/admin/products/', ''))
       const body = JSON.parse(event.body || '{}')
-      const existing = await db.getProductBySlug(id)
-
-      if (!existing) {
-        return makeResponse(404, { success: false, message: 'Product not found' })
+      const validation = ProductSchema.safeParse(body)
+      if (!validation.success) {
+        return makeResponse(400, { success: false, message: 'Invalid product data', errors: validation.error.format() })
       }
 
+      const existing = await db.getProductBySlug(id)
+      const pData = validation.data
       const updatedProduct: DBProduct = {
-        ...existing,
-        ...body,
-        id: existing.id,
+        id: existing?.id || id,
+        categoryId: pData.categoryId ?? existing?.categoryId,
+        title: pData.title,
+        slug: pData.slug,
+        description: pData.description,
+        basePriceINR: pData.basePriceINR,
+        compareAtPriceINR: pData.compareAtPriceINR || undefined,
+        images: pData.images,
+        availableSizes: pData.availableSizes,
+        availableMouldings: pData.availableMouldings,
+        isCustomizable: pData.isCustomizable,
+        isActive: pData.isActive,
+        stockQuantity: pData.stockQuantity,
+        createdAt: existing?.createdAt || new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       }
 
@@ -300,10 +314,10 @@ export const handler: Handler = async (event: HandlerEvent, _context?: HandlerCo
         adminId: auth.user!.id,
         adminEmail: auth.user!.email,
         adminName: auth.user!.name,
-        action: 'PRODUCT_UPDATED',
+        action: existing ? 'PRODUCT_UPDATED' : 'PRODUCT_CREATED',
         entityType: 'PRODUCT',
         entityId: saved.id,
-        details: `Updated artwork "${saved.title}"`,
+        details: `${existing ? 'Updated' : 'Created'} artwork "${saved.title}"`,
         ipAddress: clientIp,
         timestamp: new Date().toISOString(),
       })
