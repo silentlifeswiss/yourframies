@@ -19,7 +19,7 @@ export type OrderStatus =
 
 export type PaymentMethod = 'PREPAID_RAZORPAY' | 'COD' | 'PARTIAL_COD'
 export type PaymentStatus = 'PENDING' | 'AUTHORIZED' | 'CAPTURED' | 'FAILED' | 'REFUNDED'
-export type CourierPartner = 'DELHIVERY' | 'SHIPROCKET' | 'NIMBUSPOST' | 'MANUAL'
+export type CourierPartner = 'DELHIVERY' | 'SHADOWFAX' | 'SHIPROCKET' | 'NIMBUSPOST' | 'MANUAL'
 export type AdminRole = 'SUPER_ADMIN' | 'MANAGER' | 'SUPPORT'
 
 // ==============================================================================

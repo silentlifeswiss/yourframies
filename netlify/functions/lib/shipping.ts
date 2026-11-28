@@ -89,6 +89,9 @@ const PINCODE_PREFIX_MAP: Record<string, { city: string; state: string; days: nu
 export class ShippingManager {
   private delhiveryToken: string | undefined
   private delhiveryMode: string
+  private shadowfaxToken: string | undefined
+  private shadowfaxMode: 'staging' | 'production'
+  private shadowfaxBaseUrl: string
   private shiprocketEmail: string | undefined
   private shiprocketPass: string | undefined
   private nimbusEmail: string | undefined
@@ -96,6 +99,12 @@ export class ShippingManager {
   constructor() {
     this.delhiveryToken = process.env.DELHIVERY_API_TOKEN || 'a83902984b7d61ecb111ccc79229c7a1e1f3e472'
     this.delhiveryMode = process.env.DELHIVERY_MODE || 'production'
+    this.shadowfaxToken = process.env.SHADOWFAX_API_TOKEN
+    this.shadowfaxMode = (process.env.SHADOWFAX_MODE as any) === 'production' ? 'production' : 'staging'
+    this.shadowfaxBaseUrl =
+      this.shadowfaxMode === 'production'
+        ? 'https://api.shadowfax.in'
+        : 'https://dale.staging.shadowfax.in'
     this.shiprocketEmail = process.env.SHIPROCKET_EMAIL
     this.shiprocketPass = process.env.SHIPROCKET_PASSWORD
     this.nimbusEmail = process.env.NIMBUSPOST_EMAIL
@@ -103,6 +112,11 @@ export class ShippingManager {
 
   public getConnectedCouriers(): Array<{ name: string; isConfigured: boolean; mode?: string }> {
     return [
+      {
+        name: 'Shadowfax Express',
+        isConfigured: Boolean(this.shadowfaxToken && !this.shadowfaxToken.includes('your_api_token')),
+        mode: this.shadowfaxMode,
+      },
       {
         name: 'Delhivery One',
         isConfigured: Boolean(this.delhiveryToken && !this.delhiveryToken.includes('YourDelhivery')),
@@ -139,7 +153,40 @@ export class ShippingManager {
       }
     }
 
-    // Live Delhivery One Serviceability check if configured
+    // 1. Live Shadowfax Serviceability Check if configured
+    if (this.shadowfaxToken && !this.shadowfaxToken.includes('your_api_token')) {
+      try {
+        const url = `${this.shadowfaxBaseUrl}/api/v1/clients/serviceability/?service=marketplace&pincodes=${cleaned}`
+        const res = await fetch(url, {
+          headers: { Authorization: `Token ${this.shadowfaxToken}` },
+        })
+
+        if (res.ok) {
+          const json: any = await res.json()
+          const item = Array.isArray(json) ? json[0] : (json.data?.[0] || json.data || json)
+          const isServ = item ? (item.serviceable !== false && item.delivery !== false) : true
+          const codAllowed = item ? (item.cod !== false) : !['110006', '700024', '400009', '500002'].includes(cleaned)
+
+          if (isServ) {
+            const prefix2 = cleaned.slice(0, 2)
+            const match = PINCODE_PREFIX_MAP[prefix2] || { city: 'District Hub', state: 'India', days: 2 }
+            return {
+              city: match.city,
+              state: match.state,
+              isServiceable: true,
+              isCodAvailable: isCod ? codAllowed : true,
+              estimatedDays: match.days,
+              courier: 'SHADOWFAX',
+              source: 'live_api',
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Shadowfax live serviceability check fallback:', err)
+      }
+    }
+
+    // 2. Live Delhivery One Serviceability check if configured
     if (this.delhiveryToken && !this.delhiveryToken.includes('YourDelhivery')) {
       try {
         const baseUrl =
@@ -284,6 +331,91 @@ export class ShippingManager {
     trackingUrl?: string
     message?: string
   }> {
+    const isShadowfaxLive = Boolean(this.shadowfaxToken && !this.shadowfaxToken.includes('your_api_token'))
+
+    // 1. Shadowfax Order Booking (V3 Clients Orders API)
+    if (isShadowfaxLive) {
+      try {
+        const shadowfaxPayload = {
+          customer_details: {
+            name: order.shippingAddress.fullName,
+            contact: order.shippingAddress.phone.replace(/\D/g, '').slice(-10),
+            address_line_1: order.shippingAddress.addressLine1,
+            city: order.shippingAddress.city || 'BANGALORE',
+            pincode: parseInt(order.shippingAddress.pincode, 10),
+          },
+          order_details: {
+            client_order_id: order.orderNumber,
+            product_value: Number(order.totalINR),
+            payment_mode: order.isCod ? 'cod' : 'prepaid',
+            cod_amount: order.isCod ? Number(order.totalINR) : 0,
+            order_service: 'Regular',
+          },
+          pickup_details: {
+            pickup_type: 'seller',
+            name: process.env.SHADOWFAX_PICKUP_NAME || 'TechStore Pvt Ltd',
+            contact: process.env.SHADOWFAX_PICKUP_CONTACT || '9876543211',
+            address_line_1: process.env.SHADOWFAX_PICKUP_ADDRESS || '15 Industrial Area Phase 2',
+            city: process.env.SHADOWFAX_PICKUP_CITY || 'BANGALORE',
+            pincode: parseInt(process.env.SHADOWFAX_PICKUP_PINCODE || '560058', 10),
+          },
+          return_details: {
+            return_type: 'seller',
+            name: process.env.SHADOWFAX_PICKUP_NAME || 'TechStore Pvt Ltd',
+            contact: process.env.SHADOWFAX_PICKUP_CONTACT || '9876543211',
+            address_line_1: process.env.SHADOWFAX_PICKUP_ADDRESS || '15 Industrial Area Phase 2',
+            city: process.env.SHADOWFAX_PICKUP_CITY || 'BANGALORE',
+            pincode: parseInt(process.env.SHADOWFAX_PICKUP_PINCODE || '560058', 10),
+          },
+          product_details:
+            order.items && order.items.length > 0
+              ? order.items.map((item, idx) => ({
+                  sku_name: item.title,
+                  sku_id: `SKU-${idx + 1}`,
+                  price: Math.round(Number(order.totalINR) / (order.items.length || 1)),
+                  category: 'Home Decor & Art Frames',
+                }))
+              : [
+                  {
+                    sku_name: 'Custom Framed Art',
+                    sku_id: 'SKU-FRAME-001',
+                    price: Number(order.totalINR),
+                    category: 'Home Decor & Art Frames',
+                  },
+                ],
+        }
+
+        const res = await fetch(`${this.shadowfaxBaseUrl}/api/v3/clients/orders/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Token ${this.shadowfaxToken}`,
+          },
+          body: JSON.stringify(shadowfaxPayload),
+        })
+
+        const resData: any = await res.json()
+        const awb =
+          resData.awb_number ||
+          resData.data?.awb_number ||
+          resData.data?.waybill ||
+          resData.waybill
+
+        if (awb) {
+          return {
+            success: true,
+            awbCode: String(awb),
+            courierPartner: 'SHADOWFAX',
+            labelUrl: `${this.shadowfaxBaseUrl}/api/v3/clients/orders/${awb}/label/`,
+            trackingUrl: `https://tracker.shadowfax.in/#/track/${awb}`,
+          }
+        }
+      } catch (err: any) {
+        console.warn('Shadowfax booking API error:', err)
+      }
+    }
+
+    // 2. Delhivery One Booking
     const isDelhiveryLive = Boolean(this.delhiveryToken && !this.delhiveryToken.includes('YourDelhivery'))
 
     if (isDelhiveryLive) {
@@ -358,12 +490,40 @@ export class ShippingManager {
   // ----------------------------------------------------------------------------
   // 4. Real-time Tracking Events
   // ----------------------------------------------------------------------------
-  public async getTrackingEvents(awbCode: string): Promise<{
+  public async getTrackingEvents(awbCode: string, courierPartner?: string): Promise<{
     awbCode: string
     currentStatus: string
     events: Array<{ status: string; location: string; timestamp: string }>
   }> {
-    // If live Delhivery token is available
+    // 1. Live Shadowfax Tracking (V4 Clients Orders Track API)
+    if (
+      this.shadowfaxToken &&
+      !this.shadowfaxToken.includes('your_api_token') &&
+      (courierPartner === 'SHADOWFAX' || awbCode.startsWith('SFX') || awbCode.startsWith('SF') || !this.delhiveryToken)
+    ) {
+      try {
+        const res = await fetch(`${this.shadowfaxBaseUrl}/api/v4/clients/orders/${encodeURIComponent(awbCode)}/track/`, {
+          headers: { Authorization: `Token ${this.shadowfaxToken}` },
+        })
+        const json: any = await res.json()
+        const events = json.data?.events || json.tracking_history || json.scans || json.events
+        if (events && Array.isArray(events) && events.length > 0) {
+          return {
+            awbCode,
+            currentStatus: json.data?.status || json.status || 'In Transit with Shadowfax Express',
+            events: events.map((e: any) => ({
+              status: e.status || e.description || e.event || 'Status Update',
+              location: e.location || e.city || 'Shadowfax Hub',
+              timestamp: e.timestamp || e.created_at || new Date().toISOString(),
+            })),
+          }
+        }
+      } catch (err) {
+        console.warn('Shadowfax tracking lookup failed:', err)
+      }
+    }
+
+    // 2. Live Delhivery Tracking if token is available
     if (this.delhiveryToken && !this.delhiveryToken.includes('YourDelhivery')) {
       try {
         const res = await fetch(`https://track.delhivery.com/api/v1/packages/json/?waybill=${awbCode}`, {

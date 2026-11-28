@@ -624,13 +624,13 @@ export const handler: Handler = async (event: HandlerEvent, _context?: HandlerCo
         })
       }
 
-      // If AWB code or Delhivery courier partner exists, fetch live transit scans
+      // If AWB code or courier partner exists, fetch live transit scans
       let trackingEvents: any = null
       if (order.awbCode) {
         try {
-          trackingEvents = await shipping.getTrackingEvents(order.awbCode)
+          trackingEvents = await shipping.getTrackingEvents(order.awbCode, order.courierPartner)
         } catch (err) {
-          console.warn('Delhivery live track lookup failed:', err)
+          console.warn('Courier live track lookup failed:', err)
         }
       }
 
@@ -802,6 +802,13 @@ export const handler: Handler = async (event: HandlerEvent, _context?: HandlerCo
       const { items, subtotalINR, pincode } = JSON.parse(event.body || '{}')
       const rates = shipping.calculateShippingRate(items || [], subtotalINR || 0, pincode || '560001')
       return makeResponse(200, { success: true, data: rates })
+    }
+
+    // Admin: List Connected Couriers GET /admin/shipping/couriers
+    if (path === '/admin/shipping/couriers' && method === 'GET') {
+      const auth = await authenticateAdmin(event, ['SUPER_ADMIN', 'MANAGER'])
+      if (auth.error) return makeResponse(auth.status || 401, { success: false, message: auth.error })
+      return makeResponse(200, { success: true, data: shipping.getConnectedCouriers() })
     }
 
     // Admin: Book Courier Shipment POST /admin/shipping/book-shipment

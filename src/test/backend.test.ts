@@ -188,6 +188,34 @@ describe('Your Framies - Backend Serverless Architecture & APIs', () => {
     expect(payload.data).toHaveProperty('shippingFeeINR')
   })
 
+  it('GET /admin/shipping/couriers lists multi-courier integrations including Shadowfax Express and Delhivery', async () => {
+    // 1. Authenticate admin
+    const loginRes: any = await handler(
+      createEvent('/admin/login', 'POST', {
+        email: 'admin@yourframies.com',
+        password: 'YourFramies2026!',
+      }),
+      {} as any
+    )
+    const token = JSON.parse(loginRes.body).token
+
+    // 2. Query couriers endpoint
+    const courierRes: any = await handler(
+      createEvent('/admin/shipping/couriers', 'GET', undefined, {
+        authorization: `Bearer ${token}`,
+      }),
+      {} as any
+    )
+    expect(courierRes.statusCode).toBe(200)
+    const courierData = JSON.parse(courierRes.body)
+    expect(courierData.success).toBe(true)
+    expect(Array.isArray(courierData.data)).toBe(true)
+
+    const courierNames = courierData.data.map((c: any) => c.name)
+    expect(courierNames).toContain('Shadowfax Express')
+    expect(courierNames).toContain('Delhivery One')
+  })
+
   // --------------------------------------------------------------------------
   // 4. Order Creation & Validation (Server-side price computation)
   // --------------------------------------------------------------------------

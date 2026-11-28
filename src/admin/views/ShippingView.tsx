@@ -20,31 +20,45 @@ export const ShippingView: React.FC = () => {
   const [saveSuccess, setSaveSuccess] = useState(false)
 
   // Courier API state
-  const [couriers, setCouriers] = useState({
-    delhivery: {
-      enabled: true,
-      apiKey: 'a83902984b7d61ecb111ccc79229c7a1e1f3e472',
-      clientId: 'YOURFRAMIES_BLR_01',
-      warehousePin: '560103',
-      environment: 'production' as 'sandbox' | 'production',
-      status: 'Connected (Live Production)',
-    },
-    shiprocket: {
-      enabled: false,
-      email: '',
-      tokenStatus: 'Not Connected',
-      autoSync: false,
-    },
-    nimbuspost: {
-      enabled: false,
-      apiToken: '',
-      status: 'Disconnected',
-    },
-    indiaPost: {
-      enabled: false,
-      businessId: '',
-      status: 'Disconnected',
-    },
+  const [couriers, setCouriers] = useState(() => {
+    try {
+      const saved = localStorage.getItem('yourframies_courier_config')
+      if (saved) return JSON.parse(saved)
+    } catch (e) {}
+    return {
+      shadowfax: {
+        enabled: true,
+        apiKey: '',
+        environment: 'staging' as 'staging' | 'production',
+        pickupPin: '560058',
+        service: 'marketplace',
+        status: 'Ready (Dale API)',
+      },
+      delhivery: {
+        enabled: true,
+        apiKey: 'a83902984b7d61ecb111ccc79229c7a1e1f3e472',
+        clientId: 'YOURFRAMIES_BLR_01',
+        warehousePin: '560103',
+        environment: 'production' as 'sandbox' | 'production',
+        status: 'Connected (Live Production)',
+      },
+      shiprocket: {
+        enabled: false,
+        email: '',
+        tokenStatus: 'Not Connected',
+        autoSync: false,
+      },
+      nimbuspost: {
+        enabled: false,
+        apiToken: '',
+        status: 'Disconnected',
+      },
+      indiaPost: {
+        enabled: false,
+        businessId: '',
+        status: 'Disconnected',
+      },
+    }
   })
 
   // Rates & Thresholds
@@ -94,6 +108,10 @@ export const ShippingView: React.FC = () => {
 
   const handleSaveShippingConfig = (e: React.FormEvent) => {
     e.preventDefault()
+    try {
+      localStorage.setItem('yourframies_courier_config', JSON.stringify(couriers))
+    } catch (e) {}
+
     updateSettings({
       freeShippingThreshold: Number(shippingRates.freeThreshold),
       codHandlingFee: Number(shippingRates.codHandlingFee),
@@ -119,7 +137,7 @@ export const ShippingView: React.FC = () => {
           Indian Logistics & Courier Orchestration
         </h2>
         <p className="text-sm text-neutral-400 mt-1">
-          Manage integrated courier APIs (Delhivery One, Shiprocket, NimbusPost), packaging profiles, PIN code verification, and COD risk safeguards.
+          Manage integrated courier APIs (Shadowfax Express, Delhivery One, Shiprocket, NimbusPost), packaging profiles, PIN code verification, and COD risk safeguards.
         </p>
       </div>
 
@@ -139,6 +157,94 @@ export const ShippingView: React.FC = () => {
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Shadowfax Logistics */}
+            <div className="border border-neutral-800 bg-neutral-900/50 rounded-lg p-5 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={`w-3 h-3 rounded-full ${couriers.shadowfax.enabled ? 'bg-amber-400' : 'bg-neutral-600'}`}></div>
+                  <div>
+                    <h4 className="font-semibold text-white flex items-center gap-2">
+                      <span>Shadowfax Express</span>
+                      <span className="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1.5 py-0.5 rounded font-mono">
+                        v1/v3/v4
+                      </span>
+                    </h4>
+                  </div>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={couriers.shadowfax.enabled}
+                    onChange={(e) =>
+                      setCouriers({
+                        ...couriers,
+                        shadowfax: { ...couriers.shadowfax, enabled: e.target.checked },
+                      })
+                    }
+                    className="sr-only peer"
+                  />
+                  <div className="w-10 h-5 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500"></div>
+                </label>
+              </div>
+
+              <div className="space-y-3 text-sm">
+                <div>
+                  <label className="text-xs text-neutral-400 block mb-1">Authorization Token (Token your_api_token)</label>
+                  <input
+                    type="password"
+                    placeholder="Enter Shadowfax client API token..."
+                    value={couriers.shadowfax.apiKey}
+                    onChange={(e) =>
+                      setCouriers({
+                        ...couriers,
+                        shadowfax: { ...couriers.shadowfax, apiKey: e.target.value },
+                      })
+                    }
+                    className="w-full bg-neutral-950 border border-neutral-800 rounded px-3 py-1.5 text-xs text-white font-mono"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-xs text-neutral-400 block mb-1">Pickup Hub PIN</label>
+                    <input
+                      type="text"
+                      value={couriers.shadowfax.pickupPin}
+                      onChange={(e) =>
+                        setCouriers({
+                          ...couriers,
+                          shadowfax: { ...couriers.shadowfax, pickupPin: e.target.value },
+                        })
+                      }
+                      className="w-full bg-neutral-950 border border-neutral-800 rounded px-3 py-1.5 text-xs text-white font-mono"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-neutral-400 block mb-1">API Environment</label>
+                    <select
+                      value={couriers.shadowfax.environment}
+                      onChange={(e) =>
+                        setCouriers({
+                          ...couriers,
+                          shadowfax: {
+                            ...couriers.shadowfax,
+                            environment: e.target.value as any,
+                          },
+                        })
+                      }
+                      className="w-full bg-neutral-950 border border-neutral-800 rounded px-3 py-1.5 text-xs text-white"
+                    >
+                      <option value="staging">Staging (dale.staging.shadowfax.in)</option>
+                      <option value="production">Production (api.shadowfax.in)</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="text-xs text-amber-300/90 pt-1 flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Serviceability, Order Booking & Live Tracking endpoints wired</span>
+                </div>
+              </div>
+            </div>
+
             {/* Delhivery One */}
             <div className="border border-neutral-800 bg-neutral-900/50 rounded-lg p-5 space-y-4">
               <div className="flex items-center justify-between">
