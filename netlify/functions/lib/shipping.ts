@@ -357,17 +357,17 @@ export class ShippingManager {
             pickup_type: 'seller',
             name: process.env.SHADOWFAX_PICKUP_NAME || 'TechStore Pvt Ltd',
             contact: process.env.SHADOWFAX_PICKUP_CONTACT || '9876543211',
-            address_line_1: process.env.SHADOWFAX_PICKUP_ADDRESS || '15 Industrial Area Phase 2',
-            city: process.env.SHADOWFAX_PICKUP_CITY || 'BANGALORE',
-            pincode: parseInt(process.env.SHADOWFAX_PICKUP_PINCODE || '560058', 10),
+            address_line_1: process.env.SHADOWFAX_PICKUP_ADDRESS || 'Connaught Place',
+            city: process.env.SHADOWFAX_PICKUP_CITY || 'NEW DELHI',
+            pincode: parseInt(process.env.SHADOWFAX_PICKUP_PINCODE || '110001', 10),
           },
           return_details: {
             return_type: 'seller',
             name: process.env.SHADOWFAX_PICKUP_NAME || 'TechStore Pvt Ltd',
             contact: process.env.SHADOWFAX_PICKUP_CONTACT || '9876543211',
-            address_line_1: process.env.SHADOWFAX_PICKUP_ADDRESS || '15 Industrial Area Phase 2',
-            city: process.env.SHADOWFAX_PICKUP_CITY || 'BANGALORE',
-            pincode: parseInt(process.env.SHADOWFAX_PICKUP_PINCODE || '560058', 10),
+            address_line_1: process.env.SHADOWFAX_PICKUP_ADDRESS || 'Connaught Place',
+            city: process.env.SHADOWFAX_PICKUP_CITY || 'NEW DELHI',
+            pincode: parseInt(process.env.SHADOWFAX_RETURN_PINCODE || process.env.SHADOWFAX_PICKUP_PINCODE || '110001', 10),
           },
           product_details:
             order.items && order.items.length > 0
@@ -511,15 +511,16 @@ export class ShippingManager {
           headers: { Authorization: `Token ${this.shadowfaxToken}` },
         })
         const json: any = await res.json()
-        const events = json.data?.events || json.tracking_history || json.scans || json.events
+        const events = json.tracking_details || json.data?.events || json.tracking_history || json.scans || json.events
         if (events && Array.isArray(events) && events.length > 0) {
+          const latest = events[events.length - 1] || events[0]
           return {
             awbCode,
-            currentStatus: json.data?.status || json.status || 'In Transit with Shadowfax Express',
+            currentStatus: json.order_details?.status_display || latest.remarks || latest.status || 'In Transit with Shadowfax Express',
             events: events.map((e: any) => ({
-              status: e.status || e.description || e.event || 'Status Update',
+              status: e.remarks || e.status || e.description || e.event || 'Status Update',
               location: e.location || e.city || 'Shadowfax Hub',
-              timestamp: e.timestamp || e.created_at || new Date().toISOString(),
+              timestamp: e.created || e.timestamp || e.created_at || new Date().toISOString(),
             })),
           }
         }

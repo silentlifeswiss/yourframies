@@ -30,7 +30,7 @@ export const ShippingView: React.FC = () => {
         enabled: true,
         apiKey: '7da41fe09a2b98c2d00e5961b95912c1d29a12f6',
         environment: 'staging' as 'staging' | 'production',
-        pickupPin: '560058',
+        pickupPin: '110001',
         service: 'marketplace',
         status: 'Ready (Dale API)',
       },
