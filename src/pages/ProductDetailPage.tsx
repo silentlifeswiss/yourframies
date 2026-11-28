@@ -525,7 +525,7 @@ export const ProductDetailPage: React.FC = () => {
                     <div className="space-y-1">
                       <p className="font-semibold flex items-center gap-1.5">
                         <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                        <span>Serviceable via {pincodeResult.courierName}</span>
+                        <span>Delivery Available</span>
                       </p>
                       <p className="text-neutral-600">
                         Estimated delivery: {pincodeResult.estimatedDays} business days ({pincodeResult.city}, {pincodeResult.state})

@@ -128,7 +128,7 @@ export function checkIndianPincode(pincode: string): PincodeServiceability {
       isServiceable: true,
       isCodAvailable: true,
       estimatedDays: 3,
-      courierName: 'Delhivery Surface Express',
+      courierName: 'Express Delivery',
       city: 'Panaji / Margao',
       state: 'Goa',
     }
@@ -149,7 +149,7 @@ export function checkIndianPincode(pincode: string): PincodeServiceability {
     isServiceable: true,
     isCodAvailable: true,
     estimatedDays,
-    courierName: cleanPin.startsWith('56') ? 'Delhivery Local Atelier Express' : 'Delhivery Surface Express',
+    courierName: 'Express Delivery',
     city,
     state,
   }

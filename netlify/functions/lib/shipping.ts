@@ -554,7 +554,7 @@ export class ShippingManager {
 
     return {
       awbCode,
-      currentStatus: 'In Transit with Delhivery Surface Express',
+      currentStatus: 'In Transit with Express Courier',
       events: [
         {
           status: 'Shipment Manifested & Picked Up from Atelier',

@@ -27,7 +27,7 @@ export const FaqPage: React.FC = () => {
     },
     {
       q: 'How long does delivery take across India?',
-      a: 'Standard dispatch takes 24 to 48 hours from our Bengaluru atelier. Delivery to metros (Delhi, Mumbai, Bengaluru, Hyderabad, Chennai) takes 2 to 3 days, and rest of India takes 3 to 5 business days via Delhivery Surface Express.',
+      a: 'Standard dispatch takes 24 to 48 hours from our Bengaluru atelier. Delivery to metros (Delhi, Mumbai, Bengaluru, Hyderabad, Chennai) takes 2 to 3 days, and rest of India takes 3 to 5 business days via insured express delivery.',
     },
   ]
 

@@ -26,7 +26,7 @@ export const OrdersView: React.FC = () => {
   const [paymentFilter, setPaymentFilter] = useState('ALL')
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [awbInput, setAwbInput] = useState('')
-  const [courierSelect, setCourierSelect] = useState('Delhivery Surface Express')
+  const [courierSelect, setCourierSelect] = useState('Shadowfax Express')
 
   const filtered = orders.filter((o) => {
     if (statusFilter !== 'ALL' && o.status !== statusFilter) return false
@@ -294,7 +294,8 @@ export const OrdersView: React.FC = () => {
                   onChange={(e) => setCourierSelect(e.target.value)}
                   className="flex-1 p-2.5 bg-neutral-900 border border-neutral-700 rounded-lg text-white outline-none"
                 >
-                  <option value="Delhivery Surface Express">Delhivery Surface Express (Cheapest Rate)</option>
+                  <option value="Shadowfax Express">Shadowfax Express (Marketplace Regular)</option>
+                  <option value="Delhivery Surface Express">Delhivery Surface Express</option>
                   <option value="Shiprocket Air Cargo">Shiprocket Air Priority</option>
                   <option value="NimbusPost Express">NimbusPost Logistics</option>
                 </select>

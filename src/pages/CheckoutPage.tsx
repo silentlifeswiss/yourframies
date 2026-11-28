@@ -567,7 +567,7 @@ export const CheckoutPage: React.FC = () => {
                 >
                   <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
                   <span>
-                    Serviceable via <strong>{pincodeStatus.courierName}</strong> to {pincodeStatus.city}. Cash on Delivery (COD) is{' '}
+                    Delivery available to <strong>{pincodeStatus.city}</strong>. Cash on Delivery (COD) is{' '}
                     <strong>{pincodeStatus.isCodAvailable ? 'Available' : 'Unavailable'}</strong>.
                   </span>
                 </div>
