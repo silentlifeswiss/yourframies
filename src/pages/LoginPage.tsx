@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Lock, Mail, Phone, ArrowRight, ShieldCheck, KeyRound, RefreshCw, CheckCircle2 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
+import { useAdminAuth } from '../context/AdminAuthContext'
 
 export const LoginPage: React.FC = () => {
   const [loginMode, setLoginMode] = useState<'otp' | 'password'>('otp')
@@ -22,6 +23,7 @@ export const LoginPage: React.FC = () => {
   const [infoMsg, setInfoMsg] = useState('')
 
   const { login, sendOtp, verifyOtpAndLogin } = useAuth()
+  const { login: adminLogin } = useAdminAuth()
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -78,11 +80,7 @@ export const LoginPage: React.FC = () => {
     try {
       const res = await verifyOtpAndLogin(phone, cleanOtp)
       if (res.success) {
-        if (phone.replace(/\D/g, '').slice(-10) === '9999999999') {
-          navigate('/admin')
-        } else {
-          navigate('/account')
-        }
+        navigate('/account')
       } else {
         setError(res.message || 'Verification failed. Please check the OTP.')
       }
@@ -93,17 +91,26 @@ export const LoginPage: React.FC = () => {
     }
   }
 
-  // Handle Classic Password Login
+  // Handle Classic Password Login (verified admin credentials route cleanly to /admin)
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+
+    const adminAttempt = await adminLogin(email, password)
+    if (adminAttempt.success) {
+      navigate('/admin')
+      return
+    }
+
+    // If explicitly an invalid admin password/lockout message, do not log in as customer
+    if (email.trim().toLowerCase() === 'admin@yourframies.com' || adminAttempt.message?.toLowerCase().includes('locked')) {
+      setError(adminAttempt.message || 'Invalid administrator credentials.')
+      return
+    }
+
     const res = await login(email, password)
     if (res.success) {
-      if (email.trim().toLowerCase() === 'admin@yourframies.com') {
-        navigate('/admin')
-      } else {
-        navigate('/account')
-      }
+      navigate('/account')
     } else {
       setError(res.message || 'Login failed. Please verify credentials.')
     }
@@ -153,7 +160,7 @@ export const LoginPage: React.FC = () => {
               }`}
             >
               <KeyRound className="w-3.5 h-3.5" />
-              <span>Password / Director</span>
+              <span>Email & Password</span>
             </button>
           </div>
 
@@ -272,8 +279,8 @@ export const LoginPage: React.FC = () => {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="admin@yourframies.com"
-                    className="w-full pl-9 pr-3 py-2.5 border border-neutral-300 rounded text-xs focus:ring-1 focus:ring-black outline-none"
+                    placeholder="you@example.com"
+                    className="w-full pl-9 pr-3 py-2.5 border border-neutral-300 rounded text-base sm:text-xs focus:ring-1 focus:ring-black outline-none"
                   />
                 </div>
               </div>

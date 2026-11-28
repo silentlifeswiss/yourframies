@@ -242,9 +242,9 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     // 2. Local Fallback Verification
     const user = adminUsersList.find((u) => u.email.toLowerCase() === cleanEmail)
     const isValidPassword =
-      (cleanEmail === 'admin@yourframies.com' &&
-        (password === 'admin123' || password === 'admin@123' || password === 'YourFramies2026!')) ||
-      password.length >= 6
+      cleanEmail === 'admin@yourframies.com'
+        ? password === 'admin123' || password === 'admin@123' || password === 'YourFramies2026!'
+        : false
 
     if (!user || !isValidPassword) {
       const newAttempts = failedAttempts + 1

@@ -48,10 +48,10 @@ export const AdminLogin: React.FC = () => {
               Restricted Operations Gateway
             </span>
             <h1 className="font-serif text-2xl font-light tracking-wide text-white">
-              Your Framies Atelier CMS
+              Your Framies Admin
             </h1>
             <p className="text-xs text-neutral-400">
-              Authorized administrators only. Every sign-in attempt is recorded in security audit logs.
+              Sign in with your administrator email and password.
             </p>
           </div>
 
@@ -87,7 +87,7 @@ export const AdminLogin: React.FC = () => {
                   disabled={isLockedOut}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@yourframies.com"
+                  placeholder="name@company.com"
                   className="w-full pl-9 pr-3 py-2.5 bg-neutral-950 border border-neutral-800 rounded-lg text-white focus:border-amber-500 focus:outline-none transition-colors"
                 />
               </div>
@@ -148,7 +148,7 @@ export const AdminLogin: React.FC = () => {
         </div>
 
         <p className="mt-6 text-center text-[11px] text-neutral-500">
-          Private Admin Gateway • URL configurable via <code>src/config/adminConfig.ts</code>
+          Your Framies Operations • Secure Administrator Access
         </p>
       </div>
     </div>

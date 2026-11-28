@@ -102,10 +102,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const cleanPhone = phone.replace(/\D/g, '').slice(-10)
         const simUser: User = {
           id: `usr-${cleanPhone}`,
-          name: cleanPhone === '9999999999' ? 'Store Admin' : `Customer (+91 ${cleanPhone.slice(-4)})`,
+          name: `Customer (+91 ${cleanPhone.slice(-4)})`,
           email: `${cleanPhone}@customer.yourframies.com`,
           phone: cleanPhone,
-          role: cleanPhone === '9999999999' ? 'ADMIN' : 'CUSTOMER',
+          role: 'CUSTOMER',
           isPhoneVerified: true,
           createdAt: new Date().toISOString(),
         }
@@ -149,25 +149,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }
 
-  const login = async (email: string, password?: string) => {
+  const login = async (email: string, _password?: string) => {
     const cleanEmail = email.trim().toLowerCase()
 
-    // Test Admin Account
-    if (cleanEmail === 'admin@yourframies.com' || cleanEmail === 'admin') {
-      const adminUser: User = {
-        id: 'usr-admin-01',
-        name: 'Store Admin',
-        email: 'admin@yourframies.com',
-        phone: '9999999999',
-        role: 'ADMIN',
-        isPhoneVerified: true,
-        createdAt: new Date().toISOString(),
-      }
-      setUser(adminUser)
-      return { success: true }
-    }
-
-    // Standard Customer Account
+    // Standard Customer Account (Admin auth is isolated in AdminAuthContext)
     const customerUser: User = {
       id: `usr-${Date.now()}`,
       name: cleanEmail.split('@')[0].toUpperCase(),

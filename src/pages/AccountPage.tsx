@@ -9,7 +9,6 @@ import {
   Trash2,
   Truck,
   ExternalLink,
-  ShieldAlert,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useOrders } from '../context/OrderContext'
@@ -17,7 +16,7 @@ import { formatINR } from '../utils/formatters'
 import { checkIndianPincode, lookupPincode } from '../data/pincodes'
 
 export const AccountPage: React.FC = () => {
-  const { user, addresses, addAddress, deleteAddress, logout, isAdmin } = useAuth()
+  const { user, addresses, addAddress, deleteAddress, logout } = useAuth()
   const { orders, refreshCustomerOrders } = useOrders()
   const navigate = useNavigate()
 
@@ -110,15 +109,6 @@ export const AccountPage: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3">
-            {isAdmin && (
-              <Link
-                to="/admin"
-                className="px-4 py-2 bg-neutral-900 text-amber-400 rounded text-xs font-semibold uppercase tracking-wider hover:bg-neutral-800 flex items-center gap-1.5 shadow"
-              >
-                <ShieldAlert className="w-3.5 h-3.5 text-amber-400" />
-                <span>Admin Control Panel</span>
-              </Link>
-            )}
             <button
               type="button"
               onClick={() => {

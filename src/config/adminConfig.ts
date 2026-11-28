@@ -13,5 +13,5 @@ export const ADMIN_CONFIG = {
   lockoutMinutes: 15,
 
   // Admin Brand Metadata
-  adminPortalTitle: 'Your Framies Atelier CMS & Operations',
+  adminPortalTitle: 'Your Framies Admin',
 }
