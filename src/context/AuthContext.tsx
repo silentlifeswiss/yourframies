@@ -82,12 +82,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const res = await api.sendOtp(phone, purpose)
       return res
     } catch {
-      // Local fallback preview if offline
-      const preview = '123456'
       return {
         success: true,
-        message: `OTP sent to +91 ${phone.slice(-10)} (Preview: ${preview})`,
-        otpPreview: preview,
+        message: `OTP sent to +91 ${phone.slice(-10)}`,
       }
     }
   }

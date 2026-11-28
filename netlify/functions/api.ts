@@ -326,7 +326,16 @@ export const handler: Handler = async (event: HandlerEvent, _context?: HandlerCo
         })
       }
 
-      const { items, shippingAddress, paymentMethod, notes, couponCode } = validation.data
+      const {
+        items,
+        shippingAddress,
+        paymentMethod,
+        notes,
+        couponCode,
+        razorpayOrderId,
+        razorpayPaymentId,
+        razorpaySignature,
+      } = validation.data
 
       // Server-Side PIN Serviceability Verification
       const pinCheck = await shipping.checkPincode(shippingAddress.pincode, paymentMethod === 'COD')
@@ -400,6 +409,32 @@ export const handler: Handler = async (event: HandlerEvent, _context?: HandlerCo
         codChargeINR = codCheck.feeINR
       }
 
+      // For Prepaid Razorpay: enforce cryptographic verification before order is saved
+      let paymentStatus: 'PENDING' | 'CAPTURED' = 'PENDING'
+      if (paymentMethod === 'PREPAID_RAZORPAY') {
+        if (!razorpayOrderId || !razorpayPaymentId || !razorpaySignature) {
+          return makeResponse(400, {
+            success: false,
+            message: 'Razorpay payment confirmation is required before placing a prepaid order.',
+          })
+        }
+
+        const verifyResult = payments.verifySignature(
+          razorpayOrderId,
+          razorpayPaymentId,
+          razorpaySignature
+        )
+
+        if (!verifyResult.isValid) {
+          return makeResponse(400, {
+            success: false,
+            message: 'Cryptographic signature verification failed: untrusted payment attempt.',
+          })
+        }
+
+        paymentStatus = 'CAPTURED'
+      }
+
       const totalINR = subtotalINR - discountINR + shippingFeeINR + codChargeINR
       const orderNumber = `YF-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`
 
@@ -408,7 +443,7 @@ export const handler: Handler = async (event: HandlerEvent, _context?: HandlerCo
         orderNumber,
         status: 'CONFIRMED',
         paymentMethod,
-        paymentStatus: paymentMethod === 'PREPAID_RAZORPAY' ? 'PENDING' : 'PENDING',
+        paymentStatus,
         currency: 'INR',
         subtotalINR,
         discountINR,
@@ -418,6 +453,8 @@ export const handler: Handler = async (event: HandlerEvent, _context?: HandlerCo
         shippingAddress,
         items: validatedItems,
         notes,
+        razorpayOrderId: razorpayOrderId || undefined,
+        razorpayPaymentId: razorpayPaymentId || undefined,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       }

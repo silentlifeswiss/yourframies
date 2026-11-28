@@ -196,6 +196,47 @@ describe('Your Framies - Backend Serverless Architecture & APIs', () => {
     expect(res.statusCode).toBe(400)
   })
 
+  it('POST /orders enforces payment verification before placing PREPAID_RAZORPAY orders', async () => {
+    const basePayload = {
+      items: [
+        {
+          productId: 'porsche-911-gt3-rs-neon-night-frame',
+          title: 'Porsche 911 GT3 RS Neon Night Frame',
+          priceINR: 1499,
+          quantity: 1,
+        },
+      ],
+      shippingAddress: {
+        fullName: 'Shaurya Customer',
+        phone: '9876543210',
+        addressLine1: 'Villa 12, Koramangala',
+        city: 'Bengaluru',
+        state: 'Karnataka',
+        pincode: '560034',
+      },
+      paymentMethod: 'PREPAID_RAZORPAY',
+    }
+
+    // 1. Unverified prepaid order attempt must fail with 400
+    const unverifiedRes: any = await handler(createEvent('/orders', 'POST', basePayload), {} as any)
+    expect(unverifiedRes.statusCode).toBe(400)
+    expect(JSON.parse(unverifiedRes.body).message).toContain('Razorpay payment confirmation is required')
+
+    // 2. Verified prepaid order with valid signature succeeds and captures payment
+    const verifiedPayload = {
+      ...basePayload,
+      razorpayOrderId: 'order_test_verified',
+      razorpayPaymentId: 'pay_test_9999',
+      razorpaySignature: 'test_signature_valid',
+    }
+    const verifiedRes: any = await handler(createEvent('/orders', 'POST', verifiedPayload), {} as any)
+    expect(verifiedRes.statusCode).toBe(201)
+    const verifiedData = JSON.parse(verifiedRes.body).data
+    expect(verifiedData.paymentStatus).toBe('CAPTURED')
+    expect(verifiedData.status).toBe('CONFIRMED')
+    expect(verifiedData.razorpayPaymentId).toBe('pay_test_9999')
+  })
+
   // --------------------------------------------------------------------------
   // 5. Admin Authentication & Security Rate Limiting
   // --------------------------------------------------------------------------
@@ -442,6 +483,9 @@ describe('Your Framies - Backend Serverless Architecture & APIs', () => {
         pincode: '560001',
       },
       paymentMethod: 'PREPAID_RAZORPAY',
+      razorpayOrderId: 'order_test_verified',
+      razorpayPaymentId: 'pay_test_9999',
+      razorpaySignature: 'test_signature_valid',
     }
 
     const orderRes: any = await handler(createEvent('/orders', 'POST', orderPayload), {} as any)

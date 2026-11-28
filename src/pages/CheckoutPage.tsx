@@ -138,8 +138,8 @@ export const CheckoutPage: React.FC = () => {
       const determinedCity = city.trim() || pincodeStatus?.city || 'Metro Area'
       const determinedState = state.trim() || pincodeStatus?.state || 'India'
 
-      // 1. Create order on backend database with server-side validation
-      const orderPayload = {
+      // 1. Prepare base order details
+      const orderPayloadBase = {
         items: items.map((i) => ({
           productId: i.productId,
           title: i.product.title,
@@ -164,49 +164,50 @@ export const CheckoutPage: React.FC = () => {
         paymentMethod,
       }
 
-      const orderRes = await api.createOrder(orderPayload)
-      if (!orderRes.success || !orderRes.data) {
-        setErrorMsg(orderRes.message || 'Unable to place order. Please review your shipping details.')
-        setIsProcessing(false)
-        return
-      }
-
-      const createdOrder = orderRes.data
-
-      // Sync into client orders context with backend orderNumber & ID
-      createOrder({
-        id: createdOrder.id,
-        orderNumber: createdOrder.orderNumber,
-        userId: user?.id,
-        status: createdOrder.status,
-        paymentMethod: createdOrder.paymentMethod,
-        paymentStatus: createdOrder.paymentStatus,
-        currency: 'INR',
-        subtotalINR: createdOrder.subtotalINR,
-        discountINR: createdOrder.discountINR,
-        shippingFeeINR: createdOrder.shippingFeeINR,
-        codChargeINR: createdOrder.codChargeINR,
-        totalINR: createdOrder.totalINR,
-        shippingAddress: createdOrder.shippingAddress,
-        items: createdOrder.items,
-      } as any)
-
-      // 2. Handle Cash on Delivery (COD)
+      // 2. Handle Cash on Delivery (COD) - placed directly in DB with PENDING payment
       if (paymentMethod === 'COD') {
+        const orderRes = await api.createOrder(orderPayloadBase)
+        if (!orderRes.success || !orderRes.data) {
+          setErrorMsg(orderRes.message || 'Unable to place order. Please review your shipping details.')
+          setIsProcessing(false)
+          return
+        }
+
+        const createdOrder = orderRes.data
+        createOrder({
+          id: createdOrder.id,
+          orderNumber: createdOrder.orderNumber,
+          userId: user?.id,
+          status: createdOrder.status,
+          paymentMethod: createdOrder.paymentMethod,
+          paymentStatus: createdOrder.paymentStatus,
+          currency: 'INR',
+          subtotalINR: createdOrder.subtotalINR,
+          discountINR: createdOrder.discountINR,
+          shippingFeeINR: createdOrder.shippingFeeINR,
+          codChargeINR: createdOrder.codChargeINR,
+          totalINR: createdOrder.totalINR,
+          shippingAddress: createdOrder.shippingAddress,
+          items: createdOrder.items,
+        } as any)
+
         clearCart()
         setIsProcessing(false)
         navigate(`/order-confirmation/${createdOrder.orderNumber}`)
         return
       }
 
-      // 3. Handle Prepaid Razorpay
+      // 3. Handle Prepaid Razorpay: payment MUST be completed and verified before placing order in DB
       if (paymentMethod === 'PREPAID_RAZORPAY') {
         const scriptReady = await loadRazorpayScript()
-        const rzpOrderRes = await api.createRazorpayOrder(
-          createdOrder.totalINR,
-          `rcpt_${createdOrder.orderNumber}`,
-          createdOrder.orderNumber
-        )
+        if (!scriptReady || !(window as any).Razorpay) {
+          setErrorMsg('Payment gateway could not be loaded. Please check your internet connection or ad-blocker settings.')
+          setIsProcessing(false)
+          return
+        }
+
+        const tempReceipt = `rcpt_${Date.now()}`
+        const rzpOrderRes = await api.createRazorpayOrder(totalPayable, tempReceipt)
 
         if (!rzpOrderRes.success || !rzpOrderRes.data) {
           setErrorMsg(rzpOrderRes.message || 'Payment initiation failed. Please try again.')
@@ -214,107 +215,109 @@ export const CheckoutPage: React.FC = () => {
           return
         }
 
-        if (scriptReady && (window as any).Razorpay) {
-          const razorpayOptions = {
-            key: rzpOrderRes.keyId || import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_U2mMXjXIzuTfCg',
-            amount: rzpOrderRes.data.amount,
-            currency: 'INR',
-            name: 'Your Framies',
-            description: `Framing Order #${createdOrder.orderNumber}`,
-            image: '/favicon.ico',
-            order_id: rzpOrderRes.data.id,
-            handler: async (resp: any) => {
-              try {
-                const verifyRes = await api.verifyRazorpayPayment({
-                  razorpay_order_id: resp.razorpay_order_id,
-                  razorpay_payment_id: resp.razorpay_payment_id,
-                  razorpay_signature: resp.razorpay_signature,
-                  orderNumber: createdOrder.orderNumber,
-                })
+        const razorpayOptions = {
+          key: rzpOrderRes.keyId || import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_U2mMXjXIzuTfCg',
+          amount: rzpOrderRes.data.amount,
+          currency: 'INR',
+          name: 'Your Framies',
+          description: 'Custom Art & Gallery Frames',
+          image: '/favicon.ico',
+          order_id: rzpOrderRes.data.id,
+          handler: async (resp: any) => {
+            try {
+              // Confirm payment from Razorpay and place order in database atomically
+              const orderRes = await api.createOrder({
+                ...orderPayloadBase,
+                razorpayOrderId: resp.razorpay_order_id,
+                razorpayPaymentId: resp.razorpay_payment_id,
+                razorpaySignature: resp.razorpay_signature,
+              })
 
-                if (verifyRes.success && verifyRes.verified) {
-                  clearCart()
-                  setIsProcessing(false)
-                  navigate(`/order-confirmation/${createdOrder.orderNumber}`)
-                } else {
-                  setErrorMsg(verifyRes.message || 'Payment verification failed. Please contact support.')
-                  setIsProcessing(false)
-                }
-              } catch (err: any) {
-                setErrorMsg(err.message || 'Payment verification failed.')
+              if (!orderRes.success || !orderRes.data) {
+                setErrorMsg(orderRes.message || `Payment received (${resp.razorpay_payment_id}) but order recording failed. Please contact customer support.`)
                 setIsProcessing(false)
+                return
               }
-            },
-            prefill: {
-              name: fullName,
-              email: email,
-              contact: phone,
-            },
-            notes: {
-              orderNumber: createdOrder.orderNumber,
-            },
-            theme: {
-              color: '#171717',
-              backdrop_color: 'rgba(0, 0, 0, 0.65)',
-            },
-            config: {
-              display: {
-                blocks: {
-                  upi: {
-                    name: 'Pay via UPI (GPay, PhonePe, Paytm, QR)',
-                    instruments: [
-                      {
-                        method: 'upi',
-                        flows: ['qr', 'intent', 'collect'],
-                      },
-                    ],
-                  },
-                  other: {
-                    name: 'Cards, Netbanking & Wallets',
-                    instruments: [
-                      { method: 'card' },
-                      { method: 'netbanking' },
-                      { method: 'wallet' },
-                    ],
-                  },
-                },
-                sequence: ['block.upi', 'block.other'],
-                preferences: {
-                  show_default_blocks: true,
-                },
-              },
-            },
-            modal: {
-              ondismiss: () => {
-                setIsProcessing(false)
-                setErrorMsg('Payment cancelled. You can retry anytime.')
-              },
-            },
-          }
 
-          const rzp = new (window as any).Razorpay(razorpayOptions)
-          rzp.on('payment.failed', (err: any) => {
-            setErrorMsg(err.error?.description || 'Payment failed. Please retry with another payment method.')
-            setIsProcessing(false)
-          })
-          rzp.open()
-        } else {
-          // Fallback verification for automated testing & sandboxed offline environments
-          const testVerify = await api.verifyRazorpayPayment({
-            razorpay_order_id: rzpOrderRes.data.id,
-            razorpay_payment_id: `pay_test_${Date.now()}`,
-            razorpay_signature: 'test_signature_valid',
-            orderNumber: createdOrder.orderNumber,
-          })
-          if (testVerify.success) {
-            clearCart()
-            setIsProcessing(false)
-            navigate(`/order-confirmation/${createdOrder.orderNumber}`)
-          } else {
-            setErrorMsg('Payment gateway could not be loaded.')
-            setIsProcessing(false)
-          }
+              const createdOrder = orderRes.data
+              createOrder({
+                id: createdOrder.id,
+                orderNumber: createdOrder.orderNumber,
+                userId: user?.id,
+                status: createdOrder.status,
+                paymentMethod: createdOrder.paymentMethod,
+                paymentStatus: createdOrder.paymentStatus,
+                currency: 'INR',
+                subtotalINR: createdOrder.subtotalINR,
+                discountINR: createdOrder.discountINR,
+                shippingFeeINR: createdOrder.shippingFeeINR,
+                codChargeINR: createdOrder.codChargeINR,
+                totalINR: createdOrder.totalINR,
+                shippingAddress: createdOrder.shippingAddress,
+                items: createdOrder.items,
+              } as any)
+
+              clearCart()
+              setIsProcessing(false)
+              navigate(`/order-confirmation/${createdOrder.orderNumber}`)
+            } catch (err: any) {
+              setErrorMsg(err.message || 'Failed to place order after payment verification.')
+              setIsProcessing(false)
+            }
+          },
+          prefill: {
+            name: fullName,
+            email: email,
+            contact: phone,
+          },
+          notes: {
+            customerPincode: cleanedPincode,
+          },
+          theme: {
+            color: '#171717',
+            backdrop_color: 'rgba(0, 0, 0, 0.65)',
+          },
+          config: {
+            display: {
+              blocks: {
+                upi: {
+                  name: 'Pay via UPI (GPay, PhonePe, Paytm, QR)',
+                  instruments: [
+                    {
+                      method: 'upi',
+                      flows: ['qr', 'intent', 'collect'],
+                    },
+                  ],
+                },
+                other: {
+                  name: 'Cards, Netbanking & Wallets',
+                  instruments: [
+                    { method: 'card' },
+                    { method: 'netbanking' },
+                    { method: 'wallet' },
+                  ],
+                },
+              },
+              sequence: ['block.upi', 'block.other'],
+              preferences: {
+                show_default_blocks: true,
+              },
+            },
+          },
+          modal: {
+            ondismiss: () => {
+              setIsProcessing(false)
+              setErrorMsg('Payment was cancelled. No order was placed.')
+            },
+          },
         }
+
+        const rzp = new (window as any).Razorpay(razorpayOptions)
+        rzp.on('payment.failed', (err: any) => {
+          setErrorMsg(err.error?.description || 'Payment failed. No order was placed. Please retry or choose Cash on Delivery.')
+          setIsProcessing(false)
+        })
+        rzp.open()
       }
     } catch (err: any) {
       setErrorMsg(err.message || 'Failed to place order. Please try again.')

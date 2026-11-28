@@ -64,6 +64,9 @@ export const CreateOrderRequestSchema = z.object({
   items: z.array(OrderItemSchema).min(1, 'Order must contain at least one item'),
   shippingAddress: AddressSchema,
   paymentMethod: z.enum(['PREPAID_RAZORPAY', 'COD', 'PARTIAL_COD']),
+  razorpayOrderId: z.string().optional(),
+  razorpayPaymentId: z.string().optional(),
+  razorpaySignature: z.string().optional(),
   notes: z.string().max(500).optional(),
   couponCode: z.string().optional(),
 })

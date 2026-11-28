@@ -21,7 +21,7 @@ export const PaymentsView: React.FC = () => {
 
   // Razorpay Gateway Config
   const [gatewayConfig, setGatewayConfig] = useState({
-    mode: 'test' as 'test' | 'live',
+    mode: 'live' as 'test' | 'live',
     keyId: 'rzp_test_U2mMXjXIzuTfCg',
     keySecret: 'aGiMWkjge3MzDUj7JCfKqOA0',
     webhookSecret: '',

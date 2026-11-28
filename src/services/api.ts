@@ -91,6 +91,9 @@ export const api = {
     items: any[]
     shippingAddress: any
     paymentMethod: 'PREPAID_RAZORPAY' | 'COD' | 'PARTIAL_COD'
+    razorpayOrderId?: string
+    razorpayPaymentId?: string
+    razorpaySignature?: string
     notes?: string
     couponCode?: string
   }) {

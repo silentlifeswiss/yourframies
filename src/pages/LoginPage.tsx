@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Lock, Mail, Phone, ArrowRight, ShieldCheck, KeyRound, Sparkles, RefreshCw, CheckCircle2 } from 'lucide-react'
+import { Lock, Mail, Phone, ArrowRight, ShieldCheck, KeyRound, RefreshCw, CheckCircle2 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
 export const LoginPage: React.FC = () => {
@@ -10,7 +10,6 @@ export const LoginPage: React.FC = () => {
   const [phone, setPhone] = useState('')
   const [otp, setOtp] = useState('')
   const [otpStep, setOtpStep] = useState<'phone' | 'code'>('phone')
-  const [otpPreview, setOtpPreview] = useState<string | null>(null)
   const [resendTimer, setResendTimer] = useState(0)
   const [isSendingOtp, setIsSendingOtp] = useState(false)
   const [isVerifying, setIsVerifying] = useState(false)
@@ -54,16 +53,11 @@ export const LoginPage: React.FC = () => {
         setOtpStep('code')
         setResendTimer(30)
         setInfoMsg(res.message || 'OTP sent successfully.')
-        if (res.otpPreview) {
-          setOtpPreview(res.otpPreview)
-        }
       } else {
         setError(res.message || 'Unable to send OTP. Please try again.')
       }
     } catch {
-      setError('Connection error while sending OTP. You can use test code 123456.')
-      setOtpStep('code')
-      setOtpPreview('123456')
+      setError('Connection error while sending OTP. Please try again.')
     } finally {
       setIsSendingOtp(false)
     }
@@ -215,7 +209,6 @@ export const LoginPage: React.FC = () => {
                         onClick={() => {
                           setOtpStep('phone')
                           setOtp('')
-                          setOtpPreview(null)
                         }}
                         className="text-[11px] text-neutral-500 hover:text-black underline"
                       >
@@ -236,23 +229,6 @@ export const LoginPage: React.FC = () => {
                       />
                     </div>
                   </div>
-
-                  {/* Test OTP Helper Banner */}
-                  {otpPreview && (
-                    <div className="p-2.5 bg-amber-50 border border-amber-200 rounded text-amber-900 text-[11px] flex items-center justify-between">
-                      <div className="flex items-center gap-1.5">
-                        <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-                        <span>OTP Preview: <strong>{otpPreview}</strong></span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setOtp(otpPreview)}
-                        className="px-2 py-0.5 bg-amber-200 hover:bg-amber-300 text-amber-950 rounded text-[10px] font-semibold"
-                      >
-                        Auto-fill
-                      </button>
-                    </div>
-                  )}
 
                   <div className="flex items-center justify-between text-xs text-neutral-500">
                     {resendTimer > 0 ? (
