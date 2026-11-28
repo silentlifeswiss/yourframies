@@ -5,6 +5,7 @@
 
 [build.environment]
   NODE_VERSION = "26"
+  SHADOWFAX_API_TOKEN = "7da41fe09a2b98c2d00e5961b95912c1d29a12f6"
   SHADOWFAX_MODE = "staging"
   DELHIVERY_API_TOKEN = "a83902984b7d61ecb111ccc79229c7a1e1f3e472"
   DELHIVERY_MODE = "production"

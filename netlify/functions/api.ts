@@ -859,6 +859,62 @@ export const handler: Handler = async (event: HandlerEvent, _context?: HandlerCo
       return makeResponse(200, { success: true, data: tracking })
     }
 
+    // Public Webhook: Shadowfax Real-Time Logistics Callbacks POST /shipping/shadowfax/webhook
+    if ((path === '/shipping/shadowfax/webhook' || path === '/shipping/webhook') && method === 'POST') {
+      const payload = JSON.parse(event.body || '{}')
+      const orderId = payload.client_order_id || payload.order_id || payload.order_number
+      const awb = payload.awb_number || payload.awb || payload.waybill
+      const rawStatus = (payload.status || payload.event || '').toString().toUpperCase()
+      const location = payload.current_location || payload.location || payload.city || 'In Transit'
+
+      if (!orderId && !awb) {
+        return makeResponse(400, { success: false, message: 'Missing order identifier or AWB in callback payload' })
+      }
+
+      // Map Shadowfax lifecycle event to internal OrderStatus
+      let mappedStatus: DBOrder['status'] = 'CONFIRMED'
+      if (['ACCEPTED', 'ALLOTTED'].includes(rawStatus)) {
+        mappedStatus = 'CONFIRMED'
+      } else if (['ARRIVED', 'DISPATCHED', 'PICKED_UP', 'IN_TRANSIT'].includes(rawStatus)) {
+        mappedStatus = 'SHIPPED'
+      } else if (['OUT_FOR_DELIVERY', 'OFD', 'ARRIVED_CUSTOMER_DOORSTEP'].includes(rawStatus)) {
+        mappedStatus = 'OUT_FOR_DELIVERY'
+      } else if (['DELIVERED', 'COMPLETED'].includes(rawStatus)) {
+        mappedStatus = 'DELIVERED'
+      } else if (['RTO', 'UNDELIVERED', 'CANCELLED', 'REJECTED'].includes(rawStatus)) {
+        mappedStatus = 'CANCELLED'
+      }
+
+      const order = orderId ? await db.getOrderByNumber(orderId) : null
+      const targetOrderNumber = order?.orderNumber || orderId
+
+      if (targetOrderNumber) {
+        await db.updateOrderStatus(targetOrderNumber, mappedStatus, {
+          awbCode: awb || order?.awbCode,
+          courierPartner: 'SHADOWFAX',
+        })
+
+        await db.saveAuditLog({
+          id: `log-${Date.now()}`,
+          adminId: 'SYSTEM_WEBHOOK',
+          adminEmail: 'webhook@shadowfax.in',
+          adminName: 'Shadowfax Webhook',
+          action: 'ORDER_STATUS_CHANGED',
+          entityType: 'ORDER',
+          entityId: targetOrderNumber,
+          details: `Shadowfax status callback: ${rawStatus} -> ${mappedStatus} (Location: ${location})`,
+          ipAddress: clientIp,
+          timestamp: new Date().toISOString(),
+        })
+      }
+
+      return makeResponse(200, {
+        success: true,
+        message: 'Shadowfax webhook callback processed successfully',
+        status: mappedStatus,
+      })
+    }
+
     // ==========================================================================
     // 6b. Customer Mobile OTP Authentication & Verification Endpoints
     // ==========================================================================

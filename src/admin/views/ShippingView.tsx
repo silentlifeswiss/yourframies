@@ -28,7 +28,7 @@ export const ShippingView: React.FC = () => {
     return {
       shadowfax: {
         enabled: true,
-        apiKey: '',
+        apiKey: '7da41fe09a2b98c2d00e5961b95912c1d29a12f6',
         environment: 'staging' as 'staging' | 'production',
         pickupPin: '560058',
         service: 'marketplace',
@@ -241,6 +241,25 @@ export const ShippingView: React.FC = () => {
                 <div className="text-xs text-amber-300/90 pt-1 flex items-center gap-1.5">
                   <CheckCircle2 className="w-3.5 h-3.5 text-amber-400" />
                   <span>Serviceability, Order Booking & Live Tracking endpoints wired</span>
+                </div>
+
+                <div className="pt-2 border-t border-neutral-800/60">
+                  <label className="text-[11px] text-neutral-400 block mb-1">Webhook Callback URL</label>
+                  <div className="flex items-center gap-1.5 bg-neutral-950 border border-neutral-800 rounded px-2.5 py-1.5">
+                    <input
+                      type="text"
+                      readOnly
+                      value="https://yourframies.vercel.app/api/shipping/shadowfax/webhook"
+                      className="bg-transparent text-[11px] text-neutral-300 font-mono w-full outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => navigator.clipboard.writeText('https://yourframies.vercel.app/api/shipping/shadowfax/webhook')}
+                      className="text-[10px] bg-neutral-800 hover:bg-neutral-700 text-neutral-200 px-2 py-0.5 rounded transition-colors whitespace-nowrap"
+                    >
+                      Copy
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

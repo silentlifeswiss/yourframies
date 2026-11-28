@@ -602,4 +602,65 @@ describe('Your Framies - Backend Serverless Architecture & APIs', () => {
     expect(trackPhoneData.success).toBe(true)
     expect(trackPhoneData.data.order.shippingAddress.phone).toBe('9845012345')
   })
+
+  // --------------------------------------------------------------------------
+  // 9. Shadowfax Webhook Callbacks & Order Lifecycle Synchronization
+  // --------------------------------------------------------------------------
+  it('POST /shipping/shadowfax/webhook processes real-time logistics events and updates order status', async () => {
+    // 1. Create a test order
+    const orderPayload = {
+      items: [{ productId: 'yf-car-01', title: 'Porsche GT3 Frame', priceINR: 1499, quantity: 1 }],
+      shippingAddress: {
+        fullName: 'Aarav Mehta',
+        phone: '9988776655',
+        addressLine1: 'Indiranagar 100ft Rd',
+        city: 'Bengaluru',
+        state: 'Karnataka',
+        pincode: '560038',
+      },
+      paymentMethod: 'PREPAID_RAZORPAY',
+      razorpayOrderId: 'order_test_verified',
+      razorpayPaymentId: 'pay_test_9999',
+      razorpaySignature: 'test_signature_valid',
+    }
+
+    const orderRes: any = await handler(createEvent('/orders', 'POST', orderPayload), {} as any)
+    const orderNumber = JSON.parse(orderRes.body).data.orderNumber
+
+    // 2. Simulate Shadowfax webhook: DISPATCHED
+    const dispatchedWebhook = createEvent('/shipping/shadowfax/webhook', 'POST', {
+      client_order_id: orderNumber,
+      awb_number: 'SFX109928374',
+      status: 'DISPATCHED',
+      current_location: 'Bangalore Hub',
+      timestamp: new Date().toISOString(),
+    })
+    const dispatchedRes: any = await handler(dispatchedWebhook, {} as any)
+    expect(dispatchedRes.statusCode).toBe(200)
+    expect(JSON.parse(dispatchedRes.body).status).toBe('SHIPPED')
+
+    // Verify order in database updated to SHIPPED
+    const checkShippedRes: any = await handler(createEvent(`/orders/${orderNumber}`, 'GET'), {} as any)
+    const shippedOrder = JSON.parse(checkShippedRes.body).data
+    expect(shippedOrder.status).toBe('SHIPPED')
+    expect(shippedOrder.awbCode).toBe('SFX109928374')
+    expect(shippedOrder.courierPartner).toBe('SHADOWFAX')
+
+    // 3. Simulate Shadowfax webhook: DELIVERED
+    const deliveredWebhook = createEvent('/shipping/shadowfax/webhook', 'POST', {
+      client_order_id: orderNumber,
+      awb_number: 'SFX109928374',
+      status: 'DELIVERED',
+      current_location: 'Indiranagar Delivery Hub',
+      timestamp: new Date().toISOString(),
+    })
+    const deliveredRes: any = await handler(deliveredWebhook, {} as any)
+    expect(deliveredRes.statusCode).toBe(200)
+    expect(JSON.parse(deliveredRes.body).status).toBe('DELIVERED')
+
+    // Verify order in database updated to DELIVERED
+    const checkDeliveredRes: any = await handler(createEvent(`/orders/${orderNumber}`, 'GET'), {} as any)
+    const deliveredOrder = JSON.parse(checkDeliveredRes.body).data
+    expect(deliveredOrder.status).toBe('DELIVERED')
+  })
 })
