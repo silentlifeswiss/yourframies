@@ -297,7 +297,7 @@ export const OrdersView: React.FC = () => {
                     <div>
                       <p className="font-bold text-white">{i.title}</p>
                       <p className="text-[11px] text-neutral-400">
-                        Size: {i.customization.frameSize}" • Moulding: {i.customization.moulding} • Mat:{' '}
+                        Size: {i.customization.frameSize === 'A4' ? 'A4' : `${i.customization.frameSize}"`} • Moulding: {i.customization.moulding} • Mat:{' '}
                         {i.customization.matColor || 'None'} • Glass: {i.customization.glassType}
                       </p>
                     </div>

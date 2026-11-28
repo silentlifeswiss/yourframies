@@ -218,7 +218,7 @@ export const AccountPage: React.FC = () => {
                         <div>
                           <p className="font-medium text-neutral-900">{item.title}</p>
                           <p className="text-[11px] text-neutral-500">
-                            {item.customization.frameSize}" • {item.customization.moulding} (x{item.quantity})
+                            {item.customization.frameSize === 'A4' ? 'A4' : `${item.customization.frameSize}"`} • {item.customization.moulding} (x{item.quantity})
                           </p>
                         </div>
                         <span className="font-semibold text-neutral-900">

@@ -91,7 +91,7 @@ export const CartPage: React.FC = () => {
 
                     <div className="text-[11px] sm:text-xs text-neutral-500 mt-1 sm:mt-2 space-y-0.5 sm:space-y-1">
                       <p className="truncate">
-                        Frame: <strong className="text-neutral-800">{item.customization.frameSize}"</strong> • <strong className="text-neutral-800">{item.customization.moulding}</strong>
+                        Frame: <strong className="text-neutral-800">{item.customization.frameSize === 'A4' ? 'A4' : `${item.customization.frameSize}"`}</strong> • <strong className="text-neutral-800">{item.customization.moulding}</strong>
                       </p>
                       <p className="truncate">
                         Mat: <span className="text-neutral-800">{item.customization.matColor || 'None'}</span> • Glass: <span className="text-neutral-800">{item.customization.glassType}</span>

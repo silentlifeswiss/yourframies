@@ -97,7 +97,7 @@ export const OrderConfirmationPage: React.FC = () => {
                   <div>
                     <p className="font-semibold text-neutral-900">{item.title}</p>
                     <p className="text-neutral-500 text-[11px]">
-                      {item.customization?.frameSize ? `Size: ${item.customization.frameSize}" • ` : ''}
+                      {item.customization?.frameSize ? `Size: ${item.customization.frameSize === 'A4' ? 'A4' : `${item.customization.frameSize}"`} • ` : ''}
                       {item.customization?.moulding ? `Moulding: ${item.customization.moulding} ` : ''}
                       (x{item.quantity})
                     </p>

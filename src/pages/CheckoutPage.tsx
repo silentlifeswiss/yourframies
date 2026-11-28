@@ -146,8 +146,8 @@ export const CheckoutPage: React.FC = () => {
           priceINR: i.priceINR,
           quantity: i.quantity,
           customization: i.customization || {
-            frameSize: '12x18',
-            moulding: 'Black Wood',
+            frameSize: 'A4',
+            moulding: 'Deep Black',
             glassType: 'Acrylic Glaze',
           },
         })),
@@ -365,7 +365,7 @@ export const CheckoutPage: React.FC = () => {
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-neutral-900 truncate">{i.product.title}</p>
                       <p className="text-[10px] text-neutral-500">
-                        {i.customization.frameSize}" • {i.customization.moulding} (x{i.quantity})
+                        {i.customization.frameSize === 'A4' ? 'A4' : `${i.customization.frameSize}"`} • {i.customization.moulding} (x{i.quantity})
                       </p>
                       <p className="font-bold text-neutral-900 mt-0.5">
                         {formatINR(i.priceINR * i.quantity)}
@@ -659,7 +659,7 @@ export const CheckoutPage: React.FC = () => {
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-semibold text-neutral-900 truncate">{i.product.title}</p>
                       <p className="text-[10px] text-neutral-500">
-                        {i.customization.frameSize}" • {i.customization.moulding} (x{i.quantity})
+                        {i.customization.frameSize === 'A4' ? 'A4' : `${i.customization.frameSize}"`} • {i.customization.moulding} (x{i.quantity})
                       </p>
                       <p className="text-xs font-bold text-neutral-900 mt-0.5">
                         {formatINR(i.priceINR * i.quantity)}

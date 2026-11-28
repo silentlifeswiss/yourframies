@@ -136,7 +136,7 @@ export const CartDrawer: React.FC = () => {
 
                       <div className="text-[11px] text-neutral-500 mt-1 space-y-0.5">
                         <p>
-                          Size: <strong className="text-neutral-700">{item.customization.frameSize}"</strong> • Timber: <strong className="text-neutral-700">{item.customization.moulding}</strong>
+                          Size: <strong className="text-neutral-700">{item.customization.frameSize === 'A4' ? 'A4' : `${item.customization.frameSize}"`}</strong> • Timber: <strong className="text-neutral-700">{item.customization.moulding}</strong>
                         </p>
                         <p>
                           Mat: <span className="text-neutral-700">{item.customization.matColor || 'None'}</span> • Glass: <span className="text-neutral-700">{item.customization.glassType}</span>

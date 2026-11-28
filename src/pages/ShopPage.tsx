@@ -45,9 +45,11 @@ export const ShopPage: React.FC = () => {
         if (!matchesTitle && !matchesDesc) return false
       }
 
-      // Size Filter
-      if (selectedSize !== 'all' && !product.availableSizes.includes(selectedSize)) {
-        return false
+      // Finish / Size Filter
+      if (selectedSize !== 'all') {
+        const matchesMoulding = product.availableMouldings.includes(selectedSize)
+        const matchesSize = product.availableSizes.includes(selectedSize)
+        if (!matchesMoulding && !matchesSize) return false
       }
 
       return true
@@ -127,12 +129,9 @@ export const ShopPage: React.FC = () => {
               onChange={(e) => setSelectedSize(e.target.value)}
               className="w-full text-xs bg-neutral-50 border border-neutral-300 rounded px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-black"
             >
-              <option value="all">All Sizes</option>
-              <option value="8x10">8x10"</option>
-              <option value="12x18">12x18"</option>
-              <option value="16x24">16x24"</option>
-              <option value="20x30">20x30"</option>
-              <option value="24x36">24x36"</option>
+              <option value="all">All Finishes (A4 Frame)</option>
+              <option value="Deep Black">Deep Black</option>
+              <option value="Minimalist White">Minimalist White</option>
             </select>
           </div>
 

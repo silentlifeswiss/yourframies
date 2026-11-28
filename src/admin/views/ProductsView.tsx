@@ -234,8 +234,8 @@ export const ProductsView: React.FC = () => {
         compareAtPriceINR: Number(comparePrice) || undefined,
         stockQuantity: Number(stockQuantity),
         images: finalImages,
-        availableSizes: ['8x10', '12x18', '16x24', '20x30'],
-        availableMouldings: ['Black Wood', 'White Minimalist', 'Natural Oak', 'Walnut'],
+        availableSizes: ['A4'],
+        availableMouldings: ['Deep Black', 'Minimalist White'],
         isCustomizable,
         isActive,
       }

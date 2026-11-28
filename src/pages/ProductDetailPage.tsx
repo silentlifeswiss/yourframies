@@ -41,8 +41,8 @@ export const ProductDetailPage: React.FC = () => {
   const product = productsList.find((p) => p.slug === slug)
 
   const [activeImageIndex, setActiveImageIndex] = useState(0)
-  const [selectedSize, setSelectedSize] = useState<FrameCustomization['frameSize']>('12x18')
-  const [selectedMoulding, setSelectedMoulding] = useState<FrameCustomization['moulding']>('Black Wood')
+  const [selectedSize, setSelectedSize] = useState<FrameCustomization['frameSize']>('A4')
+  const [selectedMoulding, setSelectedMoulding] = useState<FrameCustomization['moulding']>('Deep Black')
   const [selectedMat, setSelectedMat] = useState<FrameCustomization['matColor']>('Pure White')
   const [selectedGlass, setSelectedGlass] = useState<FrameCustomization['glassType']>('Acrylic Glaze')
 
@@ -77,15 +77,10 @@ export const ProductDetailPage: React.FC = () => {
   const category = getStoreCategories().find((c) => c.id === product.categoryId)
   const inWishlist = isInWishlist(product.id)
 
-  // Price calculations
-  let sizeAddon = 0
-  if (selectedSize === '12x18') sizeAddon = 300
-  if (selectedSize === '16x24') sizeAddon = 700
-  if (selectedSize === '20x30') sizeAddon = 1200
-  if (selectedSize === '24x36') sizeAddon = 1800
-
+  // Price calculations (Handcrafted A4 size standard, zero size surcharge)
+  const sizeAddon = 0
   const glassAddon = selectedGlass === 'Anti-Glare UV Glass' ? 350 : 0
-  const finalPrice = product.basePriceINR + sizeAddon + glassAddon
+  const finalPrice = product.basePriceINR + glassAddon
 
   const handlePincodeCheck = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -188,8 +183,12 @@ export const ProductDetailPage: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
           {/* Left: Gallery Images / Framed View */}
           <div className="lg:col-span-7 space-y-4">
-            {/* Main Active Image */}
-            <div className="relative aspect-[4/5] rounded-xl overflow-hidden bg-neutral-100 border border-neutral-200 shadow-md">
+            {/* Main Active Image with Frame Color Bevel */}
+            <div className={`relative aspect-[4/5] rounded-xl overflow-hidden bg-neutral-100 transition-all duration-300 ${
+              selectedMoulding === 'Minimalist White'
+                ? 'border-[14px] sm:border-[18px] border-white shadow-2xl ring-1 ring-neutral-200'
+                : 'border-[14px] sm:border-[18px] border-neutral-900 shadow-2xl ring-1 ring-black'
+            }`}>
               <img
                 src={displayedImage}
                 alt={product.title}
@@ -282,52 +281,71 @@ export const ProductDetailPage: React.FC = () => {
               </span>
             </div>
 
-            {/* 1. Size Selection */}
+            {/* 1. Size Specification (A4 Only) */}
             <div>
               <div className="flex justify-between items-center text-xs font-semibold uppercase tracking-wider text-neutral-800 mb-2">
-                <span>1. Select Size</span>
+                <span>1. Frame Dimensions</span>
                 <span className="text-neutral-500 normal-case font-normal text-[11px]">
-                  (Dimensions in inches)
+                  Standard Atelier A4
                 </span>
               </div>
-              <div className="grid grid-cols-4 gap-2">
-                {product.availableSizes.map((size) => (
-                  <button
-                    key={size}
-                    type="button"
-                    onClick={() => setSelectedSize(size as any)}
-                    className={`py-2 px-1 text-center rounded-md border text-xs font-semibold transition-all ${
-                      selectedSize === size
-                        ? 'border-neutral-900 bg-neutral-900 text-white'
-                        : 'border-neutral-200 text-neutral-700 hover:border-black bg-white'
-                    }`}
-                  >
-                    {size}"
-                  </button>
-                ))}
+              <div className="p-3.5 bg-neutral-50 border border-neutral-900 rounded-lg flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded bg-neutral-900 text-white flex items-center justify-center font-bold text-xs">
+                    A4
+                  </div>
+                  <div>
+                    <p className="font-bold text-xs text-neutral-900">A4 Classic Art Frame</p>
+                    <p className="text-[11px] text-neutral-500 font-mono mt-0.5">21.0 × 29.7 cm (8.3 × 11.7 in)</p>
+                  </div>
+                </div>
+                <span className="text-[10px] bg-neutral-200 text-neutral-800 font-semibold px-2 py-0.5 rounded">
+                  Exclusive A4
+                </span>
               </div>
             </div>
 
-            {/* 2. Moulding Selection */}
+            {/* 2. Color / Moulding Selection (Deep Black & Minimalist White Only) */}
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-800 mb-2">
-                2. Wood Moulding Finish
+                2. Frame Color
               </label>
-              <div className="grid grid-cols-2 gap-2">
-                {product.availableMouldings.map((m) => (
-                  <button
-                    key={m}
-                    type="button"
-                    onClick={() => setSelectedMoulding(m as any)}
-                    className={`py-2 px-3 text-left rounded-md border text-xs font-medium transition-all ${
-                      selectedMoulding === m
-                        ? 'border-neutral-900 bg-neutral-50 ring-1 ring-black'
-                        : 'border-neutral-200 text-neutral-700 hover:border-black bg-white'
-                    }`}
-                  >
-                    {m}
-                  </button>
-                ))}
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setSelectedMoulding('Deep Black')}
+                  className={`p-3 rounded-lg border text-left flex items-center gap-3 transition-all ${
+                    selectedMoulding === 'Deep Black'
+                      ? 'border-neutral-900 bg-neutral-900 text-white shadow-sm ring-1 ring-black'
+                      : 'border-neutral-200 text-neutral-800 hover:border-neutral-400 bg-white'
+                  }`}
+                >
+                  <div className="w-5 h-5 rounded-full bg-black border border-neutral-700 shadow-inner shrink-0" />
+                  <div>
+                    <p className="text-xs font-bold leading-tight">Deep Black</p>
+                    <p className={`text-[10px] mt-0.5 ${selectedMoulding === 'Deep Black' ? 'text-neutral-300' : 'text-neutral-500'}`}>
+                      Matte wood finish
+                    </p>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setSelectedMoulding('Minimalist White')}
+                  className={`p-3 rounded-lg border text-left flex items-center gap-3 transition-all ${
+                    selectedMoulding === 'Minimalist White'
+                      ? 'border-neutral-900 bg-neutral-100 text-neutral-900 shadow-sm ring-2 ring-neutral-900'
+                      : 'border-neutral-200 text-neutral-800 hover:border-neutral-400 bg-white'
+                  }`}
+                >
+                  <div className="w-5 h-5 rounded-full bg-white border border-neutral-300 shadow-sm shrink-0" />
+                  <div>
+                    <p className="text-xs font-bold leading-tight">Minimalist White</p>
+                    <p className="text-[10px] text-neutral-500 mt-0.5">
+                      Clean architectural finish
+                    </p>
+                  </div>
+                </button>
               </div>
             </div>
 

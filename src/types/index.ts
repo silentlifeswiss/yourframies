@@ -47,8 +47,8 @@ export interface Address {
 
 export interface FrameCustomization {
   photoUrl?: string
-  frameSize: '8x10' | '12x18' | '16x24' | '20x30' | '24x36'
-  moulding: 'Black Wood' | 'White Minimalist' | 'Natural Oak' | 'Walnut' | 'Gold Leaf'
+  frameSize: 'A4' | '8x10' | '12x18' | '16x24' | '20x30' | '24x36'
+  moulding: 'Deep Black' | 'Minimalist White' | 'Black Wood' | 'White Minimalist' | 'Natural Oak' | 'Walnut' | 'Gold Leaf'
   matColor?: 'None' | 'Pure White' | 'Off-White' | 'Jet Black'
   matWidthInches?: number
   glassType: 'Acrylic Glaze' | 'Anti-Glare UV Glass'

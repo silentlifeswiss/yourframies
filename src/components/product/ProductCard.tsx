@@ -19,8 +19,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.preventDefault()
     addToCart(product, {
-      frameSize: '12x18',
-      moulding: 'Black Wood',
+      frameSize: 'A4',
+      moulding: 'Deep Black',
       glassType: 'Acrylic Glaze',
     })
   }
@@ -83,7 +83,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             <Link to={`/product/${product.slug}`}>{product.title}</Link>
           </h3>
           <p className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs text-neutral-500 truncate">
-            {product.availableSizes.slice(0, 2).join(', ')} • {product.availableMouldings[0]}
+            A4 Frame • Deep Black & Minimalist White
           </p>
         </div>
 

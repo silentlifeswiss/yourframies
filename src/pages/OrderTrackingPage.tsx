@@ -289,7 +289,7 @@ export const OrderTrackingPage: React.FC = () => {
                     <div>
                       <p className="font-semibold text-neutral-900">{i.title}</p>
                       <p className="text-[11px] text-neutral-500">
-                        {i.customization.frameSize}" • {i.customization.moulding} (Qty: {i.quantity})
+                        {i.customization.frameSize === 'A4' ? 'A4' : `${i.customization.frameSize}"`} • {i.customization.moulding} (Qty: {i.quantity})
                       </p>
                     </div>
                     <span className="font-bold text-neutral-900">

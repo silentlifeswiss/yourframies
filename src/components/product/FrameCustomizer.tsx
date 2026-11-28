@@ -22,22 +22,17 @@ export const FrameCustomizer: React.FC<FrameCustomizerProps> = ({
   const [isCustomPhoto, setIsCustomPhoto] = useState(false)
   const [photoName, setPhotoName] = useState<string>('sample-artwork.jpg')
 
-  // Customization State
-  const [frameSize, setFrameSize] = useState<FrameCustomization['frameSize']>('12x18')
-  const [moulding, setMoulding] = useState<FrameCustomization['moulding']>('Black Wood')
+  // Customization State (A4 Exclusive & Deep Black / Minimalist White)
+  const [frameSize, setFrameSize] = useState<FrameCustomization['frameSize']>('A4')
+  const [moulding, setMoulding] = useState<FrameCustomization['moulding']>('Deep Black')
   const [matColor, setMatColor] = useState<FrameCustomization['matColor']>('Pure White')
   const [glassType, setGlassType] = useState<FrameCustomization['glassType']>('Acrylic Glaze')
 
   // Pricing configuration
   const basePrice = baseProduct ? baseProduct.basePriceINR : 1299
-  let sizeAddon = 0
-  if (frameSize === '12x18') sizeAddon = 300
-  if (frameSize === '16x24') sizeAddon = 700
-  if (frameSize === '20x30') sizeAddon = 1200
-  if (frameSize === '24x36') sizeAddon = 1800
-
-  let glassAddon = glassType === 'Anti-Glare UV Glass' ? 350 : 0
-  const finalPrice = basePrice + sizeAddon + glassAddon
+  const sizeAddon = 0
+  const glassAddon = glassType === 'Anti-Glare UV Glass' ? 350 : 0
+  const finalPrice = basePrice + glassAddon
 
   // Handle Photo Upload
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,8 +57,10 @@ export const FrameCustomizer: React.FC<FrameCustomizerProps> = ({
   // Frame Border Styles
   const getMouldingStyle = () => {
     switch (moulding) {
+      case 'Deep Black':
       case 'Black Wood':
         return 'bg-neutral-900 border-[16px] sm:border-[22px] border-neutral-900 shadow-2xl ring-1 ring-neutral-800'
+      case 'Minimalist White':
       case 'White Minimalist':
         return 'bg-neutral-100 border-[16px] sm:border-[22px] border-neutral-200 shadow-2xl ring-1 ring-neutral-300'
       case 'Natural Oak':
@@ -101,8 +98,8 @@ export const FrameCustomizer: React.FC<FrameCustomizerProps> = ({
       description: `Custom ${frameSize} frame crafted in ${moulding} with ${matColor} matting and ${glassType}.`,
       basePriceINR: basePrice,
       images: [uploadedImage],
-      availableSizes: ['8x10', '12x18', '16x24', '20x30', '24x36'],
-      availableMouldings: ['Black Wood', 'White Minimalist', 'Natural Oak', 'Walnut', 'Gold Leaf'],
+      availableSizes: ['A4'],
+      availableMouldings: ['Deep Black', 'Minimalist White'],
       isCustomizable: true,
       isActive: true,
       stockQuantity: 999,
@@ -161,7 +158,7 @@ export const FrameCustomizer: React.FC<FrameCustomizerProps> = ({
           {/* Quick Info Pill */}
           <div className="absolute bottom-3 left-1/2 -translate-x-1/2 px-3 py-1 sm:px-4 sm:py-1.5 rounded-full bg-white/90 backdrop-blur-md border border-neutral-200 shadow-sm text-[10px] sm:text-[11px] font-medium text-neutral-600 tracking-wider uppercase flex items-center gap-2 whitespace-nowrap">
             <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-            Live Preview • {frameSize}" • {moulding}
+            Live Preview • {frameSize === 'A4' ? 'A4 Frame' : `${frameSize}"`} • {moulding}
           </div>
         </div>
 
@@ -209,57 +206,56 @@ export const FrameCustomizer: React.FC<FrameCustomizerProps> = ({
 
         {/* 1. Frame Size Selector */}
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-800 mb-2.5">
-            1. Select Size (Inches)
-          </label>
-          <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
-            {(['8x10', '12x18', '16x24', '20x30', '24x36'] as const).map((size) => (
-              <button
-                key={size}
-                type="button"
-                onClick={() => setFrameSize(size)}
-                className={`py-2 px-1 text-center rounded-md border text-xs font-semibold transition-all ${
-                  frameSize === size
-                    ? 'border-neutral-900 bg-neutral-900 text-white shadow-sm'
-                    : 'border-neutral-200 text-neutral-700 hover:border-neutral-400 bg-white'
-                }`}
-              >
-                {size}"
-              </button>
-            ))}
+          <div className="flex justify-between items-center text-xs font-semibold uppercase tracking-wider text-neutral-800 mb-2.5">
+            <span>1. Frame Dimensions</span>
+            <span className="text-neutral-500 normal-case font-normal text-[11px]">
+              Standard Atelier A4
+            </span>
+          </div>
+          <div className="p-3 bg-neutral-50 border border-neutral-900 rounded-lg flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded bg-neutral-900 text-white flex items-center justify-center font-bold text-xs">
+                A4
+              </div>
+              <div>
+                <p className="font-bold text-xs text-neutral-900">A4 Classic Art Frame</p>
+                <p className="text-[11px] text-neutral-500 font-mono mt-0.5">21.0 × 29.7 cm (8.3 × 11.7 in)</p>
+              </div>
+            </div>
+            <span className="text-[10px] bg-neutral-200 text-neutral-800 font-semibold px-2 py-0.5 rounded">
+              Exclusive A4
+            </span>
           </div>
         </div>
 
         {/* 2. Moulding Timber Selector */}
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-800 mb-2.5">
-            2. Wood Moulding Finish: <span className="text-neutral-900">{moulding}</span>
+            2. Frame Color: <span className="text-neutral-900 font-bold">{moulding}</span>
           </label>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-            {(
-              [
-                { name: 'Black Wood', color: '#171717' },
-                { name: 'White Minimalist', color: '#f5f5f5' },
-                { name: 'Natural Oak', color: '#d2b48c' },
-                { name: 'Walnut', color: '#4a2e18' },
-                { name: 'Gold Leaf', color: '#d4af37' },
-              ] as const
-            ).map((item) => (
+          <div className="grid grid-cols-2 gap-3">
+            {[
+              { name: 'Deep Black', color: '#171717', desc: 'Matte gallery finish' },
+              { name: 'Minimalist White', color: '#ffffff', desc: 'Clean architectural finish' },
+            ].map((item) => (
               <button
                 key={item.name}
                 type="button"
-                onClick={() => setMoulding(item.name)}
-                className={`flex items-center gap-2 p-2.5 rounded-lg border text-xs font-medium text-left transition-all ${
+                onClick={() => setMoulding(item.name as any)}
+                className={`flex items-center gap-3 p-3 rounded-lg border text-xs font-medium text-left transition-all ${
                   moulding === item.name
-                    ? 'border-neutral-900 bg-neutral-50 ring-1 ring-neutral-900'
+                    ? 'border-neutral-900 bg-neutral-100 ring-2 ring-neutral-900 shadow-sm'
                     : 'border-neutral-200 hover:border-neutral-400 bg-white'
                 }`}
               >
                 <span
-                  className="w-4 h-4 rounded-full border border-black/20 shrink-0"
+                  className="w-5 h-5 rounded-full border border-black/20 shrink-0 shadow-inner"
                   style={{ backgroundColor: item.color }}
                 />
-                <span className="truncate">{item.name}</span>
+                <div>
+                  <span className="block font-bold text-neutral-900">{item.name}</span>
+                  <span className="block text-[10px] text-neutral-500">{item.desc}</span>
+                </div>
               </button>
             ))}
           </div>
