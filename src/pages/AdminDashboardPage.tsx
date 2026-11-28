@@ -34,7 +34,7 @@ import {
 import { useOrders } from '../context/OrderContext'
 import { useAuth } from '../context/AuthContext'
 import { INITIAL_PRODUCTS } from '../data/products'
-import { CATEGORIES } from '../data/categories'
+import { getStoreCategories } from '../data/categories'
 import { AVAILABLE_COUPONS, Coupon } from '../context/CartContext'
 import { formatINR } from '../utils/formatters'
 import { OrderStatus, Product } from '../types'
@@ -444,7 +444,7 @@ export const AdminDashboardPage: React.FC = () => {
                         <p className="text-[11px] text-neutral-400 font-mono">{p.slug}</p>
                       </td>
                       <td className="py-3 px-4 text-neutral-600">
-                        {CATEGORIES.find((c) => c.id === p.categoryId)?.name || 'Custom'}
+                        {getStoreCategories().find((c) => c.id === p.categoryId)?.name || 'Custom'}
                       </td>
                       <td className="py-3 px-4 font-bold text-neutral-900">
                         {formatINR(p.basePriceINR)}

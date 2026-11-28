@@ -627,7 +627,92 @@ class DataStore {
   // Categories
   // ----------------------------------------------------------------------------
   public async getCategories(): Promise<DBCategory[]> {
+    if (this.pool && this.isPostgresConnected) {
+      try {
+        const res = await this.pool.query(
+          `SELECT id, name, slug, description, image_url AS "imageUrl", display_order AS "displayOrder", is_active AS "isActive"
+           FROM categories
+           WHERE is_active = true
+           ORDER BY display_order ASC, created_at ASC`
+        )
+        if (res.rows.length > 0) {
+          return res.rows
+        }
+      } catch (err) {
+        console.warn('Postgres getCategories query failed, falling back:', err)
+      }
+    }
     return this.categories
+  }
+
+  public async saveCategory(cat: DBCategory): Promise<DBCategory> {
+    if (this.pool && this.isPostgresConnected) {
+      try {
+        const res = await this.pool.query(
+          `INSERT INTO categories (id, name, slug, description, image_url, display_order, is_active)
+           VALUES ($1, $2, $3, $4, $5, $6, $7)
+           ON CONFLICT (id) DO UPDATE SET
+             name = EXCLUDED.name,
+             slug = EXCLUDED.slug,
+             description = EXCLUDED.description,
+             image_url = EXCLUDED.image_url,
+             display_order = EXCLUDED.display_order,
+             is_active = EXCLUDED.is_active
+           RETURNING id, name, slug, description, image_url AS "imageUrl", display_order AS "displayOrder", is_active AS "isActive"`,
+          [
+            cat.id,
+            cat.name,
+            cat.slug,
+            cat.description || '',
+            cat.imageUrl || '',
+            cat.displayOrder || 0,
+            cat.isActive ?? true,
+          ]
+        )
+        if (res.rows.length > 0) {
+          const saved = res.rows[0]
+          const idx = this.categories.findIndex((c) => c.id === cat.id || c.slug === cat.slug)
+          if (idx >= 0) {
+            this.categories[idx] = saved
+          } else {
+            this.categories.push(saved)
+          }
+          this.saveToFile()
+          return saved
+        }
+      } catch (err) {
+        console.warn('Postgres saveCategory query failed, saving in-memory:', err)
+      }
+    }
+
+    const idx = this.categories.findIndex((c) => c.id === cat.id || c.slug === cat.slug)
+    if (idx >= 0) {
+      this.categories[idx] = { ...this.categories[idx], ...cat }
+    } else {
+      this.categories.push(cat)
+    }
+    this.saveToFile()
+    return cat
+  }
+
+  public async deleteCategory(id: string): Promise<boolean> {
+    if (this.pool && this.isPostgresConnected) {
+      try {
+        const res = await this.pool.query(`DELETE FROM categories WHERE id = $1 OR slug = $1`, [id])
+        if ((res.rowCount || 0) > 0) {
+          this.categories = this.categories.filter((c) => c.id !== id && c.slug !== id)
+          this.saveToFile()
+          return true
+        }
+      } catch (err) {
+        console.warn('Postgres deleteCategory query failed, deleting in-memory:', err)
+      }
+    }
+
+    const prevLen = this.categories.length
+    this.categories = this.categories.filter((c) => c.id !== id && c.slug !== id)
+    this.saveToFile()
+    return this.categories.length < prevLen
   }
 
   // ----------------------------------------------------------------------------

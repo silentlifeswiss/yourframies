@@ -78,6 +78,67 @@ describe('Your Framies - Backend Serverless Architecture & APIs', () => {
     expect(payload.data.length).toBeGreaterThan(0)
   })
 
+  it('Admin can create, update, and delete categories', async () => {
+    // 1. Get admin token
+    const loginRes: any = await handler(
+      createEvent('/admin/login', 'POST', {
+        email: 'admin@yourframies.com',
+        password: 'YourFramies2026!',
+      }),
+      {} as any
+    )
+    const token = JSON.parse(loginRes.body).token
+
+    // 2. Create new category
+    const createEventPayload = createEvent(
+      '/admin/categories',
+      'POST',
+      {
+        name: 'Anime & Manga Frames',
+        slug: 'anime-manga-frames',
+        description: 'Vibrant framed prints of iconic anime and manga series.',
+        imageUrl: 'https://images.unsplash.com/photo-1578632767115-351597cf2477',
+      },
+      { authorization: `Bearer ${token}` }
+    )
+    const createRes: any = await handler(createEventPayload, {} as any)
+    expect(createRes.statusCode).toBe(201)
+    const createData = JSON.parse(createRes.body).data
+    expect(createData.name).toBe('Anime & Manga Frames')
+    expect(createData.slug).toBe('anime-manga-frames')
+
+    // 3. Update category
+    const updateRes: any = await handler(
+      createEvent(
+        `/admin/categories/${createData.id}`,
+        'PUT',
+        {
+          name: 'Anime & Manga Art Frames',
+          slug: 'anime-manga-art-frames',
+          description: 'Updated description for Japanese anime wall art.',
+        },
+        { authorization: `Bearer ${token}` }
+      ),
+      {} as any
+    )
+    expect(updateRes.statusCode).toBe(200)
+    expect(JSON.parse(updateRes.body).data.name).toBe('Anime & Manga Art Frames')
+
+    // 4. Verify in public GET /categories
+    const listRes: any = await handler(createEvent('/categories'), {} as any)
+    const listData = JSON.parse(listRes.body).data
+    expect(listData.some((c: any) => c.name === 'Anime & Manga Art Frames')).toBe(true)
+
+    // 5. Delete category
+    const delRes: any = await handler(
+      createEvent(`/admin/categories/${createData.id}`, 'DELETE', undefined, {
+        authorization: `Bearer ${token}`,
+      }),
+      {} as any
+    )
+    expect(delRes.statusCode).toBe(200)
+  })
+
   it('GET /products/:slug fetches single product or returns 404 for unknown slug', async () => {
     const validEvent = createEvent('/products/porsche-911-gt3-rs-neon-night-frame')
     const validRes: any = await handler(validEvent, {} as any)

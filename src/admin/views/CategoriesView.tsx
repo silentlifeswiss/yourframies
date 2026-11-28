@@ -1,11 +1,15 @@
-import React, { useState } from 'react'
-import { FolderTree, Plus, Edit2, Trash2, ExternalLink } from 'lucide-react'
-import { CATEGORIES as INITIAL_CATS, Category } from '../../data/categories'
+import React, { useState, useEffect } from 'react'
+import { FolderTree, Plus, Edit2, Trash2, ExternalLink, CheckCircle2, AlertCircle } from 'lucide-react'
+import { getStoreCategories, saveStoreCategories, Category } from '../../data/categories'
 import { useMedia } from '../../context/MediaContext'
 import { useAdminAuth } from '../../context/AdminAuthContext'
+import { api } from '../../services/api'
 
 export const CategoriesView: React.FC = () => {
-  const [categories, setCategories] = useState<Category[]>(INITIAL_CATS)
+  const [categories, setCategories] = useState<Category[]>(() => getStoreCategories())
+  const [isLoading, setIsLoading] = useState(false)
+  const [saveSuccess, setSaveSuccess] = useState(false)
+  const [errorMsg, setErrorMsg] = useState('')
   const { openMediaPicker } = useMedia()
   const { logAuditAction } = useAdminAuth()
 
@@ -16,12 +20,32 @@ export const CategoriesView: React.FC = () => {
   const [imageUrl, setImageUrl] = useState('')
   const [showModal, setShowModal] = useState(false)
 
+  // Sync latest categories from Neon DB on mount
+  useEffect(() => {
+    let isMounted = true
+    const fetchLatest = async () => {
+      try {
+        const res = await api.getCategories()
+        if (res.success && Array.isArray(res.data) && res.data.length > 0 && isMounted) {
+          setCategories(res.data)
+          saveStoreCategories(res.data)
+        }
+      } catch (err) {
+        console.warn('Could not fetch categories from server:', err)
+      }
+    }
+    fetchLatest()
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
   const handleStartCreate = () => {
     setEditingCat(null)
     setName('')
     setSlug('')
     setDescription('')
-    setImageUrl('')
+    setImageUrl('https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=80')
     setShowModal(true)
   }
 
@@ -29,41 +53,98 @@ export const CategoriesView: React.FC = () => {
     setEditingCat(cat)
     setName(cat.name)
     setSlug(cat.slug)
-    setDescription(cat.description)
-    setImageUrl(cat.imageUrl)
+    setDescription(cat.description || '')
+    setImageUrl(cat.imageUrl || '')
     setShowModal(true)
   }
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleDelete = async (cat: Category) => {
+    if (!window.confirm(`Are you sure you want to delete category "${cat.name}"?`)) {
+      return
+    }
+
+    const nextCats = categories.filter((c) => c.id !== cat.id)
+    setCategories(nextCats)
+    saveStoreCategories(nextCats)
+
+    try {
+      await api.adminDeleteCategory(cat.id)
+      logAuditAction('CATEGORY_DELETED', 'CATEGORY', cat.id, `Deleted category ${cat.name}`)
+    } catch (err) {
+      console.warn('API category delete failed:', err)
+    }
+  }
+
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!name.trim()) return
 
-    if (editingCat) {
-      setCategories((prev) =>
-        prev.map((c) =>
-          c.id === editingCat.id ? { ...c, name, slug, description, imageUrl } : c
-        )
-      )
-      logAuditAction('CATEGORY_UPDATED', 'CATEGORY', editingCat.id, `Updated category ${name}`)
-    } else {
-      const newCat: Category = {
-        id: `cat-${Date.now()}`,
-        name,
-        slug: slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-        description,
-        imageUrl,
-        itemCount: 0,
-        featured: true,
-      }
-      setCategories((prev) => [...prev, newCat])
-      logAuditAction('CATEGORY_CREATED', 'CATEGORY', newCat.id, `Created category ${name}`)
-    }
+    setIsLoading(true)
+    setErrorMsg('')
 
-    setShowModal(false)
+    try {
+      if (editingCat) {
+        const cleanSlug = slug.trim() || name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+        const updatedCat: Category = {
+          ...editingCat,
+          name: name.trim(),
+          slug: cleanSlug,
+          description: description.trim(),
+          imageUrl: imageUrl.trim() || 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=80',
+        }
+
+        const nextCats = categories.map((c) => (c.id === editingCat.id ? updatedCat : c))
+        setCategories(nextCats)
+        saveStoreCategories(nextCats)
+
+        await api.adminSaveCategory(updatedCat)
+        logAuditAction('CATEGORY_UPDATED', 'CATEGORY', editingCat.id, `Updated category ${name}`)
+      } else {
+        const cleanSlug = slug.trim() || name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+        const newCat: Category = {
+          id: `cat-${cleanSlug || Date.now()}`,
+          name: name.trim(),
+          slug: cleanSlug,
+          description: description.trim(),
+          imageUrl: imageUrl.trim() || 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=80',
+          itemCount: 0,
+          featured: true,
+        }
+
+        const nextCats = [...categories, newCat]
+        setCategories(nextCats)
+        saveStoreCategories(nextCats)
+
+        await api.adminSaveCategory(newCat)
+        logAuditAction('CATEGORY_CREATED', 'CATEGORY', newCat.id, `Created category ${name}`)
+      }
+
+      setSaveSuccess(true)
+      setTimeout(() => setSaveSuccess(false), 3000)
+      setShowModal(false)
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Failed to save category to backend.')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
     <div className="space-y-6">
+      {saveSuccess && (
+        <div className="p-3 bg-emerald-950/80 border border-emerald-800 text-emerald-200 text-xs rounded-xl flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+          <span>Category changes saved and synced across all product catalogs.</span>
+        </div>
+      )}
+
+      {errorMsg && (
+        <div className="p-3 bg-red-950/80 border border-red-800 text-red-200 text-xs rounded-xl flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 text-red-400" />
+          <span>{errorMsg}</span>
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row justify-between sm:items-center pb-6 border-b border-neutral-800 gap-4">
         <div>
           <span className="text-[10px] uppercase font-bold tracking-widest text-amber-500">
@@ -105,7 +186,7 @@ export const CategoriesView: React.FC = () => {
             <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
               <p className="text-xs text-neutral-400 line-clamp-2">{cat.description}</p>
               <div className="pt-3 border-t border-neutral-800/80 flex items-center justify-between text-xs">
-                <span className="text-[11px] text-neutral-500">{cat.itemCount} Active Items</span>
+                <span className="text-[11px] text-neutral-500">{cat.itemCount || 0} Active Items</span>
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
@@ -114,6 +195,14 @@ export const CategoriesView: React.FC = () => {
                     title="Edit"
                   >
                     <Edit2 className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(cat)}
+                    className="p-1.5 bg-neutral-800 hover:bg-red-950 hover:text-red-400 text-neutral-400 rounded transition-colors"
+                    title="Delete Category"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
                   </button>
                   <a
                     href={`/shop?category=${cat.slug}`}
@@ -208,9 +297,10 @@ export const CategoriesView: React.FC = () => {
               </button>
               <button
                 type="submit"
-                className="px-5 py-2 bg-amber-500 text-neutral-950 font-bold uppercase tracking-wider rounded-lg"
+                disabled={isLoading}
+                className="px-5 py-2 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-neutral-950 font-bold uppercase tracking-wider rounded-lg transition-colors"
               >
-                Save Category
+                {isLoading ? 'Saving...' : 'Save Category'}
               </button>
             </div>
           </form>

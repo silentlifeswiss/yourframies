@@ -12,6 +12,7 @@ import { shipping } from './lib/shipping.ts'
 import {
   CreateOrderRequestSchema,
   ProductSchema,
+  CategorySchema,
   AdminLoginSchema,
   PincodeCheckSchema,
   RazorpayCreateOrderSchema,
@@ -19,6 +20,7 @@ import {
   RefundRequestSchema,
   DBOrder,
   DBProduct,
+  DBCategory,
 } from './lib/types.ts'
 
 // Helper for CORS & JSON response
@@ -116,6 +118,113 @@ export const handler: Handler = async (event: HandlerEvent, _context?: HandlerCo
     if (path === '/categories' && method === 'GET') {
       const categories = await db.getCategories()
       return makeResponse(200, { success: true, count: categories.length, data: categories })
+    }
+
+    // Admin: Create Category POST /admin/categories
+    if (path === '/admin/categories' && method === 'POST') {
+      const auth = await authenticateAdmin(event, ['SUPER_ADMIN', 'MANAGER'])
+      if (auth.error) return makeResponse(auth.status || 401, { success: false, message: auth.error })
+
+      const body = JSON.parse(event.body || '{}')
+      const validation = CategorySchema.safeParse(body)
+      if (!validation.success) {
+        return makeResponse(400, { success: false, errors: validation.error.format() })
+      }
+
+      const cData = validation.data
+      const newCategory: DBCategory = {
+        id: cData.id || `cat-${cData.slug || Date.now()}`,
+        name: cData.name,
+        slug: cData.slug,
+        description: cData.description,
+        imageUrl: cData.imageUrl,
+        displayOrder: cData.displayOrder || 0,
+        isActive: cData.isActive ?? true,
+      }
+
+      const saved = await db.saveCategory(newCategory)
+      await db.saveAuditLog({
+        id: `log-${Date.now()}`,
+        adminId: auth.user!.id,
+        adminEmail: auth.user!.email,
+        adminName: auth.user!.name,
+        action: 'CATEGORY_CREATED',
+        entityType: 'CATEGORY',
+        entityId: saved.id,
+        details: `Created category "${saved.name}" (${saved.slug})`,
+        ipAddress: clientIp,
+        timestamp: new Date().toISOString(),
+      })
+
+      return makeResponse(201, { success: true, data: saved })
+    }
+
+    // Admin: Update Category PUT /admin/categories/:id
+    if (path.startsWith('/admin/categories/') && method === 'PUT') {
+      const auth = await authenticateAdmin(event, ['SUPER_ADMIN', 'MANAGER'])
+      if (auth.error) return makeResponse(auth.status || 401, { success: false, message: auth.error })
+
+      const id = path.replace('/admin/categories/', '')
+      const body = JSON.parse(event.body || '{}')
+      const validation = CategorySchema.safeParse(body)
+      if (!validation.success) {
+        return makeResponse(400, { success: false, errors: validation.error.format() })
+      }
+
+      const cData = validation.data
+      const updatedCat: DBCategory = {
+        id,
+        name: cData.name,
+        slug: cData.slug,
+        description: cData.description,
+        imageUrl: cData.imageUrl,
+        displayOrder: cData.displayOrder || 0,
+        isActive: cData.isActive ?? true,
+      }
+
+      const saved = await db.saveCategory(updatedCat)
+      await db.saveAuditLog({
+        id: `log-${Date.now()}`,
+        adminId: auth.user!.id,
+        adminEmail: auth.user!.email,
+        adminName: auth.user!.name,
+        action: 'CATEGORY_UPDATED',
+        entityType: 'CATEGORY',
+        entityId: id,
+        details: `Updated category "${saved.name}" (${saved.slug})`,
+        ipAddress: clientIp,
+        timestamp: new Date().toISOString(),
+      })
+
+      return makeResponse(200, { success: true, data: saved })
+    }
+
+    // Admin: Delete Category DELETE /admin/categories/:id
+    if (path.startsWith('/admin/categories/') && method === 'DELETE') {
+      const auth = await authenticateAdmin(event, ['SUPER_ADMIN', 'MANAGER'])
+      if (auth.error) return makeResponse(auth.status || 401, { success: false, message: auth.error })
+
+      const id = path.replace('/admin/categories/', '')
+      const deleted = await db.deleteCategory(id)
+
+      if (!deleted) {
+        return makeResponse(404, { success: false, message: 'Category not found' })
+      }
+
+      await db.saveAuditLog({
+        id: `log-${Date.now()}`,
+        adminId: auth.user!.id,
+        adminEmail: auth.user!.email,
+        adminName: auth.user!.name,
+        action: 'CATEGORY_DELETED',
+        entityType: 'CATEGORY',
+        entityId: id,
+        details: `Deleted category ID ${id}`,
+        ipAddress: clientIp,
+        timestamp: new Date().toISOString(),
+      })
+
+      return makeResponse(200, { success: true, message: 'Category deleted' })
     }
 
     // Admin: Create Product POST /admin/products

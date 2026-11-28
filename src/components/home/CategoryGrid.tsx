@@ -1,9 +1,17 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowUpRight } from 'lucide-react'
-import { CATEGORIES } from '../../data/categories'
+import { getStoreCategories, Category } from '../../data/categories'
 
 export const CategoryGrid: React.FC = () => {
+  const [categoriesList, setCategoriesList] = useState<Category[]>(() => getStoreCategories())
+
+  useEffect(() => {
+    const handleCatUpdate = () => setCategoriesList(getStoreCategories())
+    window.addEventListener('yourframies_categories_updated', handleCatUpdate)
+    return () => window.removeEventListener('yourframies_categories_updated', handleCatUpdate)
+  }, [])
+
   return (
     <section className="py-12 sm:py-20 bg-neutral-50 border-b border-neutral-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -26,7 +34,7 @@ export const CategoryGrid: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
-          {CATEGORIES.map((cat) => (
+          {categoriesList.map((cat) => (
             <Link
               key={cat.id}
               to={`/shop?category=${cat.slug}`}

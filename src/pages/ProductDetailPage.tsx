@@ -16,7 +16,7 @@ import {
   Star,
 } from 'lucide-react'
 import { getStoreProducts } from '../data/products'
-import { CATEGORIES } from '../data/categories'
+import { getStoreCategories } from '../data/categories'
 import { ProductReviews } from '../components/product/ProductReviews'
 import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
@@ -74,7 +74,7 @@ export const ProductDetailPage: React.FC = () => {
     )
   }
 
-  const category = CATEGORIES.find((c) => c.id === product.categoryId)
+  const category = getStoreCategories().find((c) => c.id === product.categoryId)
   const inWishlist = isInWishlist(product.id)
 
   // Price calculations

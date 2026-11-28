@@ -15,7 +15,8 @@ import {
   FileImage,
 } from 'lucide-react'
 import { getStoreProducts, saveStoreProducts } from '../../data/products'
-import { CATEGORIES } from '../../data/categories'
+import { getStoreCategories, Category } from '../../data/categories'
+import { api } from '../../services/api'
 import { formatINR } from '../../utils/formatters'
 import { Product } from '../../types'
 import { useMedia } from '../../context/MediaContext'
@@ -25,6 +26,7 @@ export const ProductsView: React.FC = () => {
   const { openMediaPicker, uploadFile } = useMedia()
   const { logAuditAction } = useAdminAuth()
   const [products, setProducts] = useState<Product[]>(() => getStoreProducts())
+  const [categories, setCategories] = useState<Category[]>(() => getStoreCategories())
   const [search, setSearch] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('ALL')
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
@@ -32,6 +34,24 @@ export const ProductsView: React.FC = () => {
   const [isDragging, setIsDragging] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Listen for category updates and sync from backend
+  useEffect(() => {
+    const handleCatsUpdated = () => {
+      setCategories(getStoreCategories())
+    }
+    window.addEventListener('yourframies_categories_updated', handleCatsUpdated)
+
+    api.getCategories().then((res) => {
+      if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+        setCategories(res.data)
+      }
+    }).catch(() => {})
+
+    return () => {
+      window.removeEventListener('yourframies_categories_updated', handleCatsUpdated)
+    }
+  }, [])
 
   // Form State
   const [title, setTitle] = useState('')
@@ -65,7 +85,7 @@ export const ProductsView: React.FC = () => {
     setEditingProduct(null)
     setTitle('')
     setSlug('')
-    setCategoryId('cat-car-frames')
+    setCategoryId(categories[0]?.id || 'cat-car-frames')
     setDescription('')
     setBasePrice(0)
     setComparePrice(0)
@@ -270,7 +290,7 @@ export const ProductsView: React.FC = () => {
             className="px-3 py-2 bg-neutral-950 border border-neutral-800 rounded-lg text-xs text-neutral-300 outline-none"
           >
             <option value="ALL">All Categories</option>
-            {CATEGORIES.map((c) => (
+            {categories.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
               </option>
@@ -316,7 +336,7 @@ export const ProductsView: React.FC = () => {
                     <p className="text-[11px] text-neutral-500 font-mono">{prod.slug}</p>
                   </td>
                   <td className="py-3 px-4 text-neutral-400">
-                    {CATEGORIES.find((c) => c.id === prod.categoryId)?.name || 'Custom'}
+                    {categories.find((c) => c.id === prod.categoryId)?.name || 'Custom'}
                   </td>
                   <td className="py-3 px-4">
                     <span className="font-bold text-white">{formatINR(prod.basePriceINR)}</span>
@@ -575,7 +595,7 @@ export const ProductsView: React.FC = () => {
                   onChange={(e) => setCategoryId(e.target.value)}
                   className="w-full p-2.5 bg-neutral-950 border border-neutral-800 rounded-lg text-white outline-none focus:border-amber-500"
                 >
-                  {CATEGORIES.map((c) => (
+                  {categories.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.name}
                     </option>

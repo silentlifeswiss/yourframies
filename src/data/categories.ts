@@ -64,3 +64,27 @@ export const CATEGORIES: Category[] = [
     featured: false,
   },
 ]
+
+export const CATEGORIES_STORAGE_KEY = 'yourframies_categories_db'
+
+export function getStoreCategories(): Category[] {
+  try {
+    const raw = localStorage.getItem(CATEGORIES_STORAGE_KEY)
+    if (raw) {
+      const parsed = JSON.parse(raw)
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed
+    }
+  } catch (e) {
+    // fallback
+  }
+  return CATEGORIES
+}
+
+export function saveStoreCategories(categories: Category[]): void {
+  try {
+    localStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(categories))
+    window.dispatchEvent(new Event('yourframies_categories_updated'))
+  } catch (e) {
+    console.error('Error saving categories:', e)
+  }
+}

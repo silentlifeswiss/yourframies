@@ -209,6 +209,27 @@ export const api = {
     return res.json()
   },
 
+  async adminSaveCategory(category: any) {
+    const isEdit = Boolean(category.id && !category.id.startsWith('cat-new') && !category.id.startsWith('cat-temp'))
+    const endpoint = isEdit ? `${API_BASE}/admin/categories/${encodeURIComponent(category.id)}` : `${API_BASE}/admin/categories`
+    const method = isEdit ? 'PUT' : 'POST'
+
+    const res = await fetch(endpoint, {
+      method,
+      headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+      body: JSON.stringify(category),
+    })
+    return res.json()
+  },
+
+  async adminDeleteCategory(id: string) {
+    const res = await fetch(`${API_BASE}/admin/categories/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+      headers: { ...getAuthHeader() },
+    })
+    return res.json()
+  },
+
   async adminGetDraftHomepage() {
     const res = await fetch(`${API_BASE}/admin/homepage/draft`, {
       headers: { ...getAuthHeader() },

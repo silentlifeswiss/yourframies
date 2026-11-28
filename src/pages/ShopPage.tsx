@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Filter, SlidersHorizontal, ArrowUpDown } from 'lucide-react'
 import { getStoreProducts } from '../data/products'
-import { CATEGORIES } from '../data/categories'
+import { getStoreCategories, Category } from '../data/categories'
 import { ProductCard } from '../components/product/ProductCard'
 
 export const ShopPage: React.FC = () => {
@@ -11,11 +11,19 @@ export const ShopPage: React.FC = () => {
   const searchQuery = searchParams.get('search') || ''
 
   const [productsList, setProductsList] = useState(() => getStoreProducts())
+  const [categoriesList, setCategoriesList] = useState<Category[]>(() => getStoreCategories())
 
   useEffect(() => {
     const handleUpdate = () => setProductsList(getStoreProducts())
+    const handleCatUpdate = () => setCategoriesList(getStoreCategories())
+
     window.addEventListener('yourframies_products_updated', handleUpdate)
-    return () => window.removeEventListener('yourframies_products_updated', handleUpdate)
+    window.addEventListener('yourframies_categories_updated', handleCatUpdate)
+
+    return () => {
+      window.removeEventListener('yourframies_products_updated', handleUpdate)
+      window.removeEventListener('yourframies_categories_updated', handleCatUpdate)
+    }
   }, [])
 
   const [sortBy, setSortBy] = useState<'featured' | 'price-asc' | 'price-desc' | 'name'>('featured')
@@ -25,7 +33,7 @@ export const ShopPage: React.FC = () => {
     return productsList.filter((product) => {
       // Category Filter
       if (activeCategorySlug !== 'all') {
-        const cat = CATEGORIES.find((c) => c.slug === activeCategorySlug)
+        const cat = categoriesList.find((c) => c.slug === activeCategorySlug)
         if (cat && product.categoryId !== cat.id) return false
       }
 
@@ -71,7 +79,7 @@ export const ShopPage: React.FC = () => {
           <h1 className="font-serif text-2xl sm:text-5xl text-neutral-900 mt-1">
             {activeCategorySlug === 'all'
               ? 'All Handcrafted Frames'
-              : CATEGORIES.find((c) => c.slug === activeCategorySlug)?.name || 'Collection'}
+              : categoriesList.find((c) => c.slug === activeCategorySlug)?.name || 'Collection'}
           </h1>
           {searchQuery && (
             <p className="mt-1.5 text-xs text-neutral-500">
@@ -94,7 +102,7 @@ export const ShopPage: React.FC = () => {
           >
             All Collections
           </button>
-          {CATEGORIES.map((cat) => (
+          {categoriesList.map((cat) => (
             <button
               key={cat.id}
               type="button"

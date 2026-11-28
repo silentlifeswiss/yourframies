@@ -88,6 +88,17 @@ export const ProductSchema = z.object({
   stockQuantity: z.number().int().nonnegative().default(50),
 })
 
+// Category Schema
+export const CategorySchema = z.object({
+  id: z.string().optional(),
+  name: z.string().min(2, 'Name must be at least 2 characters').max(100),
+  slug: z.string().min(2).max(100),
+  description: z.string().max(1000).optional(),
+  imageUrl: z.string().optional(),
+  displayOrder: z.number().int().default(0),
+  isActive: z.boolean().default(true),
+})
+
 // Admin Login Schema
 export const AdminLoginSchema = z.object({
   email: z.string().email('Invalid email address'),
