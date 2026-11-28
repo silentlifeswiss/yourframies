@@ -72,7 +72,7 @@ const AppContent: React.FC = () => {
       <Navbar />
       <CartDrawer />
 
-      <main className="flex-1 pb-16 lg:pb-0">
+      <main className="flex-1 pb-16">
         <Suspense fallback={<RouteFallback />}>
           <Routes>
             <Route path="/" element={<HomePage />} />

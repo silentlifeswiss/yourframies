@@ -18,7 +18,7 @@ export const Footer: React.FC = () => {
   const telHref = `tel:${contactPhone.replace(/[^+\d]/g, '')}`
 
   return (
-    <footer className="bg-neutral-950 text-neutral-400 text-xs border-t border-neutral-800 pb-20 lg:pb-0">
+    <footer className="bg-neutral-950 text-neutral-400 text-xs border-t border-neutral-800 pb-20">
       {/* Value Badges Banner */}
       <div className="border-b border-neutral-900 py-8 sm:py-10 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 text-center md:text-left">

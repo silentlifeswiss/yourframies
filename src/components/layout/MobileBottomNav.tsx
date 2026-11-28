@@ -9,10 +9,9 @@ export const MobileBottomNav: React.FC = () => {
   const { itemCount, setIsCartOpen } = useCart()
   const { wishlistCount } = useWishlist()
 
-  // Hide bottom bar during checkout, product detail sticky CTA, or on admin pages
+  // Hide bottom bar during checkout or on admin pages
   const isHidden =
     location.pathname.startsWith('/checkout') ||
-    location.pathname.startsWith('/product/') ||
     location.pathname.startsWith('/admin') ||
     location.pathname.startsWith('/order-confirmation')
 
@@ -25,10 +24,10 @@ export const MobileBottomNav: React.FC = () => {
 
   return (
     <nav
-      aria-label="Mobile navigation"
-      className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-neutral-200/90 shadow-[0_-4px_16px_rgba(0,0,0,0.06)] pb-[env(safe-area-inset-bottom,0px)]"
+      aria-label="Sticky bottom navigation"
+      className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-neutral-200/90 shadow-[0_-4px_16px_rgba(0,0,0,0.06)] pb-[env(safe-area-inset-bottom,0px)]"
     >
-      <div className="flex items-center justify-around h-16 px-1">
+      <div className="max-w-3xl mx-auto flex items-center justify-around h-16 px-2">
         {/* 1. Home */}
         <Link
           to="/"

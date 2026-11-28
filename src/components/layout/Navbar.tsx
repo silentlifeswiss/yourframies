@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   Search,
-  ShoppingBag,
   Heart,
   User as UserIcon,
   Menu,
@@ -11,14 +10,12 @@ import {
   Frame,
   LogOut,
 } from 'lucide-react'
-import { useCart } from '../../context/CartContext'
 import { useWishlist } from '../../context/WishlistContext'
 import { useAuth } from '../../context/AuthContext'
 import { getStoreProducts, syncProductsFromApi } from '../../data/products'
 import { getStoreCategories, syncCategoriesFromApi, Category } from '../../data/categories'
 
 export const Navbar: React.FC = () => {
-  const { itemCount, setIsCartOpen } = useCart()
   const { wishlistCount } = useWishlist()
   const { user, isAuthenticated, logout } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -184,21 +181,6 @@ export const Navbar: React.FC = () => {
                   <UserIcon className="w-5 h-5" />
                 </Link>
               )}
-
-              {/* Shopping Cart Button */}
-              <button
-                type="button"
-                onClick={() => setIsCartOpen(true)}
-                className="relative p-2 text-neutral-900 hover:opacity-80 transition-opacity"
-                aria-label="Open Shopping Bag"
-              >
-                <ShoppingBag className="w-5 h-5" />
-                {itemCount > 0 && (
-                  <span className="absolute top-1 right-1 w-4 h-4 bg-neutral-900 text-white rounded-full text-[10px] font-medium flex items-center justify-center">
-                    {itemCount}
-                  </span>
-                )}
-              </button>
             </div>
           </div>
         </div>
