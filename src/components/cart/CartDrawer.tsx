@@ -53,17 +53,17 @@ export const CartDrawer: React.FC = () => {
       />
 
       <div className="fixed top-0 bottom-[calc(4rem+env(safe-area-inset-bottom,0px))] right-0 max-w-full flex pl-0 sm:pl-10">
-        <div className="w-screen max-w-md shadow-2xl flex flex-col justify-between h-full relative overflow-hidden bg-neutral-950 text-neutral-100 border-l border-white/10">
-          {/* Background image with dark gradient */}
+        <div className="w-screen max-w-md shadow-2xl flex flex-col justify-between h-full relative overflow-hidden border-l border-white/10 text-white">
+          {/* Cart background image and dark gradient overlay */}
           <div
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat pointer-events-none"
+            className="absolute inset-0 -z-10 bg-cover bg-center bg-no-repeat"
             style={{ backgroundImage: "url('/bg-frames.jpg')" }}
             aria-hidden="true"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-neutral-950/92 via-neutral-950/88 to-neutral-950/95 pointer-events-none" aria-hidden="true" />
+          <div className="absolute inset-0 -z-10 bg-neutral-950/85 backdrop-blur-md" aria-hidden="true" />
 
           {/* Header */}
-          <div className="relative z-10 px-5 py-4 sm:p-6 border-b border-white/10 flex items-center justify-between bg-black/40 backdrop-blur-md">
+          <div className="px-5 py-4 sm:p-6 border-b border-white/10 flex items-center justify-between bg-black/20">
             <div className="flex items-center gap-2">
               <ShoppingBag className="w-5 h-5 text-white" />
               <h2 className="text-base font-semibold tracking-wider uppercase text-white">
@@ -90,11 +90,11 @@ export const CartDrawer: React.FC = () => {
           </div>
 
           {/* Free Shipping Meter */}
-          <div className="relative z-10 bg-white/5 backdrop-blur-md px-6 py-3 border-b border-white/10">
+          <div className="bg-black/30 px-6 py-3 border-b border-white/10">
             <div className="text-[11px] text-neutral-300 font-medium mb-1.5 flex justify-between">
               {amountNeededForFreeShip > 0 ? (
                 <span>
-                  Add <strong className="text-white">{formatINR(amountNeededForFreeShip)}</strong> more for <strong className="text-white">Free Express Shipping</strong>!
+                  Add <strong className="text-white">{formatINR(amountNeededForFreeShip)}</strong> more for <strong>Free Express Shipping</strong>!
                 </span>
               ) : (
                 <span className="text-emerald-400 font-semibold flex items-center gap-1">
@@ -102,7 +102,7 @@ export const CartDrawer: React.FC = () => {
                 </span>
               )}
             </div>
-            <div className="w-full h-1.5 bg-white/20 rounded-full overflow-hidden">
+            <div className="w-full h-1.5 bg-neutral-800 rounded-full overflow-hidden">
               <div
                 className="h-full bg-white rounded-full transition-all duration-300"
                 style={{ width: `${freeShippingPercent}%` }}
@@ -111,7 +111,7 @@ export const CartDrawer: React.FC = () => {
           </div>
 
           {/* Item List */}
-          <div className="relative z-10 flex-1 overflow-y-auto p-6 space-y-6">
+          <div className="flex-1 overflow-y-auto p-6 space-y-6">
             {items.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center py-12">
                 <ShoppingBag className="w-12 h-12 text-neutral-500 mb-3" />
@@ -125,7 +125,7 @@ export const CartDrawer: React.FC = () => {
                     setIsCartOpen(false)
                     navigate('/shop')
                   }}
-                  className="mt-6 px-6 py-2.5 rounded-full bg-white text-neutral-900 text-xs uppercase tracking-widest font-semibold hover:bg-neutral-200 transition-colors shadow-lg"
+                  className="mt-6 px-6 py-2.5 rounded-full bg-white text-neutral-900 text-xs uppercase tracking-widest font-semibold hover:bg-neutral-200 transition-colors"
                 >
                   Start Shopping
                 </button>
@@ -165,7 +165,7 @@ export const CartDrawer: React.FC = () => {
                     </div>
 
                     <div className="flex items-center justify-between mt-3">
-                      <div className="flex items-center border border-white/20 bg-black/30 rounded-sm">
+                      <div className="flex items-center border border-white/20 rounded-sm bg-black/20">
                         <button
                           type="button"
                           onClick={() => updateQuantity(item.id, item.quantity - 1)}
@@ -199,7 +199,7 @@ export const CartDrawer: React.FC = () => {
 
           {/* Footer & Checkout Area */}
           {items.length > 0 && (
-            <div className="relative z-10 p-4 sm:p-6 border-t border-white/10 bg-black/60 backdrop-blur-md space-y-4 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]">
+            <div className="p-4 sm:p-6 border-t border-white/10 bg-black/40 space-y-4 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]">
               {/* Coupon Engine */}
               <div>
                 {appliedCoupon ? (
@@ -211,7 +211,7 @@ export const CartDrawer: React.FC = () => {
                     <button
                       type="button"
                       onClick={removeCoupon}
-                      className="text-emerald-300 hover:text-emerald-100 font-semibold underline"
+                      className="text-emerald-400 hover:text-emerald-200 font-semibold underline"
                     >
                       Remove
                     </button>
@@ -223,7 +223,7 @@ export const CartDrawer: React.FC = () => {
                       value={couponCode}
                       onChange={(e) => setCouponCode(e.target.value)}
                       placeholder="Discount Code (WELCOME10)"
-                      className="flex-1 px-3 py-2 bg-neutral-900 border border-white/20 rounded-sm text-xs text-white placeholder:text-neutral-500 focus:outline-none focus:ring-1 focus:ring-white uppercase tracking-wider"
+                      className="flex-1 px-3 py-2 border border-white/20 bg-black/30 text-white placeholder:text-neutral-500 rounded-sm text-xs focus:outline-none focus:ring-1 focus:ring-white uppercase tracking-wider"
                     />
                     <button
                       type="submit"
@@ -269,7 +269,7 @@ export const CartDrawer: React.FC = () => {
                   setIsCartOpen(false)
                   navigate('/checkout')
                 }}
-                className="w-full py-3.5 bg-white hover:bg-neutral-200 text-neutral-900 text-xs uppercase tracking-widest font-semibold rounded-sm shadow-md transition-all flex items-center justify-center gap-2"
+                className="w-full py-3.5 bg-white hover:bg-neutral-200 text-neutral-950 text-xs uppercase tracking-widest font-semibold rounded-sm shadow-md transition-all flex items-center justify-center gap-2"
               >
                 <span>Proceed To Secure Checkout</span>
                 <ArrowRight className="w-4 h-4" />
