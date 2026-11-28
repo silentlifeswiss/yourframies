@@ -148,18 +148,18 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({ product }) => {
   }
 
   return (
-    <section id="product-reviews" className="py-16 border-t border-neutral-200 mt-16 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="product-reviews" className="py-16 border-t border-white/10 mt-16 bg-white/5 backdrop-blur-md rounded-2xl p-6 sm:p-10 border text-neutral-100 shadow-xl">
+      <div className="max-w-7xl mx-auto">
         {/* Section Heading */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between pb-8 border-b border-neutral-200 gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between pb-8 border-b border-white/10 gap-4">
           <div>
-            <span className="text-[11px] font-bold uppercase tracking-widest text-neutral-500">
+            <span className="text-[11px] font-bold uppercase tracking-widest text-neutral-400">
               Customer Feedback
             </span>
-            <h2 className="font-serif text-2xl sm:text-3xl text-neutral-900 mt-1">
+            <h2 className="font-serif text-2xl sm:text-3xl text-white mt-1">
               Customer Reviews
             </h2>
-            <p className="text-sm text-neutral-600 mt-1">
+            <p className="text-sm text-neutral-300 mt-1">
               {totalReviews > 0
                 ? 'Verified feedback from customers who ordered this frame.'
                 : 'No reviews yet for this frame. Be the first to share a photo and review.'}
@@ -169,7 +169,7 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({ product }) => {
           <button
             type="button"
             onClick={() => setShowReviewForm(!showReviewForm)}
-            className="inline-flex items-center gap-2 px-5 py-3 bg-neutral-950 hover:bg-neutral-800 text-white text-xs font-semibold uppercase tracking-widest rounded-sm transition shadow-sm self-start sm:self-auto"
+            className="inline-flex items-center gap-2 px-5 py-3 bg-white hover:bg-neutral-200 text-neutral-950 text-xs font-semibold uppercase tracking-widest rounded-sm transition shadow-sm self-start sm:self-auto"
           >
             <MessageSquarePlus className="w-4 h-4" />
             <span>{showReviewForm ? 'Cancel Review' : 'Write a Review'}</span>
