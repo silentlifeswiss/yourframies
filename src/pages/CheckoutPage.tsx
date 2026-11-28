@@ -216,7 +216,7 @@ export const CheckoutPage: React.FC = () => {
         }
 
         const razorpayOptions = {
-          key: rzpOrderRes.keyId || import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_U2mMXjXIzuTfCg',
+          key: rzpOrderRes.keyId || import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_live_U5OGherACJU1kQ',
           amount: rzpOrderRes.data.amount,
           currency: 'INR',
           name: 'Your Framies',

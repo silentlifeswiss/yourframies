@@ -26,13 +26,13 @@ export class PaymentsManager {
   private webhookSecret: string | undefined
 
   constructor() {
-    this.keyId = process.env.RAZORPAY_KEY_ID || 'rzp_test_U2mMXjXIzuTfCg'
-    this.keySecret = process.env.RAZORPAY_KEY_SECRET || 'aGiMWkjge3MzDUj7JCfKqOA0'
+    this.keyId = process.env.RAZORPAY_KEY_ID || 'rzp_live_U5OGherACJU1kQ'
+    this.keySecret = process.env.RAZORPAY_KEY_SECRET || 'zTZlr04fo2Ay5YN10Do4n6ai'
     this.webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET
   }
 
   public getKeyId(): string {
-    return this.keyId || 'rzp_test_U2mMXjXIzuTfCg'
+    return this.keyId || 'rzp_live_U5OGherACJU1kQ'
   }
 
   public isRazorpayConfigured(): boolean {
