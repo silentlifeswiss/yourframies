@@ -80,7 +80,7 @@ export const ProductSchema = z.object({
   description: z.string().max(2000).default(''),
   basePriceINR: z.number().positive(),
   compareAtPriceINR: z.number().nonnegative().optional().nullable(),
-  images: z.array(z.string().min(1)).min(1, 'At least one image is required'),
+  images: z.array(z.string().min(1)).default([]),
   availableSizes: z.array(z.string()).default(['A4']),
   availableMouldings: z.array(z.string()).default(['Deep Black', 'Minimalist White']),
   isCustomizable: z.boolean().default(true),

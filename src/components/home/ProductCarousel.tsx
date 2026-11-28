@@ -62,11 +62,20 @@ export const ProductCarousel: React.FC = () => {
         </div>
 
         {/* Product Grid - 2 cols on mobile */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 lg:gap-8">
-          {productsToShow.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        {productsToShow.length === 0 ? (
+          <div className="py-14 px-6 bg-neutral-50 border border-dashed border-neutral-300 rounded-xl text-center">
+            <p className="text-sm font-semibold text-neutral-800">Catalog coming soon</p>
+            <p className="text-xs text-neutral-600 mt-1">
+              Frames published in the Admin Panel will appear here automatically.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 lg:gap-8">
+            {productsToShow.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   )

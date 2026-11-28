@@ -9,8 +9,7 @@ interface FrameCustomizerProps {
   onAddedToCart?: () => void
 }
 
-const DEFAULT_SAMPLE_PHOTO =
-  'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=1200&q=85'
+const DEFAULT_SAMPLE_PHOTO = ''
 
 export const FrameCustomizer: React.FC<FrameCustomizerProps> = ({
   baseProduct,
@@ -18,9 +17,9 @@ export const FrameCustomizer: React.FC<FrameCustomizerProps> = ({
 }) => {
   const { addToCart } = useCart()
 
-  const [uploadedImage, setUploadedImage] = useState<string>(DEFAULT_SAMPLE_PHOTO)
+  const [uploadedImage, setUploadedImage] = useState<string>(baseProduct?.images[0] || DEFAULT_SAMPLE_PHOTO)
   const [isCustomPhoto, setIsCustomPhoto] = useState(false)
-  const [photoName, setPhotoName] = useState<string>('sample-artwork.jpg')
+  const [photoName, setPhotoName] = useState<string>('custom-photo.jpg')
 
   // Customization State (A4 Exclusive & Deep Black / Minimalist White)
   const [frameSize] = useState<FrameCustomization['frameSize']>('A4')
@@ -112,12 +111,20 @@ export const FrameCustomizer: React.FC<FrameCustomizerProps> = ({
             }}
           >
             {/* Photo Area directly inside frame */}
-            <div className="w-full relative overflow-hidden aspect-[3/4] bg-neutral-200">
-              <img
-                src={uploadedImage}
-                alt="Customized Artwork Preview"
-                className="w-full h-full object-cover transition-all"
-              />
+            <div className="w-full relative overflow-hidden aspect-[3/4] bg-neutral-100">
+              {uploadedImage ? (
+                <img
+                  src={uploadedImage}
+                  alt="Customized Artwork Preview"
+                  className="w-full h-full object-cover transition-all"
+                />
+              ) : (
+                <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center text-neutral-500 gap-2">
+                  <Upload className="w-8 h-8 text-neutral-400" />
+                  <p className="text-xs font-semibold text-neutral-700">Your Photo Preview</p>
+                  <p className="text-[11px] text-neutral-500">Upload a JPG or PNG image below</p>
+                </div>
+              )}
             </div>
           </div>
 

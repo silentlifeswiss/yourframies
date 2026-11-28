@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react'
-import { FolderTree, Plus, Edit2, Trash2, ExternalLink, CheckCircle2, AlertCircle } from 'lucide-react'
+import React, { useState, useEffect, useRef } from 'react'
+import { FolderTree, Plus, Edit2, Trash2, ExternalLink, CheckCircle2, AlertCircle, Upload } from 'lucide-react'
 import { getStoreCategories, saveStoreCategories, Category } from '../../data/categories'
 import { getStoreProducts } from '../../data/products'
 import { useMedia } from '../../context/MediaContext'
@@ -13,10 +13,12 @@ export const CategoriesView: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>(() => getStoreCategories())
   const [productsCountMap, setProductsCountMap] = useState<Record<string, number>>({})
   const [isLoading, setIsLoading] = useState(false)
+  const [isUploadingImg, setIsUploadingImg] = useState(false)
   const [saveSuccess, setSaveSuccess] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
-  const { openMediaPicker } = useMedia()
+  const { openMediaPicker, uploadFile } = useMedia()
   const { logAuditAction } = useAdminAuth()
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [editingCat, setEditingCat] = useState<Category | null>(null)
   const [name, setName] = useState('')
@@ -45,7 +47,7 @@ export const CategoriesView: React.FC = () => {
     const fetchLatest = async () => {
       try {
         const res = await api.getCategories()
-        if (res.success && Array.isArray(res.data) && res.data.length > 0 && isMounted) {
+        if (res.success && Array.isArray(res.data) && isMounted) {
           setCategories(res.data)
           saveStoreCategories(res.data)
         }
@@ -67,7 +69,7 @@ export const CategoriesView: React.FC = () => {
     setName('')
     setSlug('')
     setDescription('')
-    setImageUrl('https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=80')
+    setImageUrl('')
     setShowModal(true)
   }
 
@@ -81,26 +83,37 @@ export const CategoriesView: React.FC = () => {
     setShowModal(true)
   }
 
+  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !file.type.startsWith('image/')) return
+    setIsUploadingImg(true)
+    try {
+      const item = await uploadFile(file, 'general', name || file.name)
+      setImageUrl(item.url)
+    } catch {
+      setErrorMsg('Failed to process cover image.')
+    } finally {
+      setIsUploadingImg(false)
+    }
+  }
+
   const handleDelete = async (cat: Category) => {
     if (!window.confirm(`Are you sure you want to delete category "${cat.name}"?`)) {
       return
     }
 
     setErrorMsg('')
-    const prevCats = [...categories]
-    const nextCats = categories.filter((c) => c.id !== cat.id)
-    setCategories(nextCats)
-    saveStoreCategories(nextCats)
-
     try {
       const res = await api.adminDeleteCategory(cat.id)
       if (!res.success && res.message && res.message !== 'Category not found') {
-        setErrorMsg(`Local update applied, server sync note: ${res.message}`)
+        setErrorMsg(res.message)
+        return
       }
+      const nextCats = categories.filter((c) => c.id !== cat.id)
+      setCategories(nextCats)
+      saveStoreCategories(nextCats)
       logAuditAction('CATEGORY_DELETED', 'CATEGORY', cat.id, `Deleted category ${cat.name}`)
     } catch (err: any) {
-      setCategories(prevCats)
-      saveStoreCategories(prevCats)
       setErrorMsg(err?.message || 'Failed to delete category.')
     }
   }
@@ -122,10 +135,6 @@ export const CategoriesView: React.FC = () => {
     setIsLoading(true)
     setErrorMsg('')
 
-    const defaultCover =
-      imageUrl.trim() ||
-      'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=80'
-
     try {
       const isEditing = Boolean(editingCat)
       const catPayload: Category = editingCat
@@ -134,25 +143,26 @@ export const CategoriesView: React.FC = () => {
             name: cleanName,
             slug: cleanSlug,
             description: description.trim(),
-            imageUrl: defaultCover,
+            imageUrl: imageUrl.trim(),
           }
         : {
             id: `cat-${cleanSlug}-${Date.now().toString().slice(-4)}`,
             name: cleanName,
             slug: cleanSlug,
-            description: description.trim() || `${cleanName} in A4 Deep Black & Minimalist White frames.`,
-            imageUrl: defaultCover,
+            description: description.trim(),
+            imageUrl: imageUrl.trim(),
             itemCount: 0,
             featured: true,
           }
 
       const res = await api.adminSaveCategory(catPayload, isEditing)
-      const finalCat = res.success && res.data ? { ...catPayload, ...res.data } : catPayload
-
       if (!res.success) {
-        setErrorMsg(res.message || 'Saved locally, but server sync returned an error. Please check your admin session.')
+        setErrorMsg(res.message || 'Could not save category to database. Try signing in again.')
+        setIsLoading(false)
+        return
       }
 
+      const finalCat = res.data ? { ...catPayload, ...res.data } : catPayload
       const nextCats = isEditing
         ? categories.map((c) => (c.id === editingCat!.id ? finalCat : c))
         : [...categories, finalCat]
@@ -170,7 +180,7 @@ export const CategoriesView: React.FC = () => {
       setTimeout(() => setSaveSuccess(false), 3000)
       setShowModal(false)
     } catch (err: any) {
-      setErrorMsg(err?.message || 'Failed to save category.')
+      setErrorMsg(err?.message || 'Network error while saving category.')
     } finally {
       setIsLoading(false)
     }
@@ -214,13 +224,28 @@ export const CategoriesView: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {categories.length === 0 && (
+          <div className="sm:col-span-2 lg:col-span-3 p-10 bg-neutral-950/70 border border-dashed border-neutral-800 rounded-2xl text-center space-y-2">
+            <FolderTree className="w-8 h-8 text-neutral-500 mx-auto" />
+            <p className="text-sm font-semibold text-white">No categories created yet</p>
+            <p className="text-xs text-neutral-400">
+              Click "New Category" above to add your first store collection.
+            </p>
+          </div>
+        )}
         {categories.map((cat) => (
           <div
             key={cat.id}
             className="bg-neutral-950/80 rounded-xl border border-neutral-800 overflow-hidden shadow-xl flex flex-col justify-between"
           >
             <div className="relative h-44 overflow-hidden bg-neutral-900">
-              <img src={cat.imageUrl} alt="" className="w-full h-full object-cover" />
+              {cat.imageUrl ? (
+                <img src={cat.imageUrl} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-neutral-800 to-neutral-950 flex items-center justify-center">
+                  <FolderTree className="w-10 h-10 text-neutral-700" />
+                </div>
+              )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
               <div className="absolute bottom-3 left-4 right-4">
                 <span className="text-[10px] uppercase font-bold tracking-wider text-amber-400 font-mono">
@@ -307,24 +332,46 @@ export const CategoriesView: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-neutral-400 font-semibold mb-1">Cover Image</label>
-              <div className="flex gap-2">
+              <label className="block text-neutral-400 font-semibold mb-1">Cover Image (Optional)</label>
+              <div className="flex flex-wrap gap-2">
                 <input
                   type="text"
-                  required
                   value={imageUrl}
                   onChange={(e) => setImageUrl(e.target.value)}
-                  className="flex-1 p-2.5 bg-neutral-950 border border-neutral-800 rounded-lg text-white font-mono text-[11px]"
+                  placeholder="Paste URL, upload file, or browse library..."
+                  className="flex-1 min-w-[180px] p-2.5 bg-neutral-950 border border-neutral-800 rounded-lg text-white font-mono text-[11px]"
+                />
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleCoverUpload}
+                  className="hidden"
                 />
                 <button
                   type="button"
-                  onClick={() => openMediaPicker((url) => setImageUrl(url))}
-                  className="px-3 py-2 bg-neutral-800 text-amber-400 font-bold rounded-lg"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploadingImg}
+                  className="px-3 py-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 font-semibold rounded-lg flex items-center gap-1"
                 >
-                  Browse
+                  <Upload className="w-3.5 h-3.5" />
+                  {isUploadingImg ? 'Uploading...' : 'Upload'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => openMediaPicker((url) => setImageUrl(url))}
+                  className="px-3 py-2 bg-neutral-800 hover:bg-neutral-700 text-amber-400 font-bold rounded-lg"
+                >
+                  Library
                 </button>
               </div>
             </div>
+
+            {errorMsg && (
+              <div className="p-2.5 bg-red-950/80 border border-red-800 text-red-200 text-xs rounded-lg">
+                {errorMsg}
+              </div>
+            )}
 
             <div>
               <label className="block text-neutral-400 font-semibold mb-1">Description</label>

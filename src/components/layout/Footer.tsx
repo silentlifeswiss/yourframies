@@ -1,10 +1,18 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Mail, Phone, ShieldCheck, RefreshCw, Truck } from 'lucide-react'
 import { useSiteContent } from '../../context/SiteContentContext'
+import { getStoreCategories, Category } from '../../data/categories'
 
 export const Footer: React.FC = () => {
   const { settings } = useSiteContent()
+  const [categoriesList, setCategoriesList] = useState<Category[]>(() => getStoreCategories())
+
+  useEffect(() => {
+    const handleCats = () => setCategoriesList(getStoreCategories())
+    window.addEventListener('yourframies_categories_updated', handleCats)
+    return () => window.removeEventListener('yourframies_categories_updated', handleCats)
+  }, [])
   const contactEmail = settings.contactEmail || 'silentlifeswiss@gmail.com'
   const contactPhone = settings.contactPhone || '+91 79009 43025'
   const telHref = `tel:${contactPhone.replace(/[^+\d]/g, '')}`
@@ -91,33 +99,20 @@ export const Footer: React.FC = () => {
           </h4>
           <ul className="space-y-2.5">
             <li>
-              <Link to="/shop?category=car-photo-frames" className="hover:text-white transition-colors">
-                Car Photo Frames
+              <Link to="/shop" className="hover:text-white transition-colors">
+                Shop All Frames
               </Link>
             </li>
-            <li>
-              <Link to="/shop?category=aesthetic-photo-frames" className="hover:text-white transition-colors">
-                Aesthetic Prints
-              </Link>
-            </li>
-            <li>
-              <Link to="/shop?category=personalised-photo-frames" className="hover:text-white transition-colors">
-                Personalised Frames
-              </Link>
-            </li>
+            {categoriesList.map((cat) => (
+              <li key={cat.id}>
+                <Link to={`/shop?category=${cat.slug}`} className="hover:text-white transition-colors">
+                  {cat.name}
+                </Link>
+              </li>
+            ))}
             <li>
               <Link to="/customize" className="hover:text-white transition-colors">
-                Custom Framing Studio
-              </Link>
-            </li>
-            <li>
-              <Link to="/shop?category=posters" className="hover:text-white transition-colors">
-                Posters & Typography
-              </Link>
-            </li>
-            <li>
-              <Link to="/shop?category=wall-art" className="hover:text-white transition-colors">
-                Gallery Wall Sets
+                Frame Your Photo
               </Link>
             </li>
           </ul>

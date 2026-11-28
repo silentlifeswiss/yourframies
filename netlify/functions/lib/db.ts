@@ -16,265 +16,30 @@ import {
 // Initial Seed Data (Fallback & Auto-Seed)
 // ==============================================================================
 
-const INITIAL_CATEGORIES: DBCategory[] = [
-  {
-    id: 'cat-car-frames',
-    name: 'Car Photo Frames',
-    slug: 'car-photo-frames',
-    description: 'High-contrast supercars, Tokyo night shoots, and classic motorsport prints framed in A4.',
-    imageUrl: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=800&q=80',
-    displayOrder: 1,
-    isActive: true,
-  },
-  {
-    id: 'cat-aesthetic-frames',
-    name: 'Aesthetic Photo Frames',
-    slug: 'aesthetic-photo-frames',
-    description: 'Clean botanical prints and calm architectural art ready to hang in A4.',
-    imageUrl: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=80',
-    displayOrder: 2,
-    isActive: true,
-  },
-  {
-    id: 'cat-personalised-frames',
-    name: 'Personalised Photo Frames',
-    slug: 'personalised-photo-frames',
-    description: 'Turn your photos, collages, and song keepsakes into A4 wall frames.',
-    imageUrl: 'https://images.unsplash.com/photo-1544717302-de2939b7ef71?auto=format&fit=crop&w=800&q=80',
-    displayOrder: 3,
-    isActive: true,
-  },
-  {
-    id: 'cat-custom-frames',
-    name: 'Custom Photo Frames',
-    slug: 'custom-photo-frames',
-    description: 'Upload any photo and preview it live in Deep Black or Minimalist White A4 frames.',
-    imageUrl: 'https://images.unsplash.com/photo-1582561424760-0321d75e81fa?auto=format&fit=crop&w=800&q=80',
-    displayOrder: 4,
-    isActive: true,
-  },
-  {
-    id: 'cat-posters',
-    name: 'Posters & Typography',
-    slug: 'posters',
-    description: 'Crisp typography quotes and graphic prints framed in standard A4.',
-    imageUrl: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=800&q=80',
-    displayOrder: 5,
-    isActive: true,
-  },
-  {
-    id: 'cat-wall-art',
-    name: 'Wall Art Collections',
-    slug: 'wall-art',
-    description: 'Matching 3-piece A4 frame sets built for clean bedroom and workspace walls.',
-    imageUrl: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=800&q=80',
-    displayOrder: 6,
-    isActive: true,
-  },
+const INITIAL_CATEGORIES: DBCategory[] = []
+
+const INITIAL_PRODUCTS: DBProduct[] = []
+
+const LEGACY_DEFAULT_CATEGORY_IDS = [
+  'cat-car-frames',
+  'cat-aesthetic-frames',
+  'cat-personalised-frames',
+  'cat-custom-frames',
+  'cat-posters',
+  'cat-wall-art',
 ]
 
-const INITIAL_PRODUCTS: DBProduct[] = [
-  {
-    id: 'yf-car-01',
-    categoryId: 'cat-car-frames',
-    title: 'Porsche 911 GT3 RS Neon Night Frame',
-    slug: 'porsche-911-gt3-rs-neon-night-frame',
-    description: 'Sharp night photography of the Porsche 911 GT3 RS under neon street lights, framed in standard A4.',
-    basePriceINR: 1499,
-    compareAtPriceINR: 2199,
-    images: [
-      'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=800&q=80',
-    ],
-    availableSizes: ['A4'],
-    availableMouldings: ['Deep Black', 'Minimalist White'],
-    isCustomizable: true,
-    isActive: true,
-    stockQuantity: 45,
-    createdAt: '2026-11-15T00:00:00.000Z',
-    updatedAt: '2026-11-28T00:00:00.000Z',
-  },
-  {
-    id: 'yf-car-02',
-    categoryId: 'cat-car-frames',
-    title: 'Vintage BMW E30 M3 Heritage Edition',
-    slug: 'vintage-bmw-e30-m3-heritage-edition',
-    description: 'Classic Alpine White BMW E30 M3 print in an A4 frame. Clean desk or garage wall statement.',
-    basePriceINR: 1599,
-    compareAtPriceINR: 2299,
-    images: [
-      'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=800&q=80',
-    ],
-    availableSizes: ['A4'],
-    availableMouldings: ['Deep Black', 'Minimalist White'],
-    isCustomizable: true,
-    isActive: true,
-    stockQuantity: 30,
-    createdAt: '2026-11-16T00:00:00.000Z',
-    updatedAt: '2026-11-28T00:00:00.000Z',
-  },
-  {
-    id: 'yf-car-03',
-    categoryId: 'cat-car-frames',
-    title: 'Formula 1 Monaco Grand Prix Retro Wall Art',
-    slug: 'formula-1-monaco-grand-prix-retro-wall-art',
-    description: 'Retro Monte Carlo circuit racing illustration printed crisp in A4.',
-    basePriceINR: 1399,
-    compareAtPriceINR: 1999,
-    images: [
-      'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80',
-    ],
-    availableSizes: ['A4'],
-    availableMouldings: ['Deep Black', 'Minimalist White'],
-    isCustomizable: false,
-    isActive: true,
-    stockQuantity: 60,
-    createdAt: '2026-11-16T00:00:00.000Z',
-    updatedAt: '2026-11-28T00:00:00.000Z',
-  },
-  {
-    id: 'yf-aes-01',
-    categoryId: 'cat-aesthetic-frames',
-    title: 'Serene Botanical Fern Minimalist Frame',
-    slug: 'serene-botanical-fern-minimalist-frame',
-    description: 'Clean botanical fern print in A4 size. Fits bedrooms, studies, and bright workspaces.',
-    basePriceINR: 1199,
-    compareAtPriceINR: 1799,
-    images: [
-      'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=800&q=80',
-    ],
-    availableSizes: ['A4'],
-    availableMouldings: ['Deep Black', 'Minimalist White'],
-    isCustomizable: true,
-    isActive: true,
-    stockQuantity: 60,
-    createdAt: '2026-11-17T00:00:00.000Z',
-    updatedAt: '2026-11-28T00:00:00.000Z',
-  },
-  {
-    id: 'yf-aes-02',
-    categoryId: 'cat-aesthetic-frames',
-    title: 'Abstract Architectural Arches in Sandstone',
-    slug: 'abstract-architectural-arches-in-sandstone',
-    description: 'Warm terracotta and neutral geometric arches printed for clean A4 framing.',
-    basePriceINR: 1299,
-    compareAtPriceINR: 1899,
-    images: [
-      'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=80',
-    ],
-    availableSizes: ['A4'],
-    availableMouldings: ['Deep Black', 'Minimalist White'],
-    isCustomizable: true,
-    isActive: true,
-    stockQuantity: 40,
-    createdAt: '2026-11-17T00:00:00.000Z',
-    updatedAt: '2026-11-28T00:00:00.000Z',
-  },
-  {
-    id: 'yf-pers-01',
-    categoryId: 'cat-personalised-frames',
-    title: 'The Memories Collage • 9-Photo Storyboard',
-    slug: 'the-memories-collage-9-photo-storyboard',
-    description: 'Upload your favourite photos and arrange them in a crisp A4 multi-photo storyboard frame.',
-    basePriceINR: 1999,
-    compareAtPriceINR: 2899,
-    images: [
-      'https://images.unsplash.com/photo-1544717302-de2939b7ef71?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1582561424760-0321d75e81fa?auto=format&fit=crop&w=800&q=80',
-    ],
-    availableSizes: ['A4'],
-    availableMouldings: ['Deep Black', 'Minimalist White'],
-    isCustomizable: true,
-    isActive: true,
-    stockQuantity: 100,
-    createdAt: '2026-11-18T00:00:00.000Z',
-    updatedAt: '2026-11-28T00:00:00.000Z',
-  },
-  {
-    id: 'yf-pers-02',
-    categoryId: 'cat-personalised-frames',
-    title: 'Custom Soundwave & Spotify Code Keepsake',
-    slug: 'custom-soundwave-and-spotify-code-keepsake',
-    description: 'Pair your favorite photo with a scannable song code inside a clean A4 Deep Black or Minimalist White frame.',
-    basePriceINR: 1699,
-    compareAtPriceINR: 2399,
-    images: [
-      'https://images.unsplash.com/photo-1582561424760-0321d75e81fa?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1544717302-de2939b7ef71?auto=format&fit=crop&w=800&q=80',
-    ],
-    availableSizes: ['A4'],
-    availableMouldings: ['Deep Black', 'Minimalist White'],
-    isCustomizable: true,
-    isActive: true,
-    stockQuantity: 80,
-    createdAt: '2026-11-18T00:00:00.000Z',
-    updatedAt: '2026-11-28T00:00:00.000Z',
-  },
-  {
-    id: 'yf-cust-01',
-    categoryId: 'cat-custom-frames',
-    title: 'Custom A4 Photo Frame (Upload Your Photo)',
-    slug: 'bespoke-studio-custom-frame',
-    description: 'Upload any photo from your phone or computer and choose Deep Black or Minimalist White A4 finish.',
-    basePriceINR: 1299,
-    compareAtPriceINR: 1899,
-    images: [
-      'https://images.unsplash.com/photo-1582561424760-0321d75e81fa?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=80',
-    ],
-    availableSizes: ['A4'],
-    availableMouldings: ['Deep Black', 'Minimalist White'],
-    isCustomizable: true,
-    isActive: true,
-    stockQuantity: 200,
-    createdAt: '2026-11-18T00:00:00.000Z',
-    updatedAt: '2026-11-28T00:00:00.000Z',
-  },
-  {
-    id: 'yf-post-01',
-    categoryId: 'cat-posters',
-    title: 'Typographic "Do Good & Be Kind" Framed Print',
-    slug: 'typographic-do-good-and-be-kind-archival-print',
-    description: 'Bold monochrome typography printed crisp on heavy art paper and fitted into a clean A4 frame.',
-    basePriceINR: 899,
-    compareAtPriceINR: 1299,
-    images: [
-      'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=80',
-    ],
-    availableSizes: ['A4'],
-    availableMouldings: ['Deep Black', 'Minimalist White'],
-    isCustomizable: false,
-    isActive: true,
-    stockQuantity: 75,
-    createdAt: '2026-11-18T00:00:00.000Z',
-    updatedAt: '2026-11-28T00:00:00.000Z',
-  },
-  {
-    id: 'yf-wall-01',
-    categoryId: 'cat-wall-art',
-    title: 'Nordic Forest Triptych (3-Piece A4 Set)',
-    slug: 'nordic-forest-triptych-3-piece-gallery-set',
-    description: 'Set of three coordinated A4 wall frames capturing misty pine forests, ready to hang together.',
-    basePriceINR: 3499,
-    compareAtPriceINR: 4999,
-    images: [
-      'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=80',
-    ],
-    availableSizes: ['A4'],
-    availableMouldings: ['Deep Black', 'Minimalist White'],
-    isCustomizable: false,
-    isActive: true,
-    stockQuantity: 25,
-    createdAt: '2026-11-18T00:00:00.000Z',
-    updatedAt: '2026-11-28T00:00:00.000Z',
-  },
+const LEGACY_DEFAULT_PRODUCT_IDS = [
+  'yf-car-01',
+  'yf-car-02',
+  'yf-car-03',
+  'yf-aes-01',
+  'yf-aes-02',
+  'yf-pers-01',
+  'yf-pers-02',
+  'yf-cust-01',
+  'yf-post-01',
+  'yf-wall-01',
 ]
 
 const INITIAL_HOMEPAGE_SECTIONS: DBHomepageSection[] = [
@@ -687,47 +452,19 @@ class DataStore {
       ON CONFLICT (email) DO NOTHING;
     `)
 
-    // Seed initial categories if table is empty
-    const catCountRes = await client.query(`SELECT COUNT(*)::int AS count FROM categories`)
-    if ((catCountRes.rows[0]?.count ?? 0) === 0) {
-      for (const cat of INITIAL_CATEGORIES) {
-        await client.query(
-          `INSERT INTO categories (id, name, slug, description, image_url, display_order, is_active)
-           VALUES ($1, $2, $3, $4, $5, $6, $7)
-           ON CONFLICT (id) DO NOTHING`,
-          [cat.id, cat.name, cat.slug, cat.description || '', cat.imageUrl || '', cat.displayOrder || 0, cat.isActive ?? true]
-        )
-      }
-    }
-
-    // Seed initial products if table is empty
-    const prodCountRes = await client.query(`SELECT COUNT(*)::int AS count FROM products`)
-    if ((prodCountRes.rows[0]?.count ?? 0) === 0) {
-      for (const prod of INITIAL_PRODUCTS) {
-        await client.query(
-          `INSERT INTO products (
-             id, category_id, title, slug, description, base_price_inr, compare_at_price_inr,
-             images, available_sizes, available_mouldings, is_customizable, is_active, stock_quantity
-           )
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb, $9::jsonb, $10::jsonb, $11, $12, $13)
-           ON CONFLICT (id) DO NOTHING`,
-          [
-            prod.id,
-            prod.categoryId || null,
-            prod.title,
-            prod.slug,
-            prod.description || '',
-            prod.basePriceINR,
-            prod.compareAtPriceINR || null,
-            JSON.stringify(prod.images || []),
-            JSON.stringify(prod.availableSizes || ['A4']),
-            JSON.stringify(prod.availableMouldings || ['Deep Black', 'Minimalist White']),
-            prod.isCustomizable ?? true,
-            prod.isActive ?? true,
-            prod.stockQuantity ?? 25,
-          ]
-        )
-      }
+    // One-time cleanup: remove legacy hardcoded placeholder catalog from Neon Postgres
+    // so only categories and products created in the Admin Panel are displayed.
+    const cleanupFlag = await client.query(
+      `SELECT setting_value FROM site_settings WHERE setting_key = 'removed_default_catalog_v1' LIMIT 1`
+    )
+    if (cleanupFlag.rows.length === 0) {
+      await client.query(`DELETE FROM products WHERE id = ANY($1::text[])`, [LEGACY_DEFAULT_PRODUCT_IDS])
+      await client.query(`DELETE FROM categories WHERE id = ANY($1::text[])`, [LEGACY_DEFAULT_CATEGORY_IDS])
+      await client.query(
+        `INSERT INTO site_settings (setting_key, setting_value)
+         VALUES ('removed_default_catalog_v1', 'true'::jsonb)
+         ON CONFLICT (setting_key) DO NOTHING`
+      )
     }
   }
 
@@ -771,28 +508,22 @@ class DataStore {
   // ----------------------------------------------------------------------------
   public async getProducts(): Promise<DBProduct[]> {
     if (this.pool && this.isPostgresConnected) {
-      try {
-        const res = await this.pool.query(
-          `SELECT id, category_id AS "categoryId", title, slug, description,
-                  base_price_inr AS "basePriceINR", compare_at_price_inr AS "compareAtPriceINR",
-                  images, available_sizes AS "availableSizes", available_mouldings AS "availableMouldings",
-                  is_customizable AS "isCustomizable", is_active AS "isActive",
-                  stock_quantity AS "stockQuantity", created_at AS "createdAt", updated_at AS "updatedAt"
-           FROM products
-           ORDER BY created_at DESC`
-        )
-        if (res.rows.length > 0) {
-          return res.rows.map((row: any) => ({
-            ...row,
-            basePriceINR: Number(row.basePriceINR),
-            compareAtPriceINR: row.compareAtPriceINR ? Number(row.compareAtPriceINR) : undefined,
-            availableSizes: ['A4'],
-            availableMouldings: ['Deep Black', 'Minimalist White'],
-          }))
-        }
-      } catch (err) {
-        console.warn('Postgres getProducts query failed, falling back:', err)
-      }
+      const res = await this.pool.query(
+        `SELECT id, category_id AS "categoryId", title, slug, description,
+                base_price_inr AS "basePriceINR", compare_at_price_inr AS "compareAtPriceINR",
+                images, available_sizes AS "availableSizes", available_mouldings AS "availableMouldings",
+                is_customizable AS "isCustomizable", is_active AS "isActive",
+                stock_quantity AS "stockQuantity", created_at AS "createdAt", updated_at AS "updatedAt"
+         FROM products
+         ORDER BY created_at DESC`
+      )
+      return res.rows.map((row: any) => ({
+        ...row,
+        basePriceINR: Number(row.basePriceINR),
+        compareAtPriceINR: row.compareAtPriceINR ? Number(row.compareAtPriceINR) : undefined,
+        availableSizes: ['A4'],
+        availableMouldings: ['Deep Black', 'Minimalist White'],
+      }))
     }
     return this.products.map((p) => ({
       ...p,
@@ -803,31 +534,28 @@ class DataStore {
 
   public async getProductBySlug(slug: string): Promise<DBProduct | undefined> {
     if (this.pool && this.isPostgresConnected) {
-      try {
-        const res = await this.pool.query(
-          `SELECT id, category_id AS "categoryId", title, slug, description,
-                  base_price_inr AS "basePriceINR", compare_at_price_inr AS "compareAtPriceINR",
-                  images, available_sizes AS "availableSizes", available_mouldings AS "availableMouldings",
-                  is_customizable AS "isCustomizable", is_active AS "isActive",
-                  stock_quantity AS "stockQuantity", created_at AS "createdAt", updated_at AS "updatedAt"
-           FROM products
-           WHERE slug = $1 OR id = $1
-           LIMIT 1`,
-          [slug]
-        )
-        if (res.rows.length > 0) {
-          const row = res.rows[0]
-          return {
-            ...row,
-            basePriceINR: Number(row.basePriceINR),
-            compareAtPriceINR: row.compareAtPriceINR ? Number(row.compareAtPriceINR) : undefined,
-            availableSizes: ['A4'],
-            availableMouldings: ['Deep Black', 'Minimalist White'],
-          }
+      const res = await this.pool.query(
+        `SELECT id, category_id AS "categoryId", title, slug, description,
+                base_price_inr AS "basePriceINR", compare_at_price_inr AS "compareAtPriceINR",
+                images, available_sizes AS "availableSizes", available_mouldings AS "availableMouldings",
+                is_customizable AS "isCustomizable", is_active AS "isActive",
+                stock_quantity AS "stockQuantity", created_at AS "createdAt", updated_at AS "updatedAt"
+         FROM products
+         WHERE slug = $1 OR id = $1
+         LIMIT 1`,
+        [slug]
+      )
+      if (res.rows.length > 0) {
+        const row = res.rows[0]
+        return {
+          ...row,
+          basePriceINR: Number(row.basePriceINR),
+          compareAtPriceINR: row.compareAtPriceINR ? Number(row.compareAtPriceINR) : undefined,
+          availableSizes: ['A4'],
+          availableMouldings: ['Deep Black', 'Minimalist White'],
         }
-      } catch (err) {
-        console.warn('Postgres getProductBySlug query failed, falling back:', err)
       }
+      return undefined
     }
     const found = this.products.find((p) => p.slug === slug || p.id === slug)
     return found
@@ -848,63 +576,71 @@ class DataStore {
     }
 
     if (this.pool && this.isPostgresConnected) {
-      try {
-        const res = await this.pool.query(
-          `INSERT INTO products (
-             id, category_id, title, slug, description, base_price_inr, compare_at_price_inr,
-             images, available_sizes, available_mouldings, is_customizable, is_active, stock_quantity, updated_at
-           )
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb, $9::jsonb, $10::jsonb, $11, $12, $13, NOW())
-           ON CONFLICT (id) DO UPDATE SET
-             category_id = EXCLUDED.category_id,
-             title = EXCLUDED.title,
-             slug = EXCLUDED.slug,
-             description = EXCLUDED.description,
-             base_price_inr = EXCLUDED.base_price_inr,
-             compare_at_price_inr = EXCLUDED.compare_at_price_inr,
-             images = EXCLUDED.images,
-             available_sizes = EXCLUDED.available_sizes,
-             available_mouldings = EXCLUDED.available_mouldings,
-             is_customizable = EXCLUDED.is_customizable,
-             is_active = EXCLUDED.is_active,
-             stock_quantity = EXCLUDED.stock_quantity,
-             updated_at = NOW()
-           RETURNING id, category_id AS "categoryId", title, slug, description,
-                     base_price_inr AS "basePriceINR", compare_at_price_inr AS "compareAtPriceINR",
-                     images, available_sizes AS "availableSizes", available_mouldings AS "availableMouldings",
-                     is_customizable AS "isCustomizable", is_active AS "isActive",
-                     stock_quantity AS "stockQuantity", created_at AS "createdAt", updated_at AS "updatedAt"`,
-          [
-            normalized.id,
-            normalized.categoryId || null,
-            normalized.title,
-            normalized.slug,
-            normalized.description || '',
-            normalized.basePriceINR,
-            normalized.compareAtPriceINR || null,
-            JSON.stringify(normalized.images || []),
-            JSON.stringify(normalized.availableSizes),
-            JSON.stringify(normalized.availableMouldings),
-            normalized.isCustomizable ?? true,
-            normalized.isActive ?? true,
-            normalized.stockQuantity ?? 25,
-          ]
-        )
-        if (res.rows.length > 0) {
-          const saved = {
-            ...res.rows[0],
-            basePriceINR: Number(res.rows[0].basePriceINR),
-            compareAtPriceINR: res.rows[0].compareAtPriceINR ? Number(res.rows[0].compareAtPriceINR) : undefined,
-          }
-          const idx = this.products.findIndex((p) => p.id === saved.id)
-          if (idx >= 0) this.products[idx] = saved
-          else this.products.unshift(saved)
-          this.saveToFile()
-          return saved
-        }
-      } catch (err) {
-        console.warn('Postgres saveProduct query failed, saving in-memory:', err)
+      // Prevent unique slug collisions across different product IDs
+      const slugCheck = await this.pool.query(
+        `SELECT id FROM products WHERE slug = $1 AND id <> $2 LIMIT 1`,
+        [normalized.slug, normalized.id]
+      )
+      if (slugCheck.rows.length > 0) {
+        normalized.slug = `${normalized.slug}-${Date.now().toString().slice(-4)}`
       }
+
+      const res = await this.pool.query(
+        `INSERT INTO products (
+           id, category_id, title, slug, description, base_price_inr, compare_at_price_inr,
+           images, available_sizes, available_mouldings, is_customizable, is_active, stock_quantity, updated_at
+         )
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb, $9::jsonb, $10::jsonb, $11, $12, $13, NOW())
+         ON CONFLICT (id) DO UPDATE SET
+           category_id = EXCLUDED.category_id,
+           title = EXCLUDED.title,
+           slug = EXCLUDED.slug,
+           description = EXCLUDED.description,
+           base_price_inr = EXCLUDED.base_price_inr,
+           compare_at_price_inr = EXCLUDED.compare_at_price_inr,
+           images = EXCLUDED.images,
+           available_sizes = EXCLUDED.available_sizes,
+           available_mouldings = EXCLUDED.available_mouldings,
+           is_customizable = EXCLUDED.is_customizable,
+           is_active = EXCLUDED.is_active,
+           stock_quantity = EXCLUDED.stock_quantity,
+           updated_at = NOW()
+         RETURNING id, category_id AS "categoryId", title, slug, description,
+                   base_price_inr AS "basePriceINR", compare_at_price_inr AS "compareAtPriceINR",
+                   images, available_sizes AS "availableSizes", available_mouldings AS "availableMouldings",
+                   is_customizable AS "isCustomizable", is_active AS "isActive",
+                   stock_quantity AS "stockQuantity", created_at AS "createdAt", updated_at AS "updatedAt"`,
+        [
+          normalized.id,
+          normalized.categoryId || null,
+          normalized.title,
+          normalized.slug,
+          normalized.description || '',
+          normalized.basePriceINR,
+          normalized.compareAtPriceINR || null,
+          JSON.stringify(normalized.images || []),
+          JSON.stringify(normalized.availableSizes),
+          JSON.stringify(normalized.availableMouldings),
+          normalized.isCustomizable ?? true,
+          normalized.isActive ?? true,
+          normalized.stockQuantity ?? 25,
+        ]
+      )
+      const saved = {
+        ...res.rows[0],
+        basePriceINR: Number(res.rows[0].basePriceINR),
+        compareAtPriceINR: res.rows[0].compareAtPriceINR ? Number(res.rows[0].compareAtPriceINR) : undefined,
+      }
+      const idx = this.products.findIndex((p) => p.id === saved.id)
+      if (idx >= 0) this.products[idx] = saved
+      else this.products.unshift(saved)
+      this.saveToFile()
+      return saved
+    }
+
+    const slugTaken = this.products.some((p) => p.slug === normalized.slug && p.id !== normalized.id)
+    if (slugTaken) {
+      normalized.slug = `${normalized.slug}-${Date.now().toString().slice(-4)}`
     }
 
     const idx = this.products.findIndex((p) => p.id === normalized.id)
@@ -922,16 +658,10 @@ class DataStore {
 
   public async deleteProduct(id: string): Promise<boolean> {
     if (this.pool && this.isPostgresConnected) {
-      try {
-        const res = await this.pool.query(`DELETE FROM products WHERE id = $1 OR slug = $1`, [id])
-        if ((res.rowCount || 0) > 0) {
-          this.products = this.products.filter((p) => p.id !== id && p.slug !== id)
-          this.saveToFile()
-          return true
-        }
-      } catch (err) {
-        console.warn('Postgres deleteProduct query failed, deleting in-memory:', err)
-      }
+      const res = await this.pool.query(`DELETE FROM products WHERE id = $1 OR slug = $1`, [id])
+      this.products = this.products.filter((p) => p.id !== id && p.slug !== id)
+      this.saveToFile()
+      return (res.rowCount || 0) > 0
     }
 
     const prevLen = this.products.length
@@ -945,85 +675,79 @@ class DataStore {
   // ----------------------------------------------------------------------------
   public async getCategories(): Promise<DBCategory[]> {
     if (this.pool && this.isPostgresConnected) {
-      try {
-        const res = await this.pool.query(
-          `SELECT id, name, slug, description, image_url AS "imageUrl", display_order AS "displayOrder", is_active AS "isActive"
-           FROM categories
-           WHERE is_active = true
-           ORDER BY display_order ASC, created_at ASC`
-        )
-        if (res.rows.length > 0) {
-          return res.rows
-        }
-      } catch (err) {
-        console.warn('Postgres getCategories query failed, falling back:', err)
-      }
+      const res = await this.pool.query(
+        `SELECT id, name, slug, description, image_url AS "imageUrl", display_order AS "displayOrder", is_active AS "isActive"
+         FROM categories
+         WHERE is_active = true
+         ORDER BY display_order ASC, created_at ASC`
+      )
+      return res.rows
     }
     return this.categories
   }
 
   public async saveCategory(cat: DBCategory): Promise<DBCategory> {
+    const toSave = { ...cat }
+
     if (this.pool && this.isPostgresConnected) {
-      try {
-        const res = await this.pool.query(
-          `INSERT INTO categories (id, name, slug, description, image_url, display_order, is_active)
-           VALUES ($1, $2, $3, $4, $5, $6, $7)
-           ON CONFLICT (id) DO UPDATE SET
-             name = EXCLUDED.name,
-             slug = EXCLUDED.slug,
-             description = EXCLUDED.description,
-             image_url = EXCLUDED.image_url,
-             display_order = EXCLUDED.display_order,
-             is_active = EXCLUDED.is_active
-           RETURNING id, name, slug, description, image_url AS "imageUrl", display_order AS "displayOrder", is_active AS "isActive"`,
-          [
-            cat.id,
-            cat.name,
-            cat.slug,
-            cat.description || '',
-            cat.imageUrl || '',
-            cat.displayOrder || 0,
-            cat.isActive ?? true,
-          ]
-        )
-        if (res.rows.length > 0) {
-          const saved = res.rows[0]
-          const idx = this.categories.findIndex((c) => c.id === cat.id || c.slug === cat.slug)
-          if (idx >= 0) {
-            this.categories[idx] = saved
-          } else {
-            this.categories.push(saved)
-          }
-          this.saveToFile()
-          return saved
-        }
-      } catch (err) {
-        console.warn('Postgres saveCategory query failed, saving in-memory:', err)
+      const slugCheck = await this.pool.query(
+        `SELECT id FROM categories WHERE slug = $1 AND id <> $2 LIMIT 1`,
+        [toSave.slug, toSave.id]
+      )
+      if (slugCheck.rows.length > 0) {
+        toSave.slug = `${toSave.slug}-${Date.now().toString().slice(-4)}`
       }
+
+      const res = await this.pool.query(
+        `INSERT INTO categories (id, name, slug, description, image_url, display_order, is_active)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)
+         ON CONFLICT (id) DO UPDATE SET
+           name = EXCLUDED.name,
+           slug = EXCLUDED.slug,
+           description = EXCLUDED.description,
+           image_url = EXCLUDED.image_url,
+           display_order = EXCLUDED.display_order,
+           is_active = EXCLUDED.is_active
+         RETURNING id, name, slug, description, image_url AS "imageUrl", display_order AS "displayOrder", is_active AS "isActive"`,
+        [
+          toSave.id,
+          toSave.name,
+          toSave.slug,
+          toSave.description || '',
+          toSave.imageUrl || '',
+          toSave.displayOrder || 0,
+          toSave.isActive ?? true,
+        ]
+      )
+      const saved = res.rows[0]
+      const idx = this.categories.findIndex((c) => c.id === saved.id)
+      if (idx >= 0) this.categories[idx] = saved
+      else this.categories.push(saved)
+      this.saveToFile()
+      return saved
     }
 
-    const idx = this.categories.findIndex((c) => c.id === cat.id || c.slug === cat.slug)
+    const slugTaken = this.categories.some((c) => c.slug === toSave.slug && c.id !== toSave.id)
+    if (slugTaken) {
+      toSave.slug = `${toSave.slug}-${Date.now().toString().slice(-4)}`
+    }
+
+    const idx = this.categories.findIndex((c) => c.id === toSave.id)
     if (idx >= 0) {
-      this.categories[idx] = { ...this.categories[idx], ...cat }
+      this.categories[idx] = { ...this.categories[idx], ...toSave }
     } else {
-      this.categories.push(cat)
+      this.categories.push(toSave)
     }
     this.saveToFile()
-    return cat
+    return toSave
   }
 
   public async deleteCategory(id: string): Promise<boolean> {
     if (this.pool && this.isPostgresConnected) {
-      try {
-        const res = await this.pool.query(`DELETE FROM categories WHERE id = $1 OR slug = $1`, [id])
-        if ((res.rowCount || 0) > 0) {
-          this.categories = this.categories.filter((c) => c.id !== id && c.slug !== id)
-          this.saveToFile()
-          return true
-        }
-      } catch (err) {
-        console.warn('Postgres deleteCategory query failed, deleting in-memory:', err)
-      }
+      const res = await this.pool.query(`DELETE FROM categories WHERE id = $1 OR slug = $1`, [id])
+      this.categories = this.categories.filter((c) => c.id !== id && c.slug !== id)
+      this.saveToFile()
+      return (res.rowCount || 0) > 0
     }
 
     const prevLen = this.categories.length

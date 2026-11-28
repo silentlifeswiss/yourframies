@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { Heart, ShoppingBag } from 'lucide-react'
+import { Heart, ShoppingBag, Image as ImageIcon } from 'lucide-react'
 import { Product } from '../../types'
 import { useWishlist } from '../../context/WishlistContext'
 import { useCart } from '../../context/CartContext'
@@ -33,13 +33,19 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       {/* Image Container with Frame Bevel */}
       <div className="relative aspect-[4/5] overflow-hidden bg-neutral-100 rounded-sm">
         <Link to={`/product/${product.slug}`} className="block w-full h-full">
-          <img
-            src={product.images[0]}
-            alt={product.title}
-            className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out"
-            loading="lazy"
-            decoding="async"
-          />
+          {product.images[0] ? (
+            <img
+              src={product.images[0]}
+              alt={product.title}
+              className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out"
+              loading="lazy"
+              decoding="async"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-neutral-100 text-neutral-400">
+              <ImageIcon className="w-8 h-8" />
+            </div>
+          )}
         </Link>
 
         {/* Wishlist Button */}

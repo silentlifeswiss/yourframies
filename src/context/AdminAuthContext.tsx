@@ -74,7 +74,14 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [adminUser, setAdminUser] = useState<AdminUser | null>(() => {
     try {
       const stored = sessionStorage.getItem(ADMIN_SESSION_KEY)
-      return stored ? JSON.parse(stored) : null
+      const jwt = sessionStorage.getItem('yourframies_admin_jwt')
+      if (stored && jwt) {
+        return JSON.parse(stored)
+      }
+      if (stored && !jwt) {
+        sessionStorage.removeItem(ADMIN_SESSION_KEY)
+      }
+      return null
     } catch {
       return null
     }

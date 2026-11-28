@@ -20,6 +20,10 @@ export const CategoryGrid: React.FC = () => {
     }
   }, [])
 
+  if (categoriesList.length === 0) {
+    return null
+  }
+
   return (
     <section className="py-10 sm:py-16 bg-neutral-50 border-b border-neutral-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -43,20 +47,22 @@ export const CategoryGrid: React.FC = () => {
 
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
           {categoriesList.map((cat) => {
-            const count = productsList.filter((p) => p.categoryId === cat.id).length || cat.itemCount
+            const count = productsList.filter((p) => p.categoryId === cat.id && p.isActive !== false).length
             return (
               <Link
                 key={cat.id}
                 to={`/shop?category=${cat.slug}`}
-                className="group relative h-48 sm:h-72 rounded-md overflow-hidden bg-neutral-200 flex flex-col justify-end p-3.5 sm:p-6"
+                className="group relative h-48 sm:h-72 rounded-md overflow-hidden bg-neutral-900 flex flex-col justify-end p-3.5 sm:p-6"
               >
-                <img
-                  src={cat.imageUrl}
-                  alt={cat.name}
-                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-                  loading="lazy"
-                  decoding="async"
-                />
+                {cat.imageUrl && (
+                  <img
+                    src={cat.imageUrl}
+                    alt={cat.name}
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent" />
 
                 <div className="relative z-10 text-white">
@@ -66,9 +72,11 @@ export const CategoryGrid: React.FC = () => {
                   <h3 className="font-serif text-base sm:text-2xl font-normal text-white mt-0.5 sm:mt-1 group-hover:translate-x-1 transition-transform leading-snug">
                     {cat.name}
                   </h3>
-                  <p className="hidden sm:block text-xs text-neutral-200 mt-1.5 line-clamp-2 leading-relaxed">
-                    {cat.description}
-                  </p>
+                  {cat.description && (
+                    <p className="hidden sm:block text-xs text-neutral-200 mt-1.5 line-clamp-2 leading-relaxed">
+                      {cat.description}
+                    </p>
+                  )}
                 </div>
               </Link>
             )

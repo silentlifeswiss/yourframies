@@ -52,30 +52,18 @@ describe('Your Framies - Backend Serverless Architecture & APIs', () => {
   // --------------------------------------------------------------------------
   // 2. Product & Category Management
   // --------------------------------------------------------------------------
-  it('GET /products returns seeded catalog items', async () => {
-    const event = createEvent('/products')
-    const response: any = await handler(event, {} as any)
-    expect(response.statusCode).toBe(200)
+  it('GET /products and GET /categories return admin-created items only (no seeded placeholders)', async () => {
+    const prodRes: any = await handler(createEvent('/products'), {} as any)
+    expect(prodRes.statusCode).toBe(200)
+    const prodPayload = JSON.parse(prodRes.body)
+    expect(prodPayload.success).toBe(true)
+    expect(Array.isArray(prodPayload.data)).toBe(true)
 
-    const payload = JSON.parse(response.body)
-    expect(payload.success).toBe(true)
-    expect(Array.isArray(payload.data)).toBe(true)
-    expect(payload.data.length).toBeGreaterThan(0)
-
-    const sample = payload.data[0]
-    expect(sample).toHaveProperty('title')
-    expect(sample).toHaveProperty('slug')
-    expect(sample).toHaveProperty('basePriceINR')
-  })
-
-  it('GET /categories returns valid catalog categories', async () => {
-    const event = createEvent('/categories')
-    const response: any = await handler(event, {} as any)
-    expect(response.statusCode).toBe(200)
-
-    const payload = JSON.parse(response.body)
-    expect(payload.success).toBe(true)
-    expect(payload.data.length).toBeGreaterThan(0)
+    const catRes: any = await handler(createEvent('/categories'), {} as any)
+    expect(catRes.statusCode).toBe(200)
+    const catPayload = JSON.parse(catRes.body)
+    expect(catPayload.success).toBe(true)
+    expect(Array.isArray(catPayload.data)).toBe(true)
   })
 
   it('Admin can create, update, and delete categories', async () => {
@@ -203,10 +191,45 @@ describe('Your Framies - Backend Serverless Architecture & APIs', () => {
     expect(delRes.statusCode).toBe(200)
   })
 
-  it('GET /products/:slug fetches single product or returns 404 for unknown slug', async () => {
-    const validEvent = createEvent('/products/porsche-911-gt3-rs-neon-night-frame')
+  it('GET /products/:slug fetches single admin-created product or returns 404 for unknown slug', async () => {
+    const loginRes: any = await handler(
+      createEvent('/admin/login', 'POST', {
+        email: 'admin@yourframies.com',
+        password: 'YourFramies2026!',
+      }),
+      {} as any
+    )
+    const token = JSON.parse(loginRes.body).token
+
+    const createRes: any = await handler(
+      createEvent(
+        '/admin/products',
+        'POST',
+        {
+          title: 'Test Frame Single Fetch',
+          slug: 'test-frame-single-fetch',
+          description: 'A4 frame in Deep Black',
+          basePriceINR: 1499,
+          images: [],
+          availableSizes: ['A4'],
+          availableMouldings: ['Deep Black', 'Minimalist White'],
+        },
+        { authorization: `Bearer ${token}` }
+      ),
+      {} as any
+    )
+    const created = JSON.parse(createRes.body).data
+
+    const validEvent = createEvent('/products/test-frame-single-fetch')
     const validRes: any = await handler(validEvent, {} as any)
     expect(validRes.statusCode).toBe(200)
+
+    await handler(
+      createEvent(`/admin/products/${created.id}`, 'DELETE', undefined, {
+        authorization: `Bearer ${token}`,
+      }),
+      {} as any
+    )
 
     const notFoundEvent = createEvent('/products/non-existent-frame-12345')
     const notFoundRes: any = await handler(notFoundEvent, {} as any)
@@ -284,11 +307,37 @@ describe('Your Framies - Backend Serverless Architecture & APIs', () => {
   // 4. Order Creation & Validation (Server-side price computation)
   // --------------------------------------------------------------------------
   it('POST /orders creates an order and validates server-side price without trusting client amounts', async () => {
+    const loginRes: any = await handler(
+      createEvent('/admin/login', 'POST', {
+        email: 'admin@yourframies.com',
+        password: 'YourFramies2026!',
+      }),
+      {} as any
+    )
+    const token = JSON.parse(loginRes.body).token
+
+    const createdProdRes: any = await handler(
+      createEvent(
+        '/admin/products',
+        'POST',
+        {
+          title: 'Order Pricing Verification Frame',
+          slug: 'order-pricing-verification-frame',
+          description: 'A4 frame',
+          basePriceINR: 1499,
+          images: [],
+        },
+        { authorization: `Bearer ${token}` }
+      ),
+      {} as any
+    )
+    const createdProd = JSON.parse(createdProdRes.body).data
+
     const orderPayload = {
       items: [
         {
-          productId: 'porsche-911-gt3-rs-neon-night-frame',
-          title: 'Porsche 911 GT3 RS Neon Night Frame',
+          productId: createdProd.slug,
+          title: createdProd.title,
           priceINR: 10, // Attempted tamper - server must recalculate base price + size addon!
           quantity: 1,
           customization: {

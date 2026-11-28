@@ -10,53 +10,7 @@ export interface MediaItem {
   uploadedAt: string
 }
 
-const DEFAULT_MEDIA_ITEMS: MediaItem[] = [
-  {
-    id: 'med-01',
-    filename: 'porsche-gt3rs-night.jpg',
-    url: 'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=1200&q=85',
-    folder: 'automotive',
-    altText: 'Porsche 911 GT3 RS Neon Night Frame Artwork',
-    fileSizeKB: 480,
-    uploadedAt: '2026-11-15',
-  },
-  {
-    id: 'med-02',
-    filename: 'vintage-bmw-m3.jpg',
-    url: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1200&q=85',
-    folder: 'automotive',
-    altText: 'Vintage BMW E30 M3 Heritage Edition Frame',
-    fileSizeKB: 512,
-    uploadedAt: '2026-11-16',
-  },
-  {
-    id: 'med-03',
-    filename: 'scandinavian-fern.jpg',
-    url: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=1200&q=85',
-    folder: 'aesthetic',
-    altText: 'Serene Botanical Fern Minimalist Frame Art',
-    fileSizeKB: 390,
-    uploadedAt: '2026-11-17',
-  },
-  {
-    id: 'med-04',
-    filename: 'studio-workshop-craft.jpg',
-    url: 'https://images.unsplash.com/photo-1582561424760-0321d75e81fa?auto=format&fit=crop&w=1600&q=85',
-    folder: 'materials',
-    altText: 'Solid Wood Moulding Workshop Craftsmanship',
-    fileSizeKB: 720,
-    uploadedAt: '2026-11-18',
-  },
-  {
-    id: 'med-05',
-    filename: 'hero-gallery-banner.jpg',
-    url: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=2000&q=85',
-    folder: 'banners',
-    altText: 'Main Storefront Hero Gallery Wall Background',
-    fileSizeKB: 940,
-    uploadedAt: '2026-11-19',
-  },
-]
+const DEFAULT_MEDIA_ITEMS: MediaItem[] = []
 
 interface MediaContextType {
   media: MediaItem[]
@@ -72,12 +26,26 @@ interface MediaContextType {
 const MediaContext = createContext<MediaContextType | undefined>(undefined)
 
 const MEDIA_STORAGE_KEY = 'yourframies_media_library'
+const CLEAN_MEDIA_KEY = 'yourframies_clean_media_v1'
+const LEGACY_MEDIA_IDS = new Set(['med-01', 'med-02', 'med-03', 'med-04', 'med-05'])
 
 export const MediaProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [media, setMedia] = useState<MediaItem[]>(() => {
     try {
       const stored = localStorage.getItem(MEDIA_STORAGE_KEY)
-      return stored ? JSON.parse(stored) : DEFAULT_MEDIA_ITEMS
+      if (stored) {
+        const parsed = JSON.parse(stored)
+        if (Array.isArray(parsed)) {
+          if (!localStorage.getItem(CLEAN_MEDIA_KEY)) {
+            const cleaned = parsed.filter((m) => !LEGACY_MEDIA_IDS.has(m.id))
+            localStorage.setItem(MEDIA_STORAGE_KEY, JSON.stringify(cleaned))
+            localStorage.setItem(CLEAN_MEDIA_KEY, '1')
+            return cleaned
+          }
+          return parsed
+        }
+      }
+      return DEFAULT_MEDIA_ITEMS
     } catch {
       return DEFAULT_MEDIA_ITEMS
     }

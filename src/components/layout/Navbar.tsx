@@ -15,7 +15,8 @@ import {
 import { useCart } from '../../context/CartContext'
 import { useWishlist } from '../../context/WishlistContext'
 import { useAuth } from '../../context/AuthContext'
-import { getStoreProducts } from '../../data/products'
+import { getStoreProducts, syncProductsFromApi } from '../../data/products'
+import { getStoreCategories, syncCategoriesFromApi, Category } from '../../data/categories'
 
 export const Navbar: React.FC = () => {
   const { itemCount, setIsCartOpen } = useCart()
@@ -24,7 +25,22 @@ export const Navbar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [categoriesList, setCategoriesList] = useState<Category[]>(() => getStoreCategories())
+  const [productsList, setProductsList] = useState(() => getStoreProducts())
   const navigate = useNavigate()
+
+  React.useEffect(() => {
+    const handleCats = () => setCategoriesList(getStoreCategories())
+    const handleProds = () => setProductsList(getStoreProducts())
+    window.addEventListener('yourframies_categories_updated', handleCats)
+    window.addEventListener('yourframies_products_updated', handleProds)
+    syncCategoriesFromApi().then(setCategoriesList)
+    syncProductsFromApi().then(setProductsList)
+    return () => {
+      window.removeEventListener('yourframies_categories_updated', handleCats)
+      window.removeEventListener('yourframies_products_updated', handleProds)
+    }
+  }, [])
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -36,10 +52,11 @@ export const Navbar: React.FC = () => {
   }
 
   const searchResults = searchQuery.trim()
-    ? getStoreProducts().filter(
+    ? productsList.filter(
       (p) =>
-        p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.description.toLowerCase().includes(searchQuery.toLowerCase())
+        p.isActive !== false &&
+        (p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          p.description.toLowerCase().includes(searchQuery.toLowerCase()))
     ).slice(0, 4)
     : []
 
@@ -63,22 +80,22 @@ export const Navbar: React.FC = () => {
                 <Link to="/shop" className="hover:text-black transition-colors">
                   Shop All
                 </Link>
-                <Link to="/shop?category=car-photo-frames" className="hover:text-black transition-colors">
-                  Car Frames
-                </Link>
-                <Link to="/shop?category=aesthetic-photo-frames" className="hover:text-black transition-colors">
-                  Aesthetic
-                </Link>
-                <Link to="/shop?category=personalised-photo-frames" className="hover:text-black transition-colors">
-                  Personalised
-                </Link>
+                {categoriesList.slice(0, 3).map((cat) => (
+                  <Link
+                    key={cat.id}
+                    to={`/shop?category=${cat.slug}`}
+                    className="hover:text-black transition-colors whitespace-nowrap"
+                  >
+                    {cat.name}
+                  </Link>
+                ))}
                 <Link
                   to="/customize"
-                  className="text-neutral-900 border-b-2 border-black pb-0.5 hover:text-neutral-600 transition-colors"
+                  className="text-neutral-900 border-b-2 border-black pb-0.5 hover:text-neutral-600 transition-colors whitespace-nowrap"
                 >
                   Custom Studio
                 </Link>
-                <Link to="/track-order" className="hover:text-black transition-colors flex items-center gap-1.5">
+                <Link to="/track-order" className="hover:text-black transition-colors flex items-center gap-1.5 whitespace-nowrap">
                   <Truck className="w-3.5 h-3.5 text-neutral-500" />
                   Track Order
                 </Link>
@@ -278,33 +295,22 @@ export const Navbar: React.FC = () => {
                 >
                   All Collections
                 </Link>
-                <Link
-                  to="/shop?category=car-photo-frames"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block hover:text-neutral-500"
-                >
-                  Car Photo Frames
-                </Link>
-                <Link
-                  to="/shop?category=aesthetic-photo-frames"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block hover:text-neutral-500"
-                >
-                  Aesthetic Frames
-                </Link>
-                <Link
-                  to="/shop?category=personalised-photo-frames"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block hover:text-neutral-500"
-                >
-                  Personalised Keepsakes
-                </Link>
+                {categoriesList.map((cat) => (
+                  <Link
+                    key={cat.id}
+                    to={`/shop?category=${cat.slug}`}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block hover:text-neutral-500"
+                  >
+                    {cat.name}
+                  </Link>
+                ))}
                 <Link
                   to="/customize"
                   onClick={() => setMobileMenuOpen(false)}
                   className="block text-black font-bold border-l-2 border-black pl-2"
                 >
-                  Custom Studio Visualizer
+                  Custom Frame Builder
                 </Link>
                 <Link
                   to="/track-order"

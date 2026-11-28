@@ -193,11 +193,18 @@ export const ProductDetailPage: React.FC = () => {
                 ? 'border-[14px] sm:border-[18px] border-white shadow-2xl ring-1 ring-neutral-200'
                 : 'border-[14px] sm:border-[18px] border-neutral-900 shadow-2xl ring-1 ring-black'
             }`}>
-              <img
-                src={displayedImage}
-                alt={product.title}
-                className="w-full h-full object-cover object-center transition-all duration-300"
-              />
+              {displayedImage ? (
+                <img
+                  src={displayedImage}
+                  alt={product.title}
+                  className="w-full h-full object-cover object-center transition-all duration-300"
+                />
+              ) : (
+                <div className="w-full h-full flex flex-col items-center justify-center bg-neutral-100 text-neutral-400 p-6 text-center">
+                  <ImageIcon className="w-10 h-10 mb-2" />
+                  <span className="text-xs">Upload a photo or add product image</span>
+                </div>
+              )}
 
               {uploadedPhotoUrl && (
                 <div className="absolute top-4 left-4 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-neutral-900/90 backdrop-blur-md text-amber-300 text-xs font-semibold shadow-lg">
@@ -533,11 +540,13 @@ export const ProductDetailPage: React.FC = () => {
       {/* Sticky Mobile Add-to-Bag Bar */}
       <div className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-neutral-200/90 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] shadow-[0_-4px_20px_rgba(0,0,0,0.08)] flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
-          <img
-            src={product.images[0]}
-            alt={product.title}
-            className="w-10 h-10 object-cover rounded border border-neutral-200 shrink-0"
-          />
+          {product.images[0] && (
+            <img
+              src={product.images[0]}
+              alt={product.title}
+              className="w-10 h-10 object-cover rounded border border-neutral-200 shrink-0"
+            />
+          )}
           <div className="min-w-0">
             <div className="text-base font-bold text-neutral-900 leading-tight">{formatINR(finalPrice)}</div>
             <div className="text-xs text-neutral-600 truncate">

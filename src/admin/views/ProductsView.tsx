@@ -46,13 +46,13 @@ export const ProductsView: React.FC = () => {
     window.addEventListener('yourframies_categories_updated', handleCatsUpdated)
 
     api.getCategories().then((res) => {
-      if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+      if (res.success && Array.isArray(res.data)) {
         setCategories(res.data)
       }
     }).catch(() => {})
 
     api.getProducts().then((res) => {
-      if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+      if (res.success && Array.isArray(res.data)) {
         const normalized = res.data.map(normalizeProduct)
         setProducts(normalized)
         saveStoreProducts(normalized)
@@ -136,32 +136,41 @@ export const ProductsView: React.FC = () => {
       availableSizes: ['A4'],
       availableMouldings: ['Deep Black', 'Minimalist White'],
     }
-    const updated = [dup, ...products]
-    updateProductsState(updated)
     try {
-      await api.adminSaveProduct(dup, false)
-    } catch {
-      // Local fallback retained
+      const res = await api.adminSaveProduct(dup, false)
+      if (!res.success) {
+        setErrorMsg(res.message || 'Could not duplicate product on server.')
+        return
+      }
+      const savedDup = res.data ? normalizeProduct(res.data) : dup
+      const updated = [savedDup, ...products]
+      updateProductsState(updated)
+      logAuditAction('PRODUCT_DUPLICATED', 'PRODUCT', savedDup.id, `Duplicated ${prod.title}`)
+      setSaveSuccess(`Duplicated "${prod.title}"`)
+      setTimeout(() => setSaveSuccess(''), 3000)
+    } catch (err: any) {
+      setErrorMsg(err?.message || 'Failed to duplicate product.')
     }
-    logAuditAction('PRODUCT_DUPLICATED', 'PRODUCT', dup.id, `Duplicated ${prod.title}`)
-    setSaveSuccess(`Duplicated "${prod.title}"`)
-    setTimeout(() => setSaveSuccess(''), 3000)
   }
 
   const handleDelete = async (id: string) => {
     if (confirm('Delete this product permanently?')) {
       setErrorMsg('')
       const target = products.find((p) => p.id === id)
-      const updated = products.filter((p) => p.id !== id)
-      updateProductsState(updated)
       try {
-        await api.adminDeleteProduct(id)
-      } catch {
-        // Local fallback retained
+        const res = await api.adminDeleteProduct(id)
+        if (!res.success && res.message && res.message !== 'Product not found') {
+          setErrorMsg(res.message)
+          return
+        }
+        const updated = products.filter((p) => p.id !== id)
+        updateProductsState(updated)
+        logAuditAction('PRODUCT_DELETED', 'PRODUCT', id, `Deleted ${target?.title}`)
+        setSaveSuccess(`Deleted "${target?.title || 'Product'}"`)
+        setTimeout(() => setSaveSuccess(''), 3000)
+      } catch (err: any) {
+        setErrorMsg(err?.message || 'Failed to delete product.')
       }
-      logAuditAction('PRODUCT_DELETED', 'PRODUCT', id, `Deleted ${target?.title}`)
-      setSaveSuccess(`Deleted "${target?.title || 'Product'}"`)
-      setTimeout(() => setSaveSuccess(''), 3000)
     }
   }
 
@@ -248,17 +257,14 @@ export const ProductsView: React.FC = () => {
 
     setIsSaving(true)
 
-    const finalImages =
-      productImages.length > 0
-        ? productImages
-        : ['https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=800&q=80']
+    const finalImages = productImages.filter(Boolean)
 
     const isEditing = Boolean(editingProduct)
     const prodPayload: Product = {
       id: editingProduct ? editingProduct.id : `yf-${Date.now()}`,
       title: cleanTitle,
       slug: cleanSlug,
-      categoryId: categoryId || categories[0]?.id || 'cat-car-frames',
+      categoryId: categoryId || categories[0]?.id || '',
       description: description.trim() || `${cleanTitle} in a ready-to-hang A4 frame (Deep Black or Minimalist White).`,
       basePriceINR: Number(basePrice),
       compareAtPriceINR: Number(comparePrice) > 0 ? Number(comparePrice) : undefined,
@@ -272,12 +278,13 @@ export const ProductsView: React.FC = () => {
 
     try {
       const res = await api.adminSaveProduct(prodPayload, isEditing)
-      const savedProd = res.success && res.data ? normalizeProduct(res.data) : prodPayload
-
       if (!res.success) {
-        setErrorMsg(res.message || 'Saved locally, but server sync returned an error. Check admin login or fields.')
+        setErrorMsg(res.message || 'Could not save product to database. Try signing in again.')
+        setIsSaving(false)
+        return
       }
 
+      const savedProd = res.data ? normalizeProduct(res.data) : prodPayload
       const updated = isEditing
         ? products.map((p) => (p.id === editingProduct!.id ? savedProd : p))
         : [savedProd, ...products]
@@ -381,15 +388,28 @@ export const ProductsView: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-800/60 text-neutral-300">
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="py-12 px-4 text-center text-neutral-400">
+                    No products found. Click "Add New Artwork" to publish your first frame.
+                  </td>
+                </tr>
+              )}
               {filtered.map((prod) => (
                 <tr key={prod.id} className="hover:bg-neutral-900/40">
                   <td className="py-3 px-4">
                     <div className="relative group w-12 h-14">
-                      <img
-                        src={prod.images[0] || 'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=400&q=80'}
-                        alt=""
-                        className="w-12 h-14 object-cover rounded border border-neutral-800"
-                      />
+                      {prod.images[0] ? (
+                        <img
+                          src={prod.images[0]}
+                          alt=""
+                          className="w-12 h-14 object-cover rounded border border-neutral-800"
+                        />
+                      ) : (
+                        <div className="w-12 h-14 rounded border border-neutral-800 bg-neutral-900 flex items-center justify-center text-neutral-600">
+                          <Package className="w-5 h-5" />
+                        </div>
+                      )}
                       {prod.images.length > 1 && (
                         <span className="absolute bottom-0 right-0 bg-neutral-950/90 text-amber-400 text-[9px] px-1 font-mono rounded-tl border-t border-l border-neutral-800">
                           +{prod.images.length - 1}
@@ -661,6 +681,7 @@ export const ProductsView: React.FC = () => {
                   onChange={(e) => setCategoryId(e.target.value)}
                   className="w-full p-2.5 bg-neutral-950 border border-neutral-800 rounded-lg text-white outline-none focus:border-amber-500"
                 >
+                  <option value="">Uncategorized</option>
                   {categories.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.name}
