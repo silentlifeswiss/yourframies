@@ -29,7 +29,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     : 0
 
   return (
-    <div className="group relative flex flex-col bg-white">
+    <div className="group relative flex flex-col bg-white/5 backdrop-blur-sm rounded-lg border border-white/10">
       {/* Image Container with Frame Bevel */}
       <div className="relative aspect-[4/5] overflow-hidden bg-neutral-100 rounded-sm">
         <Link to={`/product/${product.slug}`} className="block w-full h-full">
@@ -85,17 +85,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       {/* Product Details */}
       <div className="pt-2 sm:pt-4 flex flex-col flex-1 justify-between">
         <div>
-          <h3 className="text-xs sm:text-sm font-medium text-neutral-900 group-hover:text-neutral-600 transition-colors line-clamp-1">
+          <h3 className="text-xs sm:text-sm font-medium text-neutral-100 group-hover:text-neutral-300 transition-colors line-clamp-1">
             <Link to={`/product/${product.slug}`}>{product.title}</Link>
           </h3>
-          <p className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs text-neutral-500 truncate">
+          <p className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs text-neutral-400 truncate">
             A4 Frame • Deep Black & Minimalist White
           </p>
         </div>
 
         <div className="mt-2 flex items-center justify-between gap-1">
           <div className="flex items-baseline gap-1.5 flex-wrap">
-            <span className="text-xs sm:text-sm font-bold text-neutral-900">
+            <span className="text-xs sm:text-sm font-bold text-white">
               {formatINR(product.basePriceINR)}
             </span>
             {product.compareAtPriceINR && (
@@ -109,7 +109,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           <button
             type="button"
             onClick={handleQuickAdd}
-            className="sm:hidden p-1.5 rounded-full bg-neutral-900 text-white hover:bg-neutral-800 active:scale-95 transition-all shadow-xs"
+            className="sm:hidden p-1.5 rounded-full bg-white text-neutral-900 hover:bg-neutral-200 active:scale-95 transition-all shadow-xs"
             aria-label={`Add ${product.title} to bag`}
           >
             <ShoppingBag className="w-3.5 h-3.5" />

@@ -54,21 +54,21 @@ export const HomePage: React.FC = () => {
             key={section.id}
             className={`py-20 border-b ${
               section.backgroundStyle === 'neutral-900'
-                ? 'bg-neutral-900 text-white border-neutral-800'
+                ? 'bg-white/5 text-white border-white/10'
                 : section.backgroundStyle === 'neutral-50'
-                ? 'bg-neutral-50 border-neutral-200'
-                : 'bg-white border-neutral-200'
+                ? 'bg-white/5 border-white/10'
+                : 'border-white/10'
             }`}
           >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-12">
-                <span className="text-[11px] font-bold uppercase tracking-widest text-neutral-500">
+                <span className="text-[11px] font-bold uppercase tracking-widest text-neutral-400">
                   Live Frame Preview
                 </span>
-                <h2 className="font-serif text-2xl sm:text-4xl text-neutral-900 mt-1">
+                <h2 className="font-serif text-2xl sm:text-4xl text-white mt-1">
                   {section.title || 'Frame Your Own Photo Live'}
                 </h2>
-                <p className="mt-2 text-sm text-neutral-600">
+                <p className="mt-2 text-sm text-neutral-300">
                   {section.subtitle ||
                     'Upload your photo and preview how it looks in our A4 Deep Black or Minimalist White frame before ordering.'}
                 </p>
@@ -114,10 +114,10 @@ export const HomePage: React.FC = () => {
             key={section.id}
             className={`py-20 px-4 sm:px-6 lg:px-8 border-b ${
               section.backgroundStyle === 'neutral-900'
-                ? 'bg-neutral-900 text-white border-neutral-800'
+                ? 'bg-white/5 text-white border-white/10'
                 : section.backgroundStyle === 'neutral-50'
-                ? 'bg-neutral-50 border-neutral-200'
-                : 'bg-white border-neutral-200'
+                ? 'bg-white/5 border-white/10'
+                : 'border-white/10'
             }`}
           >
             <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-10">
@@ -127,11 +127,11 @@ export const HomePage: React.FC = () => {
                     {section.badgeText}
                   </span>
                 )}
-                <h2 className="text-3xl sm:text-4xl font-serif text-neutral-900">
+                <h2 className="text-3xl sm:text-4xl font-serif text-white">
                   {section.title}
                 </h2>
                 {section.subtitle && (
-                  <p className="text-sm text-neutral-600 leading-relaxed font-light">
+                  <p className="text-sm text-neutral-300 leading-relaxed font-light">
                     {section.subtitle}
                   </p>
                 )}
@@ -139,7 +139,7 @@ export const HomePage: React.FC = () => {
                   <div className="pt-2">
                     <Link
                       to={section.ctaLink}
-                      className="inline-flex items-center gap-2 bg-neutral-900 hover:bg-neutral-800 text-white text-xs uppercase tracking-widest font-semibold px-6 py-3.5 rounded transition"
+                      className="inline-flex items-center gap-2 bg-white hover:bg-neutral-200 text-neutral-900 text-xs uppercase tracking-widest font-semibold px-6 py-3.5 rounded transition"
                     >
                       <span>{section.ctaText}</span>
                       <ArrowRight className="w-4 h-4" />
@@ -149,7 +149,7 @@ export const HomePage: React.FC = () => {
               </div>
 
               {section.imageUrl && (
-                <div className="w-full md:w-1/2 aspect-video rounded-xl overflow-hidden shadow-xl border border-neutral-200">
+                <div className="w-full md:w-1/2 aspect-video rounded-xl overflow-hidden shadow-xl border border-white/10">
                   <img
                     src={section.imageUrl}
                     alt={section.title}
@@ -167,7 +167,7 @@ export const HomePage: React.FC = () => {
   }
 
   return (
-    <div className="bg-white">
+    <div>
       {activeSections.map((sec) => renderSection(sec))}
     </div>
   )

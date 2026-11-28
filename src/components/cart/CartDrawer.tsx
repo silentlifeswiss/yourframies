@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import React, { useState, useEffect } from 'react'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { X, Trash2, Plus, Minus, ArrowRight, ShoppingBag, ShieldCheck, Tag } from 'lucide-react'
 import { useCart } from '../../context/CartContext'
 import { formatINR } from '../../utils/formatters'
@@ -23,6 +23,12 @@ export const CartDrawer: React.FC = () => {
   const [couponCode, setCouponCode] = useState('')
   const [couponMsg, setCouponMsg] = useState<{ success: boolean; text: string } | null>(null)
   const navigate = useNavigate()
+  const location = useLocation()
+
+  // Close drawer automatically whenever the user navigates to another route
+  useEffect(() => {
+    setIsCartOpen(false)
+  }, [location.pathname, setIsCartOpen])
 
   if (!isCartOpen) return null
 
@@ -39,31 +45,40 @@ export const CartDrawer: React.FC = () => {
   const freeShippingPercent = Math.min(100, (subtotalINR / freeShippingThreshold) * 100)
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden">
+    <div className="fixed inset-x-0 top-0 bottom-[calc(4rem+env(safe-area-inset-bottom,0px))] z-40 overflow-hidden">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-neutral-950/60 backdrop-blur-sm transition-opacity"
+        className="fixed inset-x-0 top-0 bottom-[calc(4rem+env(safe-area-inset-bottom,0px))] bg-neutral-950/60 backdrop-blur-sm transition-opacity"
         onClick={() => setIsCartOpen(false)}
       />
 
-      <div className="fixed inset-y-0 right-0 max-w-full flex pl-0 sm:pl-10">
-        <div className="w-screen max-w-md bg-white shadow-2xl flex flex-col justify-between">
+      <div className="fixed top-0 bottom-[calc(4rem+env(safe-area-inset-bottom,0px))] right-0 max-w-full flex pl-0 sm:pl-10">
+        <div className="w-screen max-w-md bg-white shadow-2xl flex flex-col justify-between h-full">
           {/* Header */}
-          <div className="p-6 border-b border-neutral-100 flex items-center justify-between">
+          <div className="px-5 py-4 sm:p-6 border-b border-neutral-100 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <ShoppingBag className="w-5 h-5 text-neutral-900" />
               <h2 className="text-base font-semibold tracking-wider uppercase text-neutral-900">
                 Your Bag ({items.reduce((acc, i) => acc + i.quantity, 0)})
               </h2>
             </div>
-            <button
-              type="button"
-              onClick={() => setIsCartOpen(false)}
-              className="p-1.5 text-neutral-400 hover:text-black rounded-md"
-              aria-label="Close cart"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-3">
+              <Link
+                to="/cart"
+                onClick={() => setIsCartOpen(false)}
+                className="text-[11px] font-semibold uppercase tracking-wider text-neutral-600 hover:text-neutral-950 underline underline-offset-2"
+              >
+                Full Bag
+              </Link>
+              <button
+                type="button"
+                onClick={() => setIsCartOpen(false)}
+                className="p-1.5 text-neutral-400 hover:text-black rounded-md"
+                aria-label="Close cart"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
           {/* Free Shipping Meter */}

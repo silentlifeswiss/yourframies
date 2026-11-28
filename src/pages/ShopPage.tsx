@@ -76,21 +76,21 @@ export const ShopPage: React.FC = () => {
   }
 
   return (
-    <div className="bg-neutral-50 min-h-screen py-6 sm:py-12">
+    <div className="min-h-screen py-6 sm:py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header Title */}
-        <div className="border-b border-neutral-200 pb-5 sm:pb-8 mb-5 sm:mb-8">
+        <div className="border-b border-white/10 pb-5 sm:pb-8 mb-5 sm:mb-8">
           <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-neutral-400">
             Catalog & Artworks
           </span>
-          <h1 className="font-serif text-2xl sm:text-5xl text-neutral-900 mt-1">
+          <h1 className="font-serif text-2xl sm:text-5xl text-white mt-1">
             {activeCategorySlug === 'all'
               ? 'All A4 Framed Prints'
               : categoriesList.find((c) => c.slug === activeCategorySlug)?.name || 'Collection'}
           </h1>
           {searchQuery && (
             <p className="mt-1.5 text-xs text-neutral-500">
-              Showing search results for "<strong className="text-neutral-900">{searchQuery}</strong>" (
+              Showing search results for "<strong className="text-white">{searchQuery}</strong>" (
               {filteredProducts.length} items)
             </p>
           )}
@@ -103,8 +103,8 @@ export const ShopPage: React.FC = () => {
             onClick={() => handleCategoryChange('all')}
             className={`px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-semibold uppercase tracking-wider whitespace-nowrap transition-all ${
               activeCategorySlug === 'all'
-                ? 'bg-neutral-900 text-white shadow-xs'
-                : 'bg-white border border-neutral-300 text-neutral-700 hover:border-black'
+                ? 'bg-white text-neutral-900 shadow-xs'
+                : 'bg-white/10 border border-white/20 text-neutral-300 hover:border-white'
             }`}
           >
             All Collections
@@ -126,13 +126,13 @@ export const ShopPage: React.FC = () => {
         </div>
 
         {/* Filters and Sorting Bar */}
-        <div className="bg-white p-3 sm:p-4 rounded-xl border border-neutral-200 mb-6 sm:mb-8 grid grid-cols-2 sm:flex sm:items-center sm:justify-between gap-3">
+        <div className="bg-white/5 backdrop-blur-sm p-3 sm:p-4 rounded-xl border border-white/10 mb-6 sm:mb-8 grid grid-cols-2 sm:flex sm:items-center sm:justify-between gap-3">
           <div className="flex items-center gap-2">
-            <Filter className="w-3.5 h-3.5 text-neutral-500 shrink-0" />
+            <Filter className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
             <select
               value={selectedSize}
               onChange={(e) => setSelectedSize(e.target.value)}
-              className="w-full text-base sm:text-xs bg-neutral-50 border border-neutral-300 rounded px-2.5 py-2 focus:outline-none focus:ring-1 focus:ring-black"
+              className="w-full text-base sm:text-xs bg-neutral-900 border border-white/20 text-neutral-200 rounded px-2.5 py-2 focus:outline-none focus:ring-1 focus:ring-white"
             >
               <option value="all">All Finishes (A4 Frame)</option>
               <option value="Deep Black">Deep Black</option>
@@ -141,11 +141,11 @@ export const ShopPage: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2 justify-end">
-            <ArrowUpDown className="w-3.5 h-3.5 text-neutral-500 shrink-0" />
+            <ArrowUpDown className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="w-full text-base sm:text-xs bg-neutral-50 border border-neutral-300 rounded px-2.5 py-2 focus:outline-none focus:ring-1 focus:ring-black"
+              className="w-full text-base sm:text-xs bg-neutral-900 border border-white/20 text-neutral-200 rounded px-2.5 py-2 focus:outline-none focus:ring-1 focus:ring-white"
             >
               <option value="featured">Featured</option>
               <option value="price-asc">Price: Low to High</option>
@@ -157,10 +157,10 @@ export const ShopPage: React.FC = () => {
 
         {/* Product Grid */}
         {filteredProducts.length === 0 ? (
-          <div className="py-24 text-center bg-white rounded-2xl border border-neutral-200">
-            <SlidersHorizontal className="w-10 h-10 text-neutral-300 mx-auto mb-3" />
-            <h3 className="text-sm font-semibold text-neutral-800">No frames found</h3>
-            <p className="text-xs text-neutral-500 mt-1 max-w-sm mx-auto">
+          <div className="py-24 text-center bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10">
+            <SlidersHorizontal className="w-10 h-10 text-neutral-500 mx-auto mb-3" />
+            <h3 className="text-sm font-semibold text-neutral-200">No frames found</h3>
+            <p className="text-xs text-neutral-400 mt-1 max-w-sm mx-auto">
               Try adjusting your category filter, clearing your search query, or resetting sizes.
             </p>
             <button
@@ -170,7 +170,7 @@ export const ShopPage: React.FC = () => {
                 setSearchParams({})
                 setSelectedSize('all')
               }}
-              className="mt-5 px-5 py-2.5 rounded-full bg-neutral-900 text-white text-xs uppercase tracking-wider font-semibold"
+              className="mt-5 px-5 py-2.5 rounded-full bg-white text-neutral-900 text-xs uppercase tracking-wider font-semibold"
             >
               Reset Filters
             </button>

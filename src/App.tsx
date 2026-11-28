@@ -67,7 +67,14 @@ const AppContent: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-white text-neutral-900 font-sans selection:bg-neutral-900 selection:text-white">
+    <div className="min-h-screen flex flex-col text-neutral-100 font-sans selection:bg-white/20 selection:text-white bg-neutral-950 relative">
+      {/* Fixed background image with dark gradient overlay */}
+      <div
+        className="fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat bg-fixed"
+        style={{ backgroundImage: "url('/bg-frames.jpg')" }}
+        aria-hidden="true"
+      />
+      <div className="fixed inset-0 -z-10 bg-gradient-to-b from-neutral-950/85 via-neutral-950/80 to-neutral-950/90" aria-hidden="true" />
       <AnnouncementBar />
       <Navbar />
       <CartDrawer />

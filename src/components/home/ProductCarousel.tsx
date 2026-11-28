@@ -22,27 +22,27 @@ export const ProductCarousel: React.FC = () => {
       : activeProducts.slice(0, 4)
 
   return (
-    <section className="py-10 sm:py-16 bg-white border-b border-neutral-200">
+    <section className="py-10 sm:py-16 border-b border-white/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 sm:mb-10 gap-4">
           <div>
-            <span className="text-[11px] font-bold uppercase tracking-widest text-neutral-500">
+            <span className="text-[11px] font-bold uppercase tracking-widest text-neutral-400">
               Popular Picks
             </span>
-            <h2 className="font-serif text-2xl sm:text-4xl text-neutral-900 mt-1">
+            <h2 className="font-serif text-2xl sm:text-4xl text-white mt-1">
               Popular A4 Frames
             </h2>
           </div>
 
           {/* Tab Switcher */}
-          <div className="inline-flex p-1 bg-neutral-100 rounded-full border border-neutral-200 self-start sm:self-auto">
+          <div className="inline-flex p-1 bg-white/10 rounded-full border border-white/20 self-start sm:self-auto">
             <button
               type="button"
               onClick={() => setActiveTab('bestsellers')}
               className={`px-4 sm:px-5 py-1.5 sm:py-2 text-[11px] sm:text-xs font-semibold tracking-wider uppercase rounded-full transition-all ${
                 activeTab === 'bestsellers'
-                  ? 'bg-neutral-900 text-white shadow-sm'
-                  : 'text-neutral-600 hover:text-black'
+                  ? 'bg-white text-neutral-900 shadow-sm'
+                  : 'text-neutral-300 hover:text-white'
               }`}
             >
               Bestsellers
@@ -52,8 +52,8 @@ export const ProductCarousel: React.FC = () => {
               onClick={() => setActiveTab('new-arrivals')}
               className={`px-4 sm:px-5 py-1.5 sm:py-2 text-[11px] sm:text-xs font-semibold tracking-wider uppercase rounded-full transition-all ${
                 activeTab === 'new-arrivals'
-                  ? 'bg-neutral-900 text-white shadow-sm'
-                  : 'text-neutral-600 hover:text-black'
+                  ? 'bg-white text-neutral-900 shadow-sm'
+                  : 'text-neutral-300 hover:text-white'
               }`}
             >
               New Arrivals
@@ -63,9 +63,9 @@ export const ProductCarousel: React.FC = () => {
 
         {/* Product Grid - 2 cols on mobile */}
         {productsToShow.length === 0 ? (
-          <div className="py-14 px-6 bg-neutral-50 border border-dashed border-neutral-300 rounded-xl text-center">
-            <p className="text-sm font-semibold text-neutral-800">Catalog coming soon</p>
-            <p className="text-xs text-neutral-600 mt-1">
+          <div className="py-14 px-6 bg-white/5 border border-dashed border-white/20 rounded-xl text-center">
+            <p className="text-sm font-semibold text-neutral-200">Catalog coming soon</p>
+            <p className="text-xs text-neutral-400 mt-1">
               Frames published in the Admin Panel will appear here automatically.
             </p>
           </div>

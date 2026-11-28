@@ -36,15 +36,15 @@ export const CartPage: React.FC = () => {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center p-6 text-center bg-white">
-        <ShoppingBag className="w-16 h-16 text-neutral-300 mb-4" />
-        <h1 className="text-2xl font-serif text-neutral-900">Your Shopping Bag is Empty</h1>
-        <p className="text-xs text-neutral-500 mt-2 max-w-sm">
+      <div className="min-h-[60vh] flex flex-col items-center justify-center p-6 text-center">
+        <ShoppingBag className="w-16 h-16 text-neutral-500 mb-4" />
+        <h1 className="text-2xl font-serif text-white">Your Shopping Bag is Empty</h1>
+        <p className="text-xs text-neutral-400 mt-2 max-w-sm">
           Explore our collection of automotive frames, aesthetic artwork, or build a custom frame.
         </p>
         <Link
           to="/shop"
-          className="mt-6 px-8 py-3 bg-neutral-900 text-white rounded-full text-xs uppercase tracking-widest font-semibold hover:bg-neutral-800 transition-colors"
+          className="mt-6 px-8 py-3 bg-white text-neutral-900 rounded-full text-xs uppercase tracking-widest font-semibold hover:bg-neutral-200 transition-colors"
         >
           Explore Catalog
         </Link>
@@ -53,19 +53,19 @@ export const CartPage: React.FC = () => {
   }
 
   return (
-    <div className="bg-neutral-50 min-h-screen py-6 sm:py-12">
+    <div className="min-h-screen py-6 sm:py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="font-serif text-2xl sm:text-4xl text-neutral-900 mb-6 sm:mb-8">
+        <h1 className="font-serif text-2xl sm:text-4xl text-white mb-6 sm:mb-8">
           Shopping Bag ({items.reduce((acc, i) => acc + i.quantity, 0)} Items)
         </h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-10 items-start">
           {/* Item List */}
-          <div className="lg:col-span-8 bg-white p-4 sm:p-8 rounded-xl border border-neutral-200 space-y-6">
+          <div className="lg:col-span-8 bg-white/5 backdrop-blur-sm p-4 sm:p-8 rounded-xl border border-white/10 space-y-6">
             {items.map((item) => (
               <div
                 key={item.id}
-                className="flex flex-row gap-3.5 sm:gap-6 pb-6 border-b border-neutral-100 last:border-none last:pb-0"
+                className="flex flex-row gap-3.5 sm:gap-6 pb-6 border-b border-white/10 last:border-none last:pb-0"
               >
                 <img
                   src={item.customization.photoUrl || item.product.images[0]}
@@ -76,7 +76,7 @@ export const CartPage: React.FC = () => {
                 <div className="flex-1 flex flex-col justify-between min-w-0">
                   <div>
                     <div className="flex items-start justify-between gap-2">
-                      <h3 className="text-xs sm:text-sm font-semibold text-neutral-900 truncate">
+                      <h3 className="text-xs sm:text-sm font-semibold text-white truncate">
                         {item.product.title}
                       </h3>
                       <button
@@ -89,36 +89,36 @@ export const CartPage: React.FC = () => {
                       </button>
                     </div>
 
-                    <div className="text-xs text-neutral-600 mt-1 sm:mt-2 space-y-1">
+                    <div className="text-xs text-neutral-400 mt-1 sm:mt-2 space-y-1">
                       <p className="truncate">
-                        Frame: <strong className="text-neutral-800">{item.customization.frameSize === 'A4' ? 'A4' : `${item.customization.frameSize}"`}</strong> • <strong className="text-neutral-800">{item.customization.moulding}</strong>
+                        Frame: <strong className="text-neutral-200">{item.customization.frameSize === 'A4' ? 'A4' : `${item.customization.frameSize}"`}</strong> • <strong className="text-neutral-200">{item.customization.moulding}</strong>
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-center justify-between mt-3 sm:mt-4">
-                    <div className="flex items-center border border-neutral-300 rounded">
+                    <div className="flex items-center border border-white/20 rounded">
                       <button
                         type="button"
                         onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        className="px-2 py-1 sm:p-1.5 hover:bg-neutral-100 text-neutral-600 active:bg-neutral-200 transition-colors"
+                        className="px-2 py-1 sm:p-1.5 hover:bg-white/10 text-neutral-300 active:bg-white/20 transition-colors"
                       >
                         <Minus className="w-3.5 h-3.5" />
                       </button>
-                      <span className="px-2.5 sm:px-3 text-xs font-semibold text-neutral-900">
+                      <span className="px-2.5 sm:px-3 text-xs font-semibold text-white">
                         {item.quantity}
                       </span>
                       <button
                         type="button"
                         onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        className="px-2 py-1 sm:p-1.5 hover:bg-neutral-100 text-neutral-600 active:bg-neutral-200 transition-colors"
+                        className="px-2 py-1 sm:p-1.5 hover:bg-white/10 text-neutral-300 active:bg-white/20 transition-colors"
                       >
                         <Plus className="w-3.5 h-3.5" />
                       </button>
                     </div>
 
                     <div className="text-right">
-                      <span className="text-xs sm:text-sm font-bold text-neutral-900">
+                      <span className="text-xs sm:text-sm font-bold text-white">
                         {formatINR(item.priceINR * item.quantity)}
                       </span>
                       {item.quantity > 1 && (
@@ -135,8 +135,8 @@ export const CartPage: React.FC = () => {
 
           {/* Order Summary & Coupon */}
           <div className="lg:col-span-4 space-y-6">
-            <div className="bg-white p-6 sm:p-8 rounded-xl border border-neutral-200 space-y-6">
-              <h2 className="text-base font-semibold uppercase tracking-wider text-neutral-900">
+            <div className="bg-white/5 backdrop-blur-sm p-6 sm:p-8 rounded-xl border border-white/10 space-y-6">
+              <h2 className="text-base font-semibold uppercase tracking-wider text-white">
                 Order Summary
               </h2>
 
