@@ -25,7 +25,7 @@ export const CategoryGrid: React.FC = () => {
   }
 
   return (
-    <section className="py-10 sm:py-16 border-b border-white/10">
+    <section className="py-10 sm:py-16 bg-neutral-950 border-b border-white/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 sm:mb-10">
           <div>
