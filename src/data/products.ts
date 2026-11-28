@@ -58,19 +58,37 @@ export function saveStoreProducts(products: Product[]): void {
   }
 }
 
-export async function syncProductsFromApi(): Promise<Product[]> {
-  try {
-    const res = await fetch('/api/products')
-    if (res.ok) {
-      const json = await res.json()
-      if (json.success && Array.isArray(json.data)) {
-        const normalized = json.data.map(normalizeProduct)
-        saveStoreProducts(normalized)
-        return normalized
-      }
-    }
-  } catch {
-    // Offline fallback
+let inFlightProductsSync: Promise<Product[]> | null = null
+let lastProductsSyncAt = 0
+
+export async function syncProductsFromApi(force = false): Promise<Product[]> {
+  const now = Date.now()
+  if (!force && lastProductsSyncAt > 0 && now - lastProductsSyncAt < 15000) {
+    return getStoreProducts()
   }
-  return getStoreProducts()
+  if (inFlightProductsSync) {
+    return inFlightProductsSync
+  }
+
+  inFlightProductsSync = (async () => {
+    try {
+      const res = await fetch('/api/products')
+      if (res.ok) {
+        const json = await res.json()
+        if (json.success && Array.isArray(json.data)) {
+          const normalized = json.data.map(normalizeProduct)
+          saveStoreProducts(normalized)
+          lastProductsSyncAt = Date.now()
+          return normalized
+        }
+      }
+    } catch {
+      // Offline fallback
+    } finally {
+      inFlightProductsSync = null
+    }
+    return getStoreProducts()
+  })()
+
+  return inFlightProductsSync
 }

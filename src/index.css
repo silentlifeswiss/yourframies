@@ -1,16 +1,25 @@
 @import "tailwindcss";
 
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-serif: "Playfair Display", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+}
+
 @layer base {
   html {
     -webkit-tap-highlight-color: transparent;
     scroll-behavior: smooth;
     text-size-adjust: 100%;
     -webkit-text-size-adjust: 100%;
+    font-family: var(--font-sans);
   }
 
   body {
     overflow-x: hidden;
     touch-action: manipulation;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   /* Safe area insets for mobile notched devices */
@@ -20,6 +29,12 @@
     --sab: env(safe-area-inset-bottom, 0px);
     --sal: env(safe-area-inset-left, 0px);
   }
+}
+
+/* Defer rendering work for off-screen sections */
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 420px;
 }
 
 /* Hide scrollbars while preserving momentum scroll */

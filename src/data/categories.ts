@@ -52,18 +52,36 @@ export function saveStoreCategories(categories: Category[]): void {
   }
 }
 
-export async function syncCategoriesFromApi(): Promise<Category[]> {
-  try {
-    const res = await fetch('/api/categories')
-    if (res.ok) {
-      const json = await res.json()
-      if (json.success && Array.isArray(json.data)) {
-        saveStoreCategories(json.data)
-        return json.data
-      }
-    }
-  } catch {
-    // Offline fallback
+let inFlightCatsSync: Promise<Category[]> | null = null
+let lastCatsSyncAt = 0
+
+export async function syncCategoriesFromApi(force = false): Promise<Category[]> {
+  const now = Date.now()
+  if (!force && lastCatsSyncAt > 0 && now - lastCatsSyncAt < 15000) {
+    return getStoreCategories()
   }
-  return getStoreCategories()
+  if (inFlightCatsSync) {
+    return inFlightCatsSync
+  }
+
+  inFlightCatsSync = (async () => {
+    try {
+      const res = await fetch('/api/categories')
+      if (res.ok) {
+        const json = await res.json()
+        if (json.success && Array.isArray(json.data)) {
+          saveStoreCategories(json.data)
+          lastCatsSyncAt = Date.now()
+          return json.data
+        }
+      }
+    } catch {
+      // Offline fallback
+    } finally {
+      inFlightCatsSync = null
+    }
+    return getStoreCategories()
+  })()
+
+  return inFlightCatsSync
 }

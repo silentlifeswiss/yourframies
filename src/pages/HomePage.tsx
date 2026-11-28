@@ -1,14 +1,23 @@
-import React from 'react'
+import React, { Suspense, lazy } from 'react'
 import { Link } from 'react-router-dom'
 import { HeroBanner } from '../components/home/HeroBanner'
 import { CategoryGrid } from '../components/home/CategoryGrid'
 import { ProductCarousel } from '../components/home/ProductCarousel'
-import { WhyChooseUs } from '../components/home/WhyChooseUs'
-import { FrameCustomizer } from '../components/product/FrameCustomizer'
-import { InstagramSection } from '../components/home/InstagramSection'
-import { Newsletter } from '../components/home/Newsletter'
 import { useSiteContent, HomepageSection } from '../context/SiteContentContext'
 import { ArrowRight } from 'lucide-react'
+
+const FrameCustomizer = lazy(() =>
+  import('../components/product/FrameCustomizer').then((m) => ({ default: m.FrameCustomizer }))
+)
+const WhyChooseUs = lazy(() =>
+  import('../components/home/WhyChooseUs').then((m) => ({ default: m.WhyChooseUs }))
+)
+const InstagramSection = lazy(() =>
+  import('../components/home/InstagramSection').then((m) => ({ default: m.InstagramSection }))
+)
+const Newsletter = lazy(() =>
+  import('../components/home/Newsletter').then((m) => ({ default: m.Newsletter }))
+)
 
 export const HomePage: React.FC = () => {
   const { homepageSections } = useSiteContent()
@@ -65,19 +74,39 @@ export const HomePage: React.FC = () => {
                 </p>
               </div>
 
-              <FrameCustomizer />
+              <Suspense fallback={<div className="min-h-[360px]" />}>
+                <FrameCustomizer />
+              </Suspense>
             </div>
           </section>
         )
 
       case 'why_choose_us':
-        return <WhyChooseUs key={section.id} />
+        return (
+          <div key={section.id} className="cv-auto">
+            <Suspense fallback={<div className="min-h-[240px]" />}>
+              <WhyChooseUs />
+            </Suspense>
+          </div>
+        )
 
       case 'instagram':
-        return <InstagramSection key={section.id} />
+        return (
+          <div key={section.id} className="cv-auto">
+            <Suspense fallback={<div className="min-h-[260px]" />}>
+              <InstagramSection />
+            </Suspense>
+          </div>
+        )
 
       case 'newsletter':
-        return <Newsletter key={section.id} />
+        return (
+          <div key={section.id} className="cv-auto">
+            <Suspense fallback={<div className="min-h-[200px]" />}>
+              <Newsletter />
+            </Suspense>
+          </div>
+        )
 
       case 'custom_banner':
         return (
