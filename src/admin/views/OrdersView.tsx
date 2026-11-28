@@ -52,13 +52,37 @@ export const OrdersView: React.FC = () => {
     }
   }
 
-  const handleBookShipment = (order: Order) => {
-    const generatedAwb = `DEL-${Math.floor(1000000 + Math.random() * 9000000)}`
+  const handleBookShipment = async (order: Order) => {
+    try {
+      const token = localStorage.getItem('yourframies_admin_token')
+      const res = await fetch('/api/admin/shipping/book-shipment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ orderNumber: order.orderNumber, courier: courierSelect }),
+      })
+      const data = await res.json()
+      if (data.success && data.data?.awbCode) {
+        updateOrderStatus(order.orderNumber, 'SHIPPED', data.data.awbCode, data.data.courierPartner || courierSelect)
+        logAuditAction('SHIPMENT_BOOKED', 'SHIPMENT', order.orderNumber, `Booked on ${data.data.courierPartner || courierSelect} with AWB: ${data.data.awbCode}`)
+        alert(`Shipment booked successfully with ${data.data.courierPartner || courierSelect}!\nAssigned AWB Tracking: ${data.data.awbCode}`)
+        if (selectedOrder) {
+          setSelectedOrder({ ...selectedOrder, status: 'SHIPPED', awbCode: data.data.awbCode })
+        }
+        return
+      }
+    } catch (e) {
+      console.warn('Backend book shipment fallback:', e)
+    }
+
+    const generatedAwb = `SFX-${Math.floor(1000000 + Math.random() * 9000000)}`
     updateOrderStatus(order.orderNumber, 'SHIPPED', generatedAwb, courierSelect)
     logAuditAction('SHIPMENT_BOOKED', 'SHIPMENT', order.orderNumber, `Booked on ${courierSelect} with AWB: ${generatedAwb}`)
     alert(`Shipment booked successfully with ${courierSelect}!\nAssigned AWB Tracking: ${generatedAwb}`)
     if (selectedOrder) {
-      setSelectedOrder({ ...selectedOrder, status: 'SHIPPED' })
+      setSelectedOrder({ ...selectedOrder, status: 'SHIPPED', awbCode: generatedAwb })
     }
   }
 

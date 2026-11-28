@@ -661,6 +661,13 @@ export const handler: Handler = async (event: HandlerEvent, _context?: HandlerCo
       const orderNumber = path.replace('/admin/orders/', '').replace('/status', '')
       const { status, awbCode, courierPartner, paymentStatus } = JSON.parse(event.body || '{}')
 
+      if (status === 'CANCELLED') {
+        const existingOrder = await db.getOrderByNumber(orderNumber)
+        if (existingOrder?.awbCode && existingOrder.courierPartner === 'SHADOWFAX') {
+          await shipping.cancelShipment(existingOrder.awbCode, 'Order cancelled from admin dashboard')
+        }
+      }
+
       const updated = await db.updateOrderStatus(orderNumber, status, {
         awbCode,
         courierPartner,
@@ -857,6 +864,16 @@ export const handler: Handler = async (event: HandlerEvent, _context?: HandlerCo
       const awb = path.replace('/shipping/track/', '')
       const tracking = await shipping.getTrackingEvents(awb)
       return makeResponse(200, { success: true, data: tracking })
+    }
+
+    // Admin: Generate Courier Shipping Label GET /admin/shipping/label/:awb
+    if (path.startsWith('/admin/shipping/label/') && method === 'GET') {
+      const auth = await authenticateAdmin(event, ['SUPER_ADMIN', 'MANAGER'])
+      if (auth.error) return makeResponse(auth.status || 401, { success: false, message: auth.error })
+
+      const awb = path.replace('/admin/shipping/label/', '')
+      const labelUrl = await shipping.generateShadowfaxLabel(awb)
+      return makeResponse(200, { success: true, data: { awb, labelUrl } })
     }
 
     // Public Webhook: Shadowfax Real-Time Logistics Callbacks POST /shipping/shadowfax/webhook

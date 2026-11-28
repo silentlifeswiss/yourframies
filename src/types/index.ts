@@ -95,6 +95,8 @@ export interface Order {
   totalINR: number
   shippingAddress: Address
   items: OrderItem[]
+  awbCode?: string
+  courierPartner?: CourierPartner | string
   createdAt: string
 }
 
