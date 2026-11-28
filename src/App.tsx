@@ -67,14 +67,19 @@ const AppContent: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col text-neutral-100 font-sans selection:bg-white/20 selection:text-white bg-neutral-950 relative">
+    <div className="min-h-screen flex flex-col text-neutral-100 font-sans selection:bg-white/20 selection:text-white bg-neutral-950">
       {/* Fixed background image with dark gradient overlay */}
-      <div
-        className="fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat bg-fixed"
-        style={{ backgroundImage: "url('/bg-frames.jpg')" }}
-        aria-hidden="true"
-      />
-      <div className="fixed inset-0 -z-10 bg-gradient-to-b from-neutral-950/85 via-neutral-950/80 to-neutral-950/90" aria-hidden="true" />
+      <div className="fixed inset-0 z-0">
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: "url('/bg-frames.jpg')" }}
+          aria-hidden="true"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-neutral-950/85 via-neutral-950/80 to-neutral-950/90" aria-hidden="true" />
+      </div>
+
+      {/* All content above the background */}
+      <div className="relative z-10 min-h-screen flex flex-col">
       <AnnouncementBar />
       <Navbar />
       <CartDrawer />
@@ -107,6 +112,7 @@ const AppContent: React.FC = () => {
 
       <MobileBottomNav />
       <Footer />
+      </div>
     </div>
   )
 }
